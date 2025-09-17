@@ -1,0 +1,18 @@
+//
+//  ScreenLogin.swift
+//  Fraud Fishing
+//
+//  Created by Javier Canella Ramos on 16/09/25.
+//
+
+import SwiftUI
+
+struct ScreenLogin: View {
+    var body: some View {
+        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+    }
+}
+
+#Preview {
+    ScreenLogin()
+}
