@@ -3,11 +3,12 @@
 //  Fraud Fishing
 //
 //  Created by Javier Canella Ramos on 16/09/25.
-//
+//  Edited by Victor Bosquez on 18/09/25.
 
 import SwiftUI
 
 struct ScreenRegister: View {
+    @Environment(\.authenticationController) private var authController
     @State private var nombre: String = ""
     @State private var correo: String = ""
     @State private var contrasena: String = ""
@@ -16,7 +17,7 @@ struct ScreenRegister: View {
     @State private var alertMessage: String = ""
     @State private var isLoading: Bool = false
     @State private var registroExitoso: Bool = false
-    
+
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [
@@ -26,13 +27,13 @@ struct ScreenRegister: View {
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
     
-            ScrollView { // Agregado para manejar teclado
+            ScrollView {
                 VStack(spacing: 20) {
                     // Logo
                     Image("FRAUD FISHING-03")
                         .resizable()
-                        .scaledToFit() // Cambiado de scaledToFill
-                        .frame(width: 300, height: 180) // Tamaño más manejable
+                        .scaledToFit()
+                        .frame(width: 300, height: 180)
                         .padding(.top, 20)
                     
                     VStack(spacing: 15) {
@@ -43,7 +44,7 @@ struct ScreenRegister: View {
                                 .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            TextField("Ingresa nombre completo", text: $nombre)
+                            TextField("Ingresa tu nombre completo", text: $nombre)
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(10)
@@ -52,6 +53,7 @@ struct ScreenRegister: View {
                                         .stroke(validarNombre() ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
                                 )
                                 .autocapitalization(.words)
+                                .disabled(isLoading)
                         }
                         
                         // Campo de Correo
@@ -72,6 +74,7 @@ struct ScreenRegister: View {
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .autocorrectionDisabled()
+                                .disabled(isLoading)
                         }
                         
                         // Campo de Contraseña
@@ -89,6 +92,7 @@ struct ScreenRegister: View {
                                     RoundedRectangle(cornerRadius: 10)
                                         .stroke(validarContrasena() ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
                                 )
+                                .disabled(isLoading)
                             
                             // Indicadores de fortaleza de contraseña
                             if !contrasena.isEmpty {
@@ -134,6 +138,7 @@ struct ScreenRegister: View {
                                     RoundedRectangle(cornerRadius: 10)
                                         .stroke(contrasena == confirmarContrasena && !confirmarContrasena.isEmpty ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
                                 )
+                                .disabled(isLoading)
                             
                             if !confirmarContrasena.isEmpty && contrasena != confirmarContrasena {
                                 Text("Las contraseñas no coinciden")
@@ -149,7 +154,9 @@ struct ScreenRegister: View {
                     
                     // Botón Regístrate
                     Button(action: {
-                        registrarUsuario()
+                        Task {
+                            await registrarUsuario()
+                        }
                     }) {
                         HStack {
                             if isLoading {
@@ -157,14 +164,14 @@ struct ScreenRegister: View {
                                     .scaleEffect(0.8)
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             }
-                            Text(isLoading ? "Registrando..." : "Registrate")
+                            Text(isLoading ? "Registrando..." : "Regístrate")
                                 .font(.title2)
                                 .fontWeight(.bold)
                         }
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(formularioValido() ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.gray)
+                        .background(formularioValido() && !isLoading ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.gray)
                         .cornerRadius(10)
                         .padding(.horizontal, 30)
                     }
@@ -189,13 +196,13 @@ struct ScreenRegister: View {
     // MARK: - Funciones de Validación
     
     private func validarNombre() -> Bool {
-        return nombre.count >= 2
+        return nombre.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
     }
     
     private func validarCorreo() -> Bool {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        return emailPred.evaluate(with: correo)
+        return emailPred.evaluate(with: correo.trimmingCharacters(in: .whitespacesAndNewlines))
     }
     
     private func validarContrasena() -> Bool {
@@ -216,22 +223,33 @@ struct ScreenRegister: View {
     
     // MARK: - Función de Registro
     
-    private func registrarUsuario() {
+    @MainActor
+    private func registrarUsuario() async {
         isLoading = true
         
-        // Simulación de llamada a API
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            isLoading = false
+        do {
+            let response = try await authController.registerUser(
+                name: nombre.trimmingCharacters(in: .whitespacesAndNewlines),
+                email: correo.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+                password: contrasena
+            )
             
-            // Aquí harías la llamada real a tu API
-            // Por ahora simulamos un registro exitoso
+            // Registro exitoso
             registroExitoso = true
-            alertMessage = "¡Registro exitoso! Bienvenido a Fraud Fishing."
+            alertMessage = "¡Registro exitoso! Bienvenido \(response.name) a Fraud Fishing."
             showAlert = true
             
             // Limpiar campos después del registro exitoso
             limpiarCampos()
+            
+        } catch {
+            // Manejar errores
+            alertMessage = "Error en el registro. Por favor intenta de nuevo."
+            showAlert = true
+            registroExitoso = false
         }
+        
+        isLoading = false
     }
     
     private func limpiarCampos() {
