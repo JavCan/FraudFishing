@@ -11,11 +11,11 @@ import SwiftUI // Importar SwiftUI para EnvironmentKey
 struct AuthenticationController {
     let httpClient: HTTPClient
     
-    /*func registerUser(name: String,email: String, password: String) async throws -> Bool{
+    func registerUser(name: String,email: String, password: String) async throws -> Bool{
         let registrationResponse = try await httpClient.registerUser(email: email, name: name, password: password)
         
         return registrationResponse
-    }*/
+    }
 
     func loginUser(email: String, password: String) async throws -> UserLoginResponse {
         let loginResponse = try await httpClient.loginUser(email: email, password: password)

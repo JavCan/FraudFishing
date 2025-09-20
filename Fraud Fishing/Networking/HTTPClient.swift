@@ -9,7 +9,7 @@ import Foundation
 
 struct HTTPClient {
     
-    /*func registerUser(email: String, name:String, password: String) async throws -> Bool{
+    func registerUser(email: String, name:String, password: String) async throws -> Bool{
         
         var returnValue:Bool = false
         let dataRequest = UserRequest(email: email, name: name, password: password)
@@ -27,7 +27,7 @@ struct HTTPClient {
             returnValue = true
         }
         return returnValue
-    }*/
+    }
 
     func loginUser(email: String, password: String) async throws -> UserLoginResponse { // Cambiado de username a email
         let loginRequest = UserLoginRequest(email: email, password: password) // Cambiado de username a email
