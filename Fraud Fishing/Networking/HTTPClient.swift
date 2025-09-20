@@ -12,7 +12,7 @@ struct HTTPClient {
     func registerUser(email: String, name:String, password: String) async throws -> Bool{
         
         var returnValue:Bool = false
-        let dataRequest = UserRequest(email: email, name: name, password: password)
+        let dataRequest = UserRegisterRequest(name: name, email: email, password: password)
         let jsonData = try JSONEncoder().encode(dataRequest)
         let url = URL(string: "http://localhost:3000/users")!
         var request = URLRequest(url: url)

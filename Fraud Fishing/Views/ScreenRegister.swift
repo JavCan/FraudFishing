@@ -32,7 +32,7 @@ struct ScreenRegister: View {
                     // Logo
                     Image("FRAUD FISHING-03")
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
                         .frame(width: 300, height: 180)
                         .padding(.top, 20)
                     
@@ -232,11 +232,11 @@ struct ScreenRegister: View {
                 name: nombre.trimmingCharacters(in: .whitespacesAndNewlines),
                 email: correo.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
                 password: contrasena
-            )
             
+            )
             // Registro exitoso
             registroExitoso = true
-            alertMessage = "¡Registro exitoso! Bienvenido \(response.name) a Fraud Fishing."
+            alertMessage = "¡Registro exitoso! Bienvenido "
             showAlert = true
             
             // Limpiar campos después del registro exitoso
