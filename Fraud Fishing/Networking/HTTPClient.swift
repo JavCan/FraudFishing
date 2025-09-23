@@ -9,10 +9,10 @@ import Foundation
 
 struct HTTPClient {
     
-    /*func registerUser(email: String, name:String, password: String) async throws -> Bool{
+    func registerUser(email: String, name:String, password: String) async throws -> Bool{
         
         var returnValue:Bool = false
-        let dataRequest = UserRequest(email: email, name: name, password: password)
+        let dataRequest = UserRegisterRequest(name: name, email: email, password: password)
         let jsonData = try JSONEncoder().encode(dataRequest)
         let url = URL(string: "http://localhost:3000/users")!
         var request = URLRequest(url: url)
@@ -27,7 +27,7 @@ struct HTTPClient {
             returnValue = true
         }
         return returnValue
-    }*/
+    }
 
     func loginUser(email: String, password: String) async throws -> UserLoginResponse { // Cambiado de username a email
         let loginRequest = UserLoginRequest(email: email, password: password) // Cambiado de username a email
