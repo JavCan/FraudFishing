@@ -11,7 +11,8 @@ import SwiftUI
 struct Fraud_FishingApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ScreenLogin()
+                .environment(\.authenticationController, AuthenticationController(httpClient: HTTPClient())) // Proporciona la instancia aquí
         }
     }
 }
