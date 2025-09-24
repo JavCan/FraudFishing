@@ -34,7 +34,7 @@ struct ScreenCreateReport: View {
                             .fontWeight(.bold)
                             .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                             .padding(.horizontal, 30)
-                            .padding(.top, 5)
+                            .padding(.top, 10)
 
                         // Campo URL de la página
                         VStack(alignment: .leading) {
@@ -89,7 +89,7 @@ struct ScreenCreateReport: View {
                                         Image(uiImage: uiImage)
                                             .resizable()
                                             .scaledToFit()
-                                            .frame(maxWidth: .infinity, maxHeight: 120)
+                                            .frame(maxWidth: .infinity, maxHeight: 150)
                                             .cornerRadius(15)
                                     } else {
                                         Image(systemName: "square.and.arrow.up")
@@ -99,7 +99,7 @@ struct ScreenCreateReport: View {
                                             .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4, opacity: 0.4))
                                     }
                                 }
-                                .frame(maxWidth: .infinity, minHeight: 120)
+                                .frame(maxWidth: .infinity, minHeight: 150)
                                 .background(Color.white)
                                 .cornerRadius(15)
                                 .overlay(
@@ -123,7 +123,7 @@ struct ScreenCreateReport: View {
                                 .font(.headline)
                                 .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                             TextEditor(text: $descriptionInput)
-                                .frame(minHeight: 100, maxHeight: 200)
+                                .frame(minHeight: 150, maxHeight: 200)
                                 .padding(8)
                                 .background(Color.white)
                                 .cornerRadius(10)
@@ -155,50 +155,8 @@ struct ScreenCreateReport: View {
                                 .cornerRadius(10)
                                 .padding(.horizontal, 60)
                         }
-                        .padding(.bottom, 20) // Añadido padding inferior para separar del borde o barra de navegación
+                        .padding(.top, 10) // Añadido padding inferior para separar del borde o barra de navegación
                     }
-                }
-
-                // Barra de navegación inferior (copiada de ScreenHome)
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            // Acción para Buscar
-                        }) {
-                            VStack {
-                                Image(systemName: "plus.magnifyingglass")
-                                Text("Buscar")
-                            }
-                            .foregroundColor(.white)
-                        }
-                        Spacer()
-                        Button(action: {
-                            // Acción para Dashboard
-                        }) {
-                            VStack {
-                                Image(systemName: "lightbulb.fill")
-                                Text("Dashboard")
-                            }
-                            .foregroundColor(.white)
-                        }
-                        Spacer()
-                        Button(action: {
-                            // Acción para Perfil
-                        }) {
-                            VStack {
-                                Image(systemName: "person.fill")
-                                Text("Perfil")
-                            }
-                            .foregroundColor(.white)
-                        }
-                        Spacer()
-                    }
-                    .padding(.vertical, 20)
-                    .background(Color(red: 0.0, green: 0.2, blue: 0.4))
-                    .cornerRadius(45)
-                    .padding(.horizontal, 20)
                 }
             }
             .navigationBarHidden(true)
