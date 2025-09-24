@@ -22,7 +22,7 @@ struct ScreenRegister: View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [
                 Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
+                Color(red: 0.0, green: 0.71, blue: 0.737)]),
                            startPoint: UnitPoint(x:0.5, y:0.7),
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
