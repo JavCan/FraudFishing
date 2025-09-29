@@ -152,14 +152,13 @@ struct ScreenCreateReport: View {
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(Color.red)
-                                .cornerRadius(10)
+                                .cornerRadius(15)
                                 .padding(.horizontal, 60)
                         }
                         .padding(.top, 10) // Añadido padding inferior para separar del borde o barra de navegación
                     }
                 }
             }
-            .navigationBarHidden(true)
         }
     }
 }

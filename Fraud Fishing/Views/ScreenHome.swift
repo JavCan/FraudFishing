@@ -96,8 +96,8 @@ struct ScreenHome: View {
                                 // Acción para Buscar
                             }) {
                                 VStack {
-                                    Image(systemName: "plus.magnifyingglass")
-                                    Text("Buscar")
+                                    Image(systemName: "house.fill")
+                                    Text("Home")
                                 }
                                 .foregroundColor(.white)
                             }
