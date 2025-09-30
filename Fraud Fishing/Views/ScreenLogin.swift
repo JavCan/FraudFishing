@@ -28,96 +28,94 @@ struct ScreenLogin: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Gradiente de malla sutil con RadialGradient
-                RadialGradient(gradient: Gradient(colors: [
-                    Color(red: 0.98, green: 0.98, blue: 1.0), // Muy claro, casi blanco azulado
-                    Color(red: 0.90, green: 0.95, blue: 1.0),  // Azul claro
-                    Color(red: 0, green: 0.90, blue: 0.95)   // Azul ligeramente más profundo
-                ]), center: .center, startRadius: 15, endRadius: 500)
+                LinearGradient(gradient: Gradient(colors: [
+                    Color(red: 1, green: 1, blue: 1),
+                    Color(red: 0.0, green: 0.71, blue: 0.737)]),
+                               startPoint: UnitPoint(x:0.5, y:0.7),
+                               endPoint: .bottom)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack {
                     // Título "Iniciar Sesión"
                     Text("Iniciar Sesión")
-                        .font(.poppinsRegular(size: 34)) // Aplicando Poppins Bold
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .font(.poppinsMedium(size: 34)) // Aplicando Poppins Bold
+                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Cambiado a blanco para contraste
                         .padding(.bottom, 40)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 30)
 
                     // Campo de Correo
-                    Text("Correo")
-                        .font(.poppinsSemiBold(size: 17)) // Aplicando Poppins SemiBold
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 40)
+                    VStack(alignment: .leading, spacing: 8) { // Alineación a la izquierda para el label
+                        Text("Correo")
+                            .font(.poppinsSemiBold(size: 14)) // Semibold más pequeño
+                            .foregroundColor(.gray) // Color gris
+                            .padding(.leading, 30) // Alineado con el contenido del campo
 
-                    HStack {
-                        Image(systemName: "envelope")
-                            .foregroundColor(.gray)
-                            .padding(.leading, 10)
-                        TextField("ejemplo@email.com", text: $emailOrUsername)
-                            .font(.poppinsRegular(size: 17)) // Aplicando Poppins Regular
-                            .padding(.vertical, 10)
+                        HStack {
+                            Image(systemName: "envelope")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 30) // Alineación del icono
+                            TextField("ejemplo@email.com", text: $emailOrUsername)
+                                .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
+                                .padding(.vertical, 5) // Ajuste de padding vertical
+                        }
+                        Rectangle() // Línea gris tenue
+                            .frame(height: 1)
+                            .foregroundColor(.gray.opacity(0.5))
+                            .padding(.horizontal, 30) // Alineado con el contenido del campo
                     }
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 30)
                     .padding(.bottom, 20)
 
                     // Campo de Contraseña
-                    Text("Contraseña")
-                        .font(.poppinsSemiBold(size: 17)) // Aplicando Poppins SemiBold
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 40)
+                    VStack(alignment: .leading, spacing: 8) { // Alineación a la izquierda para el label
+                        Text("Contraseña")
+                            .font(.poppinsSemiBold(size: 14)) // Semibold más pequeño
+                            .foregroundColor(.gray) // Color gris
+                            .padding(.leading, 30) // Alineado con el contenido del campo
 
-
-                    HStack {
-                        Image(systemName: "lock")
-                            .foregroundColor(.gray)
-                            .padding(.leading, 10)
-                        if isPasswordVisible {
-                            TextField("••••••••", text: $password)
-                                .font(.poppinsRegular(size: 17)) // Aplicando Poppins Regular
-                                .padding(.vertical, 10)
-                        } else {
-                            SecureField("••••••••", text: $password)
-                                .font(.poppinsRegular(size: 17)) // Aplicando Poppins Regular
-                                .padding(.vertical, 10)
-                        }
-                        Button(action: {
-                            isPasswordVisible.toggle()
-                        }) {
-                            Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
+                        HStack {
+                            Image(systemName: "lock")
                                 .foregroundColor(.gray)
-                                .padding(.trailing, 10)
+                                .padding(.leading, 30)
+                                .padding(.horizontal, 4)
+                            if isPasswordVisible {
+                                TextField("••••••••", text: $password)
+                                    .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
+                                    .padding(.vertical, 5) // Ajuste de padding vertical
+                            } else {
+                                SecureField("••••••••", text: $password)
+                                    .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
+                                    .padding(.vertical, 5) // Ajuste de padding vertical
+                            }
+                            Button(action: {
+                                isPasswordVisible.toggle()
+                            }) {
+                                Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 30) // Alineación del icono
+                            }
                         }
+                        Rectangle() // Línea gris tenue
+                            .frame(height: 1)
+                            .foregroundColor(.gray.opacity(0.5))
+                            .padding(.horizontal, 30) // Alineado con el contenido del campo
                     }
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 30)
 
                     // ¿Olvidaste tu contraseña?
                     Button(action: {
                         // Acción para recuperar contraseña
                     }) {
-                        Text("¿Olvidaste tu contraseña?")
+                        Text("Olvidé mi contraseña") // Texto actualizado
                             .font(.poppinsRegular(size: 15)) // Aplicando Poppins Regular
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                            .foregroundColor(.gray) // Color gris
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.trailing, 30)
-                    .padding(.top, 5)
-                    .padding(.bottom, 40)
+                    .padding(.top, 10)
+                    .padding(.bottom, 30)
 
                     // Botón Iniciar Sesión
                     Button(action: {
@@ -134,19 +132,20 @@ struct ScreenLogin: View {
                             .cornerRadius(10)
                             .padding(.horizontal, 30)
                     }
-                    .padding(.bottom, 50)
+                    .padding(.bottom, 10)
 
                     // ¿No tienes cuenta? Regístrate aquí
                     HStack {
                         Text("Soy un nuevo usuario.")
                             .font(.poppinsRegular(size: 17)) // Aplicando Poppins Regular
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Cambiado a blanco
                         NavigationLink(destination: ScreenRegister()) {
                             Text("Registrarme")
                                 .font(.poppinsBold(size: 17)) // Aplicando Poppins Bold
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Color de acento
                         }
                     }
+                    .padding(.bottom, 170)
                 }
             }
             .navigationBarHidden(true)
