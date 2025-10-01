@@ -118,11 +118,8 @@ struct ScreenLogin: View {
                     .padding(.bottom, 30)
 
                     // Botón Iniciar Sesión
-                    Button(action: {
-                        Task {
-                            await login()
-                        }
-                    }) {
+                    // Botón Iniciar Sesión que navega a ScreenHome
+                    NavigationLink(destination: ScreenHome()) {
                         Text("Iniciar Sesión")
                             .font(.poppinsBold(size: 20)) // Aplicando Poppins Bold
                             .foregroundColor(.white)
@@ -133,6 +130,7 @@ struct ScreenLogin: View {
                             .padding(.horizontal, 30)
                     }
                     .padding(.bottom, 10)
+
 
                     // ¿No tienes cuenta? Regístrate aquí
                     HStack {

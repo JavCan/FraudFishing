@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ScreenHome: View {
     @State private var urlInput: String = ""
+    // NUEVO: pestaña seleccionada para la CustomTabBar
+    @State private var selectedTab: Tab = .home
 
     var body: some View {
         NavigationView {
@@ -87,48 +89,10 @@ struct ScreenHome: View {
 
                     Spacer() // Empuja el contenido hacia arriba
 
-                    // Barra de navegación inferior
-                    VStack {
-                        Spacer() // Empuja la barra de navegación hacia abajo
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // Acción para Buscar
-                            }) {
-                                VStack {
-                                    Image(systemName: "house.fill")
-                                    Text("Home")
-                                }
-                                .foregroundColor(.white)
-                            }
-                            Spacer()
-                            Button(action: {
-                                // Acción para Dashboard
-                            }) {
-                                VStack {
-                                    Image(systemName: "lightbulb.fill")
-                                    Text("Dashboard")
-                                }
-                                .foregroundColor(.white)
-                            }
-                            Spacer()
-                            Button(action: {
-                                // Acción para Perfil
-                            }) {
-                                VStack {
-                                    Image(systemName: "person.fill")
-                                    Text("Perfil")
-                                }
-                                .foregroundColor(.white)
-                            }
-                            Spacer()
-                        }
-                        .padding(.vertical, 20)
-                        .background(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .cornerRadius(45)
-                        .padding(.horizontal, 20)
-                        
-                    }
+                    // REEMPLAZO: Navbar inferior por CustomTabBar
+                    CustomTabBar(selectedTab: $selectedTab)
+                        .ignoresSafeArea(.container, edges: .bottom) // sin espacio debajo
+                        //.padding(.bottom)
                 }
 
                 // Botón de notificaciones
@@ -151,7 +115,74 @@ struct ScreenHome: View {
                 .padding(.trailing, 30)
                 .padding(.top, 30)
             }
-            .navigationBarHidden(true) // Oculta la barra de navegación por defecto
+            .navigationBarBackButtonHidden(true)
+        }
+    }
+}
+
+enum Tab {
+    case home, dashboard, settings
+}
+
+struct CustomTabBar: View {
+    @Binding var selectedTab: Tab
+
+    var body: some View {
+        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        let barHeight: CGFloat = 88
+
+        ZStack {
+            // Fondo blanco con curva hacia abajo al centro
+            Path { path in
+                let width = UIScreen.main.bounds.width
+                path.move(to: CGPoint(x: 0, y: 0))
+                path.addQuadCurve(to: CGPoint(x: width, y: 0),
+                                  control: CGPoint(x: width / 2, y: 40))
+                path.addLine(to: CGPoint(x: width, y: barHeight))
+                path.addLine(to: CGPoint(x: 0, y: barHeight))
+                path.closeSubpath()
+            }
+            .fill(Color.white)
+            .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
+
+            // Laterales: solo Dashboard y Settings
+            HStack {
+                TabButton(icon: "chart.bar.fill", tab: .dashboard, selectedTab: $selectedTab)
+                Spacer()
+                TabButton(icon: "gearshape.fill", tab: .settings, selectedTab: $selectedTab)
+            }
+            .padding(.horizontal, 55)
+
+            // Botón central elevado (Home)
+            Button(action: { selectedTab = .home }) {
+                ZStack {
+                    Circle()
+                        .fill(darkBlue)
+                        .frame(width: 70, height: 70)
+                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .offset(y: -25)
+        }
+        .frame(height: barHeight)
+        .ignoresSafeArea(.container, edges: .bottom) // barra pegada abajo
+    }
+}
+
+struct TabButton: View {
+    let icon: String
+    let tab: Tab
+    @Binding var selectedTab: Tab
+
+    var body: some View {
+        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        Button(action: { selectedTab = tab }) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(selectedTab == tab ? darkBlue : Color.gray.opacity(0.5))
         }
     }
 }
