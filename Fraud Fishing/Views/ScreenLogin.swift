@@ -13,20 +13,35 @@ struct ScreenLogin: View {
     @State private var password: String = ""
     @State private var isPasswordVisible: Bool = false
     @Environment(\.authenticationController) var authenticationController
+    
+    // Estados para el flujo de login
+    @State private var isLoading: Bool = false
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+    @State private var loginExitoso: Bool = false
 
     func login() async {
+        isLoading = true
         do {
             let response = try await authenticationController.loginUser(email: emailOrUsername, password: password)
             print("Login exitoso: \(response)")
-            // Aquí puedes manejar la navegación a la siguiente vista o guardar los tokens
+            // Guardar tokens y actualizar estado de la app si es necesario
+            
+            alertMessage = "Inicio de sesión exitoso."
+            loginExitoso = true
+            showAlert = true
+            
         } catch {
             print("Error al iniciar sesión: \(error.localizedDescription)")
-            // Aquí puedes mostrar un mensaje de error al usuario
+            alertMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo."
+            showAlert = true
+            loginExitoso = false
         }
+        isLoading = false
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LinearGradient(gradient: Gradient(colors: [
                     Color(red: 1, green: 1, blue: 1),
@@ -38,41 +53,43 @@ struct ScreenLogin: View {
                 VStack {
                     // Título "Iniciar Sesión"
                     Text("Iniciar Sesión")
-                        .font(.poppinsMedium(size: 34)) // Aplicando Poppins Bold
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Cambiado a blanco para contraste
+                        .font(.poppinsMedium(size: 34))
+                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                         .padding(.bottom, 40)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 30)
 
                     // Campo de Correo
-                    VStack(alignment: .leading, spacing: 8) { // Alineación a la izquierda para el label
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Correo")
-                            .font(.poppinsSemiBold(size: 14)) // Semibold más pequeño
-                            .foregroundColor(.gray) // Color gris
-                            .padding(.leading, 30) // Alineado con el contenido del campo
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.leading, 30)
 
                         HStack {
                             Image(systemName: "envelope")
                                 .foregroundColor(.gray)
-                                .padding(.leading, 30) // Alineación del icono
+                                .padding(.leading, 30)
                             TextField("ejemplo@email.com", text: $emailOrUsername)
-                                .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
-                                .padding(.vertical, 5) // Ajuste de padding vertical
+                                .font(.poppinsRegular(size: 18))
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .padding(.vertical, 5)
+                                .autocapitalization(.none)
+                                .keyboardType(.emailAddress)
                         }
-                        Rectangle() // Línea gris tenue
+                        Rectangle()
                             .frame(height: 1)
                             .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30) // Alineado con el contenido del campo
+                            .padding(.horizontal, 30)
                     }
                     .padding(.bottom, 20)
 
                     // Campo de Contraseña
-                    VStack(alignment: .leading, spacing: 8) { // Alineación a la izquierda para el label
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Contraseña")
-                            .font(.poppinsSemiBold(size: 14)) // Semibold más pequeño
-                            .foregroundColor(.gray) // Color gris
-                            .padding(.leading, 30) // Alineado con el contenido del campo
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.leading, 30)
 
                         HStack {
                             Image(systemName: "lock")
@@ -81,36 +98,33 @@ struct ScreenLogin: View {
                                 .padding(.horizontal, 4)
                             if isPasswordVisible {
                                 TextField("••••••••", text: $password)
-                                    .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
-                                    .padding(.vertical, 5) // Ajuste de padding vertical
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .padding(.vertical, 5)
                             } else {
                                 SecureField("••••••••", text: $password)
-                                    .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
-                                    .padding(.vertical, 5) // Ajuste de padding vertical
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .padding(.vertical, 5)
                             }
-                            Button(action: {
-                                isPasswordVisible.toggle()
-                            }) {
+                            Button(action: { isPasswordVisible.toggle() }) {
                                 Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
                                     .foregroundColor(.gray)
-                                    .padding(.trailing, 30) // Alineación del icono
+                                    .padding(.trailing, 30)
                             }
                         }
-                        Rectangle() // Línea gris tenue
+                        Rectangle()
                             .frame(height: 1)
                             .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30) // Alineado con el contenido del campo
+                            .padding(.horizontal, 30)
                     }
 
                     // ¿Olvidaste tu contraseña?
-                    Button(action: {
-                        // Acción para recuperar contraseña
-                    }) {
-                        Text("Olvidé mi contraseña") // Texto actualizado
-                            .font(.poppinsRegular(size: 15)) // Aplicando Poppins Regular
-                            .foregroundColor(.gray) // Color gris
+                    Button(action: {})
+                    {
+                        Text("Olvidé mi contraseña")
+                            .font(.poppinsRegular(size: 15))
+                            .foregroundColor(.gray)
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.trailing, 30)
@@ -123,32 +137,46 @@ struct ScreenLogin: View {
                             await login()
                         }
                     }) {
-                        Text("Iniciar Sesión")
-                            .font(.poppinsBold(size: 20)) // Aplicando Poppins Bold
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color(red: 0.0, green: 0.2, blue: 0.4))
-                            .cornerRadius(10)
-                            .padding(.horizontal, 30)
+                        HStack {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Iniciar Sesión")
+                                    .font(.poppinsBold(size: 20))
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(isLoading ? Color.gray : Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .cornerRadius(10)
+                        .padding(.horizontal, 30)
                     }
+                    .disabled(isLoading)
                     .padding(.bottom, 10)
 
                     // ¿No tienes cuenta? Regístrate aquí
                     HStack {
                         Text("Soy un nuevo usuario.")
-                            .font(.poppinsRegular(size: 17)) // Aplicando Poppins Regular
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Cambiado a blanco
+                            .font(.poppinsRegular(size: 17))
+                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                         NavigationLink(destination: ScreenRegister()) {
                             Text("Registrarme")
-                                .font(.poppinsBold(size: 17)) // Aplicando Poppins Bold
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Color de acento
+                                .font(.poppinsBold(size: 17))
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                         }
                     }
                     .padding(.bottom, 170)
                 }
             }
             .navigationBarHidden(true)
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text(loginExitoso ? "Éxito" : "Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            }
+            .navigationDestination(isPresented: $loginExitoso) {
+                ScreenHome()
+            }
         }
     }
 }

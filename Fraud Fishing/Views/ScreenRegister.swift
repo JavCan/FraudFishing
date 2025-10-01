@@ -17,142 +17,204 @@ struct ScreenRegister: View {
     @State private var alertMessage: String = ""
     @State private var isLoading: Bool = false
     @State private var registroExitoso: Bool = false
+    @State private var isPasswordVisible: Bool = false
+    @State private var isConfirmPasswordVisible: Bool = false
+    @Environment(\.presentationMode) private var presentationMode
 
     var body: some View {
         ZStack {
+            // Fondo con el mismo gradiente que ScreenLogin
             LinearGradient(gradient: Gradient(colors: [
                 Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.71, blue: 0.737)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-    
+                Color(red: 0.0, green: 0.71, blue: 0.737)
+            ]),
+            startPoint: UnitPoint(x: 0.5, y: 0.7),
+            endPoint: .bottom)
+            .edgesIgnoringSafeArea(.all)
+
             ScrollView {
                 VStack(spacing: 20) {
-                    // Logo
-                    Image("FRAUD FISHING-03")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 300, height: 180)
-                        .padding(.top, 20)
-                    
-                    VStack(spacing: 15) {
-                        // Campo de Nombre
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Nombre completo")
-                                .font(.headline)
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                    // Título "Registrar" (estilo similar a ScreenLogin)
+                    Text("Registrarse")
+                        .font(.poppinsMedium(size: 34))
+                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 70)
+                        .padding(.leading, 30)
 
+                    // Campo: Nombre Completo (label gris arriba, ícono + texto, línea inferior)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Nombre Completo")
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.leading, 30)
+                            .padding(.top, 15)
+
+                        HStack {
+                            Image(systemName: "person")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 30)
                             TextField("Ingresa tu nombre completo", text: $nombre)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(validarNombre() ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
-                                )
+                                .font(.poppinsRegular(size: 18))
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .padding(.vertical, 5)
                                 .autocapitalization(.words)
                                 .disabled(isLoading)
                         }
-                        
-                        // Campo de Correo
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Correo electrónico")
-                                .font(.headline)
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.gray.opacity(0.5))
+                            .padding(.horizontal, 30)
+                    }
 
+                    // Campo: Correo
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Correo")
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.leading, 30)
+
+                        HStack {
+                            Image(systemName: "envelope")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 30)
                             TextField("ejemplo@correo.com", text: $correo)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(validarCorreo() ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
-                                )
+                                .font(.poppinsRegular(size: 18))
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .padding(.vertical, 5)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .autocorrectionDisabled()
                                 .disabled(isLoading)
                         }
-                        
-                        // Campo de Contraseña
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Contraseña")
-                                .font(.headline)
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.gray.opacity(0.5))
+                            .padding(.horizontal, 30)
+                    }
 
-                            SecureField("Mínimo 6 caracteres", text: $contrasena)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(validarContrasena() ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
-                                )
-                                .disabled(isLoading)
-                            
-                            // Indicadores de fortaleza de contraseña
-                            if !contrasena.isEmpty {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("La contraseña debe tener:")
+                    // Campo: Contraseña
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Contraseña")
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.leading, 30)
+
+                        HStack {
+                            Image(systemName: "lock")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 30)
+                                .padding(.horizontal, 4)
+
+                            if isPasswordVisible {
+                                TextField("••••••••", text: $contrasena)
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .padding(.vertical, 5)
+                                    .disabled(isLoading)
+                            } else {
+                                SecureField("••••••••", text: $contrasena)
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .padding(.vertical, 5)
+                                    .disabled(isLoading)
+                            }
+
+                            Button(action: {
+                                isPasswordVisible.toggle()
+                            }) {
+                                Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 30)
+                            }
+                        }
+
+                        // Indicadores de fortaleza de contraseña (agregados)
+                        if !contrasena.isEmpty {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("La contraseña debe tener:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack {
+                                    Image(systemName: contrasena.count >= 6 ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(contrasena.count >= 6 ? .green : .red)
+                                        .font(.caption)
+                                    Text("Al menos 6 caracteres")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                    
-                                    HStack {
-                                        Image(systemName: contrasena.count >= 6 ? "checkmark.circle.fill" : "circle")
-                                            .foregroundColor(contrasena.count >= 6 ? .green : .red)
-                                            .font(.caption)
-                                        Text("Al menos 6 caracteres")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    
-                                    HStack {
-                                        Image(systemName: contrasenaContieneNumero() ? "checkmark.circle.fill" : "circle")
-                                            .foregroundColor(contrasenaContieneNumero() ? .green : .red)
-                                            .font(.caption)
-                                        Text("Al menos un número")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
                                 }
-                                .padding(.leading, 5)
+                                
+                                HStack {
+                                    Image(systemName: contrasenaContieneNumero() ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(contrasenaContieneNumero() ? .green : .red)
+                                        .font(.caption)
+                                    Text("Al menos un número")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
+                            .padding(.leading, 30) // alineado con el contenido del campo
                         }
-                        
-                        // Campo de Confirmar Contraseña
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Confirmar contraseña")
-                                .font(.headline)
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .frame(maxWidth: .infinity, alignment: .leading)
 
-                            SecureField("Confirma tu contraseña", text: $confirmarContrasena)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(contrasena == confirmarContrasena && !confirmarContrasena.isEmpty ? Color(red: 0.0, green: 0.2, blue: 0.4) : Color.red, lineWidth: 1)
-                                )
-                                .disabled(isLoading)
-                            
-                            if !confirmarContrasena.isEmpty && contrasena != confirmarContrasena {
-                                Text("Las contraseñas no coinciden")
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                                    .padding(.leading, 5)
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.gray.opacity(0.5))
+                            .padding(.horizontal, 30)
+                    }
+                
+
+                    // Campo: Confirmar Contraseña
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Confirmar Contraseña")
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.leading, 30)
+
+                        HStack {
+                            Image(systemName: "lock")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 30)
+                                .padding(.horizontal, 4)
+
+                            if isConfirmPasswordVisible {
+                                TextField("••••••••", text: $confirmarContrasena)
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .padding(.vertical, 5)
+                                    .disabled(isLoading)
+                            } else {
+                                SecureField("••••••••", text: $confirmarContrasena)
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .padding(.vertical, 5)
+                                    .disabled(isLoading)
+                            }
+
+                            Button(action: {
+                                isConfirmPasswordVisible.toggle()
+                            }) {
+                                Image(systemName: isConfirmPasswordVisible ? "eye.fill" : "eye.slash.fill")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 30)
                             }
                         }
+
+                        // Mensaje de validación (coincidencia)
+                        if !confirmarContrasena.isEmpty && contrasena != confirmarContrasena {
+                            Text("Las contraseñas no coinciden")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(.leading, 30)
+                        }
+
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.gray.opacity(0.5))
+                            .padding(.horizontal, 30)
                     }
-                    .padding(.horizontal, 30)
-                    
-                    Spacer().frame(height: 30)
-                    
-                    // Botón Regístrate
+
+                    // Botón Registrarse (estilo consistente con ScreenLogin)
                     Button(action: {
                         Task {
                             await registrarUsuario()
@@ -164,9 +226,8 @@ struct ScreenRegister: View {
                                     .scaleEffect(0.8)
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             }
-                            Text(isLoading ? "Registrando..." : "Regístrate")
-                                .font(.title2)
-                                .fontWeight(.bold)
+                            Text(isLoading ? "Registrando..." : "Registrarse")
+                                .font(.poppinsBold(size: 20))
                         }
                         .foregroundColor(.white)
                         .padding()
@@ -176,7 +237,38 @@ struct ScreenRegister: View {
                         .padding(.horizontal, 30)
                     }
                     .disabled(!formularioValido() || isLoading)
-                    .padding(.bottom, 50)
+
+                    // ¿Ya tengo una cuenta? Iniciar Sesión
+                    HStack(spacing: 4) {
+                        Text("Ya tengo una cuenta.")
+                            .font(.poppinsRegular(size: 17))
+                            .foregroundColor(.gray)
+
+                        NavigationLink(destination: ScreenLogin()) {
+                            Text("Iniciar Sesión")
+                                .font(.poppinsBold(size: 17))
+                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        }
+                    }
+                    .padding(.horizontal, 30)
+                    .padding(.top, 8)
+                    .padding(.bottom, 40)
+                }
+            }
+        }
+        // Al mostrar esta vista dentro de una NavigationView, ocultamos el back predeterminado y usamos uno personalizado
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                            .font(.system(size: 16, weight: .semibold))
+                    }
                 }
             }
         }
