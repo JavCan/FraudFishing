@@ -9,10 +9,16 @@ import SwiftUI
 
 @main
 struct Fraud_FishingApp: App {
+    @State private var isOnboardingFinished = false
+
     var body: some Scene {
         WindowGroup {
-            ScreenLogin()
-                .environment(\.authenticationController, AuthenticationController(httpClient: HTTPClient())) // Proporciona la instancia aquí
+            if isOnboardingFinished {
+                ScreenLogin()
+                    .environment(\.authenticationController, AuthenticationController(httpClient: HTTPClient()))
+            } else {
+                ScreenOnboarding(isOnboardingFinished: $isOnboardingFinished)
+            }
         }
     }
 }
