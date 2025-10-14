@@ -44,9 +44,9 @@ struct ScreenLogin: View {
         NavigationStack {
             ZStack {
                 LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.71, blue: 0.737)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                               startPoint: UnitPoint(x:0.5, y:0.1),
                                endPoint: .bottom)
                     .edgesIgnoringSafeArea(.all)
 
@@ -54,7 +54,7 @@ struct ScreenLogin: View {
                     // Título "Iniciar Sesión"
                     Text("Iniciar Sesión")
                         .font(.poppinsMedium(size: 34))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(Color(red: 1, green: 1, blue: 1))
                         .padding(.bottom, 40)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 30)
@@ -63,23 +63,23 @@ struct ScreenLogin: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Correo")
                             .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.8))
                             .padding(.leading, 30)
 
                         HStack {
                             Image(systemName: "envelope")
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.5))
                                 .padding(.leading, 30)
                             TextField("ejemplo@email.com", text: $emailOrUsername)
                                 .font(.poppinsRegular(size: 18))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .foregroundColor(Color(red: 1, green: 1, blue: 1))
                                 .padding(.vertical, 5)
                                 .autocapitalization(.none)
                                 .keyboardType(.emailAddress)
                         }
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
+                            .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.5))
                             .padding(.horizontal, 30)
                     }
                     .padding(.bottom, 20)
@@ -88,34 +88,34 @@ struct ScreenLogin: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Contraseña")
                             .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.8))
                             .padding(.leading, 30)
 
                         HStack {
                             Image(systemName: "lock")
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.5))
                                 .padding(.leading, 30)
                                 .padding(.horizontal, 4)
                             if isPasswordVisible {
                                 TextField("••••••••", text: $password)
                                     .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .foregroundColor(Color(red: 1, green: 1, blue: 1))
                                     .padding(.vertical, 5)
                             } else {
                                 SecureField("••••••••", text: $password)
                                     .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                    .foregroundColor(Color(red: 1, green: 1, blue: 1))
                                     .padding(.vertical, 5)
                             }
                             Button(action: { isPasswordVisible.toggle() }) {
                                 Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.5))
                                     .padding(.trailing, 30)
                             }
                         }
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
+                            .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.5))
                             .padding(.horizontal, 30)
                     }
 
@@ -124,7 +124,7 @@ struct ScreenLogin: View {
                     {
                         Text("Olvidé mi contraseña")
                             .font(.poppinsRegular(size: 15))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.8))
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.trailing, 30)
@@ -160,11 +160,11 @@ struct ScreenLogin: View {
                     HStack {
                         Text("Soy un nuevo usuario.")
                             .font(.poppinsRegular(size: 17))
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                            .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.8))
                         NavigationLink(destination: ScreenRegister()) {
                             Text("Registrarme")
                                 .font(.poppinsBold(size: 17))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .foregroundColor(Color(red: 1, green: 1, blue: 1))
                         }
                     }
                     .padding(.bottom, 170)
