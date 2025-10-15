@@ -61,7 +61,8 @@ struct ScreenRegister: View {
                         placeholder: "ejemplo@correo.com",
                         text: $correo,
                         isSecure: false,
-                        keyboardType: .emailAddress
+                        keyboardType: .emailAddress,
+                        autocapitalization: .never
                     )
 
                     // MARK: - Campo Contraseña
@@ -72,6 +73,7 @@ struct ScreenRegister: View {
                         text: $contrasena,
                         isSecure: !isPasswordVisible,
                         trailingIcon: isPasswordVisible ? "eye.fill" : "eye.slash.fill",
+                        autocapitalization: .never,
                         onTrailingTap: { isPasswordVisible.toggle() }
                     )
 
@@ -102,6 +104,7 @@ struct ScreenRegister: View {
                         text: $confirmarContrasena,
                         isSecure: !isConfirmPasswordVisible,
                         trailingIcon: isConfirmPasswordVisible ? "eye.fill" : "eye.slash.fill",
+                        autocapitalization: .never,
                         onTrailingTap: { isConfirmPasswordVisible.toggle() }
                     )
 
@@ -187,6 +190,7 @@ struct ScreenRegister: View {
         isSecure: Bool,
         trailingIcon: String? = nil,
         keyboardType: UIKeyboardType = .default,
+        autocapitalization: TextInputAutocapitalization = .sentences,
         onTrailingTap: (() -> Void)? = nil
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -215,6 +219,7 @@ struct ScreenRegister: View {
                     } else {
                         TextField("", text: text)
                             .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white)
                             .foregroundColor(.white)
                             .keyboardType(keyboardType)
                             .padding(.vertical, 5)
