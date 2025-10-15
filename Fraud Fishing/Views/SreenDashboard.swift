@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ScreenHome: View {
+struct ScreenDashboard: View {
     @State private var categoriaSeleccionada: String = "Todas"
     @State private var showNotificaciones: Bool = false
     
@@ -573,5 +573,5 @@ struct NotificacionesView: View {
 // MARK: - Preview
 
 #Preview {
-    ScreenHome()
+    ScreenDashboard()
 }
