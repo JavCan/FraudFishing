@@ -17,15 +17,15 @@ struct ScreenHome: View {
                 // Capa 1: Contenido principal con fondo
                 ZStack(alignment: .topTrailing) {
                     LinearGradient(gradient: Gradient(colors: [
-                        Color(red: 1, green: 1, blue: 1),
-                        Color(red: 0.0, green: 0.71, blue: 0.737)]),
+                        Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                        Color(red: 0.043, green: 0.067, blue: 0.173)]),
                                    startPoint: UnitPoint(x:0.5, y:0.7),
                                    endPoint: .bottom)
                         .edgesIgnoringSafeArea(.all)
 
                     VStack {
                         // Logo
-                        Image("FRAUD FISHING-03")
+                        Image("LogoBlanco")
                             .resizable()
                             .scaledToFill()
                             .frame(width: 400, height: 240)
@@ -36,6 +36,7 @@ struct ScreenHome: View {
                             TextField("URL", text: $urlInput)
                                 .padding()
                                 .background(Color(red: 0.0, green: 0.71, blue: 0.737, opacity: 0.2))
+                                .foregroundColor(.white)
                                 .cornerRadius(25)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 25)
@@ -144,7 +145,7 @@ struct CustomTabBar: View {
             Button(action: { selectedTab = .home }) {
                 ZStack {
                     Circle()
-                        .fill(darkBlue)
+                        .fill(Color(red: 0.0, green: 0.71, blue: 0.737))
                         .frame(width: 70, height: 70)
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
                     Image(systemName: "house.fill")

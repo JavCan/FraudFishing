@@ -4,6 +4,7 @@
 //
 //  Created by Javier Canella Ramos on 16/09/25.
 //  Edited by Victor Bosquez on 18/09/25.
+//  Dark mode + unified design by ChatGPT (2025)
 
 import SwiftUI
 
@@ -23,211 +24,106 @@ struct ScreenRegister: View {
 
     var body: some View {
         ZStack {
-            // Fondo con el mismo gradiente que ScreenLogin
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.71, blue: 0.737)
-            ]),
-            startPoint: UnitPoint(x: 0.5, y: 0.7),
-            endPoint: .bottom)
+            // 🔹 Fondo igual que ScreenLogin
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: UnitPoint(x: 0.5, y: 0.1),
+                endPoint: .bottom
+            )
             .edgesIgnoringSafeArea(.all)
 
             ScrollView {
-                VStack(spacing: 20) {
-                    // Título "Registrar" (estilo similar a ScreenLogin)
+                VStack(spacing: 25) {
+                    // 🔹 Título
                     Text("Registrarse")
                         .font(.poppinsMedium(size: 34))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 70)
                         .padding(.leading, 30)
 
-                    // Campo: Nombre Completo (label gris arriba, ícono + texto, línea inferior)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Nombre Completo")
-                            .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.gray)
-                            .padding(.leading, 30)
-                            .padding(.top, 15)
+                    // MARK: - Campo Nombre
+                    customTextField(
+                        label: "Nombre Completo",
+                        icon: "person",
+                        placeholder: "Ingresa tu nombre completo",
+                        text: $nombre,
+                        isSecure: false
+                    )
 
-                        HStack {
-                            Image(systemName: "person")
-                                .foregroundColor(.gray)
-                                .padding(.leading, 30)
-                            TextField("Ingresa tu nombre completo", text: $nombre)
-                                .font(.poppinsRegular(size: 18))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .padding(.vertical, 5)
-                                .autocapitalization(.words)
-                                .disabled(isLoading)
+                    // MARK: - Campo Correo
+                    customTextField(
+                        label: "Correo",
+                        icon: "envelope",
+                        placeholder: "ejemplo@correo.com",
+                        text: $correo,
+                        isSecure: false,
+                        keyboardType: .emailAddress
+                    )
+
+                    // MARK: - Campo Contraseña
+                    customTextField(
+                        label: "Contraseña",
+                        icon: "lock",
+                        placeholder: "••••••••",
+                        text: $contrasena,
+                        isSecure: !isPasswordVisible,
+                        trailingIcon: isPasswordVisible ? "eye.fill" : "eye.slash.fill",
+                        onTrailingTap: { isPasswordVisible.toggle() }
+                    )
+
+                    // Indicadores de fortaleza
+                    if !contrasena.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: contrasena.count >= 6 ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(contrasena.count >= 6 ? .green : .red)
+                                Text("Al menos 6 caracteres")
+                            }
+                            HStack {
+                                Image(systemName: contrasenaContieneNumero() ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(contrasenaContieneNumero() ? .green : .red)
+                                Text("Al menos un número")
+                            }
                         }
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.leading, 38)
                     }
 
-                    // Campo: Correo
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Correo")
-                            .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.gray)
-                            .padding(.leading, 30)
+                    // MARK: - Confirmar Contraseña
+                    customTextField(
+                        label: "Confirmar Contraseña",
+                        icon: "lock",
+                        placeholder: "••••••••",
+                        text: $confirmarContrasena,
+                        isSecure: !isConfirmPasswordVisible,
+                        trailingIcon: isConfirmPasswordVisible ? "eye.fill" : "eye.slash.fill",
+                        onTrailingTap: { isConfirmPasswordVisible.toggle() }
+                    )
 
-                        HStack {
-                            Image(systemName: "envelope")
-                                .foregroundColor(.gray)
-                                .padding(.leading, 30)
-                            TextField("ejemplo@correo.com", text: $correo)
-                                .font(.poppinsRegular(size: 18))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .padding(.vertical, 5)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                                .autocorrectionDisabled()
-                                .disabled(isLoading)
-                        }
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30)
+                    if !confirmarContrasena.isEmpty && contrasena != confirmarContrasena {
+                        Text("Las contraseñas no coinciden")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.leading, 38)
                     }
 
-                    // Campo: Contraseña
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Contraseña")
-                            .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.gray)
-                            .padding(.leading, 30)
-
-                        HStack {
-                            Image(systemName: "lock")
-                                .foregroundColor(.gray)
-                                .padding(.leading, 30)
-                                .padding(.horizontal, 4)
-
-                            if isPasswordVisible {
-                                TextField("••••••••", text: $contrasena)
-                                    .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                    .padding(.vertical, 5)
-                                    .disabled(isLoading)
-                            } else {
-                                SecureField("••••••••", text: $contrasena)
-                                    .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                    .padding(.vertical, 5)
-                                    .disabled(isLoading)
-                            }
-
-                            Button(action: {
-                                isPasswordVisible.toggle()
-                            }) {
-                                Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 30)
-                            }
-                        }
-
-                        // Indicadores de fortaleza de contraseña (agregados)
-                        if !contrasena.isEmpty {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("La contraseña debe tener:")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                HStack {
-                                    Image(systemName: contrasena.count >= 6 ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(contrasena.count >= 6 ? .green : .red)
-                                        .font(.caption)
-                                    Text("Al menos 6 caracteres")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                HStack {
-                                    Image(systemName: contrasenaContieneNumero() ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(contrasenaContieneNumero() ? .green : .red)
-                                        .font(.caption)
-                                    Text("Al menos un número")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .padding(.leading, 30) // alineado con el contenido del campo
-                        }
-
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30)
-                    }
-                
-
-                    // Campo: Confirmar Contraseña
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Confirmar Contraseña")
-                            .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.gray)
-                            .padding(.leading, 30)
-
-                        HStack {
-                            Image(systemName: "lock")
-                                .foregroundColor(.gray)
-                                .padding(.leading, 30)
-                                .padding(.horizontal, 4)
-
-                            if isConfirmPasswordVisible {
-                                TextField("••••••••", text: $confirmarContrasena)
-                                    .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                    .padding(.vertical, 5)
-                                    .disabled(isLoading)
-                            } else {
-                                SecureField("••••••••", text: $confirmarContrasena)
-                                    .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                    .padding(.vertical, 5)
-                                    .disabled(isLoading)
-                            }
-
-                            Button(action: {
-                                isConfirmPasswordVisible.toggle()
-                            }) {
-                                Image(systemName: isConfirmPasswordVisible ? "eye.fill" : "eye.slash.fill")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 30)
-                            }
-                        }
-
-                        // Mensaje de validación (coincidencia)
-                        if !confirmarContrasena.isEmpty && contrasena != confirmarContrasena {
-                            Text("Las contraseñas no coinciden")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                                .padding(.leading, 30)
-                        }
-
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30)
-                    }
-
-                    // Botón Registrarse (estilo consistente con ScreenLogin)
+                    // MARK: - Botón Registrarse
                     Button(action: {
-                        Task {
-                            await registrarUsuario()
-                        }
+                        Task { await registrarUsuario() }
                     }) {
                         HStack {
                             if isLoading {
                                 ProgressView()
-                                    .scaleEffect(0.8)
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Registrarse")
+                                    .font(.poppinsBold(size: 20))
                             }
-                            Text(isLoading ? "Registrando..." : "Registrarse")
-                                .font(.poppinsBold(size: 20))
                         }
                         .foregroundColor(.white)
                         .padding()
@@ -237,36 +133,34 @@ struct ScreenRegister: View {
                         .padding(.horizontal, 30)
                     }
                     .disabled(!formularioValido() || isLoading)
+                    .padding(.top, 10)
 
-                    // ¿Ya tengo una cuenta? Iniciar Sesión
-                    HStack(spacing: 4) {
+                    // MARK: - Ya tengo cuenta
+                    HStack {
                         Text("Ya tengo una cuenta.")
                             .font(.poppinsRegular(size: 17))
-                            .foregroundColor(.gray)
-
+                            .foregroundColor(.white.opacity(0.8))
                         NavigationLink(destination: ScreenLogin()) {
                             Text("Iniciar Sesión")
                                 .font(.poppinsBold(size: 17))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .foregroundColor(.white)
                         }
                     }
-                    .padding(.horizontal, 30)
                     .padding(.top, 8)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 80)
                 }
             }
         }
-        // Al mostrar esta vista dentro de una NavigationView, ocultamos el back predeterminado y usamos uno personalizado
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: { presentationMode.wrappedValue.dismiss() }) {
                     ZStack {
                         Circle()
-                            .fill(Color.white)
+                            .fill(Color.white.opacity(0.1))
                             .frame(width: 36, height: 36)
                         Image(systemName: "chevron.left")
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                            .foregroundColor(.white)
                             .font(.system(size: 16, weight: .semibold))
                     }
                 }
@@ -274,76 +168,113 @@ struct ScreenRegister: View {
         }
         .alert("Registro", isPresented: $showAlert) {
             if registroExitoso {
-                Button("Continuar") {
-                    // Aquí navegarías a la siguiente pantalla
-                }
+                Button("Continuar") {}
             } else {
-                Button("OK") { }
+                Button("OK") {}
             }
         } message: {
             Text(alertMessage)
         }
     }
-    
-    // MARK: - Funciones de Validación
-    
-    private func validarNombre() -> Bool {
-        return nombre.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
+
+    // MARK: - Subcomponentes reutilizables
+    @ViewBuilder
+    func customTextField(
+        label: String,
+        icon: String,
+        placeholder: String,
+        text: Binding<String>,
+        isSecure: Bool,
+        trailingIcon: String? = nil,
+        keyboardType: UIKeyboardType = .default,
+        onTrailingTap: (() -> Void)? = nil
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.poppinsSemiBold(size: 14))
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.leading, 30)
+
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.leading, 30)
+
+                ZStack(alignment: .leading) {
+                    if text.wrappedValue.isEmpty {
+                        Text(placeholder)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                    if isSecure {
+                        SecureField("", text: text)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white)
+                            .keyboardType(keyboardType)
+                            .padding(.vertical, 5)
+                    } else {
+                        TextField("", text: text)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white)
+                            .keyboardType(keyboardType)
+                            .padding(.vertical, 5)
+                    }
+                }
+
+                if let trailingIcon = trailingIcon {
+                    Button(action: { onTrailingTap?() }) {
+                        Image(systemName: trailingIcon)
+                            .foregroundColor(.white.opacity(0.6))
+                            .padding(.trailing, 30)
+                    }
+                }
+            }
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(.white.opacity(0.5))
+                .padding(.horizontal, 30)
+        }
     }
-    
+
+    // MARK: - Validaciones
+    private func validarNombre() -> Bool { nombre.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2 }
     private func validarCorreo() -> Bool {
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        return emailPred.evaluate(with: correo.trimmingCharacters(in: .whitespacesAndNewlines))
+        let regex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        return NSPredicate(format:"SELF MATCHES %@", regex)
+            .evaluate(with: correo.trimmingCharacters(in: .whitespacesAndNewlines))
     }
-    
     private func validarContrasena() -> Bool {
-        return contrasena.count >= 6 && contrasenaContieneNumero()
+        contrasena.count >= 6 && contrasenaContieneNumero()
     }
-    
     private func contrasenaContieneNumero() -> Bool {
-        return contrasena.rangeOfCharacter(from: CharacterSet.decimalDigits) != nil
+        contrasena.rangeOfCharacter(from: .decimalDigits) != nil
     }
-    
     private func formularioValido() -> Bool {
-        return validarNombre() && 
-               validarCorreo() && 
-               validarContrasena() && 
-               contrasena == confirmarContrasena &&
-               !confirmarContrasena.isEmpty
+        validarNombre() && validarCorreo() && validarContrasena() && contrasena == confirmarContrasena && !confirmarContrasena.isEmpty
     }
-    
-    // MARK: - Función de Registro
-    
+
+    // MARK: - Registro
     @MainActor
     private func registrarUsuario() async {
         isLoading = true
-        
         do {
-            let response = try await authController.registerUser(
+            _ = try await authController.registerUser(
                 name: nombre.trimmingCharacters(in: .whitespacesAndNewlines),
                 email: correo.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
                 password: contrasena
-            
             )
-            // Registro exitoso
             registroExitoso = true
-            alertMessage = "¡Registro exitoso! Bienvenido "
+            alertMessage = "¡Registro exitoso! Bienvenido."
             showAlert = true
-            
-            // Limpiar campos después del registro exitoso
             limpiarCampos()
-            
         } catch {
-            // Manejar errores
-            alertMessage = "Error en el registro. Por favor intenta de nuevo."
-            showAlert = true
             registroExitoso = false
+            alertMessage = "Error en el registro. Inténtalo de nuevo."
+            showAlert = true
         }
-        
         isLoading = false
     }
-    
+
     private func limpiarCampos() {
         nombre = ""
         correo = ""
