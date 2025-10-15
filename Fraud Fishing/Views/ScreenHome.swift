@@ -12,99 +12,98 @@ struct ScreenHome: View {
     @State private var selectedTab: Tab = .home
 
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottom) { // CAMBIO CLAVE: ZStack principal con alignment .bottom
-                // Capa 1: Contenido principal con fondo
-                ZStack(alignment: .topTrailing) {
-                    LinearGradient(gradient: Gradient(colors: [
-                        Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
-                        Color(red: 0.043, green: 0.067, blue: 0.173)]),
-                                   startPoint: UnitPoint(x:0.5, y:0.7),
-                                   endPoint: .bottom)
-                        .edgesIgnoringSafeArea(.all)
+        // Eliminado NavigationView para evitar barra y botón “Back”
+        ZStack(alignment: .bottom) {
+            // Capa 1: Contenido principal con fondo
+            ZStack(alignment: .topTrailing) {
+                LinearGradient(gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                               startPoint: UnitPoint(x:0.5, y:0.1),
+                               endPoint: .bottom)
+                    .edgesIgnoringSafeArea(.all)
 
-                    VStack {
-                        // Logo
-                        Image("LogoBlanco")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 400, height: 240)
-                            .padding(.top, 60)
+                VStack {
+                    // Logo
+                    Image("LogoBlanco")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 400, height: 240)
+                        .padding(.top, 60)
 
-                        // Barra de entrada de URL
-                        HStack {
-                            TextField("URL", text: $urlInput)
-                                .padding()
-                                .background(Color(red: 0.0, green: 0.71, blue: 0.737, opacity: 0.2))
-                                .foregroundColor(.white)
-                                .cornerRadius(25)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 25)
-                                        .stroke(Color(red: 0.0, green: 0.71, blue: 0.737))
-                                )
-                                .padding(.leading, 20)
-                                .padding(.trailing, 20)
-                        }
-                        .padding(.bottom, 30)
-
-                        // Botones de Reportar y Buscar
-                        HStack(spacing: 20) {
-                            NavigationLink(destination: ScreenCreateReport(reportedURL: urlInput)) {
-                                Text("Reportar")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.red)
-                                    .cornerRadius(10)
-                            }
-
-                            Button(action: {
-                                print("Buscar URL reportada: \(urlInput)")
-                            }) {
-                                Text("Buscar")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                    .cornerRadius(10)
-                            }
-                        }
-                        .padding(.horizontal, 30)
-                        .padding(.bottom, 50)
-
-                        Spacer()
-                    }
-                    .padding(.bottom, 88) // Espacio para la tab bar
-
-                    // Botón de notificaciones
-                    NavigationLink(destination: ScreenNotifications()) {
-                        Image(systemName: "bell.fill")
-                            .font(.title)
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    // Barra de entrada de URL
+                    HStack {
+                        TextField("URL", text: $urlInput)
+                            .padding()
+                            .background(Color(red: 0.0, green: 0.71, blue: 0.737, opacity: 0.2))
+                            .foregroundColor(.white)
+                            .cornerRadius(25)
                             .overlay(
-                                Text("1")
-                                    .font(.caption2)
-                                    .foregroundColor(.white)
-                                    .padding(5)
-                                    .background(Color.red)
-                                    .clipShape(Circle())
-                                    .offset(x: 10, y: -10)
+                                RoundedRectangle(cornerRadius: 25)
+                                    .stroke(Color(red: 0.0, green: 0.71, blue: 0.737))
                             )
+                            .padding(.leading, 20)
+                            .padding(.trailing, 20)
                     }
-                    .padding(.trailing, 30)
-                    .padding(.top, 30)
+                    .padding(.bottom, 30)
+
+                    // Botones de Reportar y Buscar
+                    HStack(spacing: 20) {
+                        NavigationLink(destination: ScreenCreateReport(reportedURL: urlInput)) {
+                            Text("Reportar")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.red)
+                                .cornerRadius(10)
+                        }
+
+                        Button(action: {
+                            print("Buscar URL reportada: \(urlInput)")
+                        }) {
+                            Text("Buscar")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal, 30)
+                    .padding(.bottom, 50)
+
+                    Spacer()
                 }
-                
-                // Capa 2: CustomTabBar superpuesta
-                CustomTabBar(selectedTab: $selectedTab)
+                .padding(.bottom, 88) // Espacio para la tab bar
+
+                // Botón de notificaciones
+                NavigationLink(destination: ScreenNotifications()) {
+                    Image(systemName: "bell.fill")
+                        .font(.title)
+                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .overlay(
+                            Text("1")
+                                .font(.caption2)
+                                .foregroundColor(.white)
+                                .padding(5)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                                .offset(x: 10, y: -10)
+                        )
+                }
+                .padding(.trailing, 30)
+                .padding(.top, 30)
             }
-            .navigationBarBackButtonHidden(true)
-            .edgesIgnoringSafeArea(.bottom) // Importante para que llegue hasta abajo
+            // Capa 2: CustomTabBar superpuesta
+            CustomTabBar(selectedTab: $selectedTab)
         }
+        .navigationBarBackButtonHidden(true)   // ← Oculta botón atrás
+        .toolbar(.hidden, for: .navigationBar) // ← Oculta barra completa
+        .edgesIgnoringSafeArea(.bottom)
     }
 }
 

@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+enum LoginRoute: Hashable {
+    case home
+}
+
 struct ScreenLogin: View {
     // MARK: - Estados y Entorno
     @State private var emailOrUsername: String = ""
@@ -18,6 +22,7 @@ struct ScreenLogin: View {
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     @State private var loginExitoso: Bool = false
+    @State private var navPath: [LoginRoute] = []  // ← Nuevo path de navegación
 
     // MARK: - Función de Inicio de Sesión
     func login() async {
@@ -28,6 +33,9 @@ struct ScreenLogin: View {
             alertMessage = "Inicio de sesión exitoso."
             loginExitoso = true
             showAlert = true
+            await MainActor.run {
+                navPath.append(.home)  // ← Navegación programática con NavigationStack
+            }
         } catch {
             print("Error al iniciar sesión: \(error.localizedDescription)")
             alertMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo."
@@ -39,7 +47,7 @@ struct ScreenLogin: View {
 
     // MARK: - Vista Principal
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navPath) {   // ← Usa path
             ZStack {
                 // MARK: Fondo con gradiente oscuro
                 LinearGradient(
@@ -208,8 +216,13 @@ struct ScreenLogin: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
-            .navigationDestination(isPresented: $loginExitoso) {
-                ScreenHome()
+            .navigationDestination(for: LoginRoute.self) { route in   // ← Destino moderno
+                switch route {
+                case .home:
+                    ScreenHome()
+                        .navigationBarBackButtonHidden(true)
+                        .toolbar(.hidden, for: .navigationBar)
+                }
             }
         }
     }
