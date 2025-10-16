@@ -535,41 +535,18 @@ struct DetalleReporteDestacadoView: View {
     }
 }
 
-// MARK: - Vista de Notificaciones
+// MARK: - Enlace a Notificaciones
 
 struct NotificacionesView: View {
-    @Environment(\.dismiss) private var dismiss
-    
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color(red: 0.95, green: 0.95, blue: 0.97)
-                    .edgesIgnoringSafeArea(.all)
-                
-                VStack {
-                    EmptyStateView(
-                        icon: "bell.slash",
-                        message: "No tienes notificaciones",
-                        description: "Te notificaremos cuando haya actualizaciones importantes"
-                    )
-                    .padding(.top, 100)
-                    
-                    Spacer()
-                }
-            }
-            .navigationTitle("Notificaciones")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cerrar") {
-                        dismiss()
-                    }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                }
-            }
+        NavigationLink(destination: ScreenNotifications()) {
+            Label("Notificaciones", systemImage: "bell")
+                .foregroundColor(.primary)
+                .padding()
         }
     }
 }
+
 
 // MARK: - Preview
 
