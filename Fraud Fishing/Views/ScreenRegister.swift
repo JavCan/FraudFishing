@@ -208,7 +208,7 @@ struct ScreenRegister: View {
                     if text.wrappedValue.isEmpty {
                         Text(placeholder)
                             .font(.poppinsRegular(size: 18))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.white.opacity(0.3))
                     }
                     if isSecure {
                         SecureField("", text: text)

@@ -208,6 +208,7 @@ struct ScreenLogin: View {
             }
 
             // MARK: - Navegación y Alertas
+            .ignoresSafeArea(.keyboard)
             .navigationBarHidden(true)
             .alert(isPresented: $showAlert) {
                 Alert(
