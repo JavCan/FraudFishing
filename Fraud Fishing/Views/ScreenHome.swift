@@ -9,49 +9,41 @@ import SwiftUI
 
 struct ScreenHome: View {
     @State private var urlInput: String = ""
+    @State private var selectedTab: Tab = .home
 
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .topTrailing) { // Alineamos el ZStack para el botón de notificación
+        // Eliminado NavigationView para evitar barra y botón “Back”
+        ZStack(alignment: .bottom) {
+            // Capa 1: Contenido principal con fondo
+            ZStack(alignment: .topTrailing) {
                 LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.71, blue: 0.737)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                               startPoint: UnitPoint(x:0.5, y:0.1),
                                endPoint: .bottom)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack {
                     // Logo
-                    Image("FRAUD FISHING-03")
+                    Image("LogoBlanco")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 400, height: 240)
-                        .padding(.top, 60) // Ajusta el padding superior para el logo
+                        .padding(.top, 60)
 
                     // Barra de entrada de URL
                     HStack {
                         TextField("URL", text: $urlInput)
                             .padding()
                             .background(Color(red: 0.0, green: 0.71, blue: 0.737, opacity: 0.2))
+                            .foregroundColor(.white)
                             .cornerRadius(25)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 25)
                                     .stroke(Color(red: 0.0, green: 0.71, blue: 0.737))
                             )
                             .padding(.leading, 20)
-
-                        /*Button(action: {
-                            // Acción para buscar URL
-                            print("Buscar URL: \(urlInput)")
-                        }) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.title2)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color(red: 0.0, green: 0.71, blue: 0.737))
-                                .clipShape(Circle())
-                        }
-                        */.padding(.trailing, 20)
+                            .padding(.trailing, 20)
                     }
                     .padding(.bottom, 30)
 
@@ -69,7 +61,6 @@ struct ScreenHome: View {
                         }
 
                         Button(action: {
-                            // Acción para buscar
                             print("Buscar URL reportada: \(urlInput)")
                         }) {
                             Text("Buscar")
@@ -85,61 +76,17 @@ struct ScreenHome: View {
                     .padding(.horizontal, 30)
                     .padding(.bottom, 50)
 
-                    Spacer() // Empuja el contenido hacia arriba
-
-                    // Barra de navegación inferior
-                    VStack {
-                        Spacer() // Empuja la barra de navegación hacia abajo
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // Acción para Buscar
-                            }) {
-                                VStack {
-                                    Image(systemName: "house.fill")
-                                    Text("Home")
-                                }
-                                .foregroundColor(.white)
-                            }
-                            Spacer()
-                            Button(action: {
-                                // Acción para Dashboard
-                            }) {
-                                VStack {
-                                    Image(systemName: "lightbulb.fill")
-                                    Text("Dashboard")
-                                }
-                                .foregroundColor(.white)
-                            }
-                            Spacer()
-                            Button(action: {
-                                // Acción para Perfil
-                            }) {
-                                VStack {
-                                    Image(systemName: "person.fill")
-                                    Text("Perfil")
-                                }
-                                .foregroundColor(.white)
-                            }
-                            Spacer()
-                        }
-                        .padding(.vertical, 20)
-                        .background(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .cornerRadius(45)
-                        .padding(.horizontal, 20)
-                        
-                    }
+                    Spacer()
                 }
+                .padding(.bottom, 88) // Espacio para la tab bar
 
                 // Botón de notificaciones
-                Button(action: {
-                    // Acción para notificaciones
-                }) {
+                NavigationLink(destination: ScreenNotifications()) {
                     Image(systemName: "bell.fill")
                         .font(.title)
                         .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                         .overlay(
-                            Text("1") // Número de notificaciones
+                            Text("1")
                                 .font(.caption2)
                                 .foregroundColor(.white)
                                 .padding(5)
@@ -151,7 +98,77 @@ struct ScreenHome: View {
                 .padding(.trailing, 30)
                 .padding(.top, 30)
             }
-            .navigationBarHidden(true) // Oculta la barra de navegación por defecto
+            // Capa 2: CustomTabBar superpuesta
+            CustomTabBar(selectedTab: $selectedTab)
+        }
+        .navigationBarBackButtonHidden(true)   // ← Oculta botón atrás
+        .toolbar(.hidden, for: .navigationBar) // ← Oculta barra completa
+        .edgesIgnoringSafeArea(.bottom)
+    }
+}
+
+enum Tab {
+    case home, dashboard, settings
+}
+
+struct CustomTabBar: View {
+    @Binding var selectedTab: Tab
+
+    var body: some View {
+        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        let barHeight: CGFloat = 88
+
+        ZStack {
+            // Fondo blanco con curva hacia abajo al centro
+            Path { path in
+                let width = UIScreen.main.bounds.width
+                path.move(to: CGPoint(x: 0, y: 0))
+                path.addQuadCurve(to: CGPoint(x: width, y: 0),
+                                  control: CGPoint(x: width / 2, y: 40))
+                path.addLine(to: CGPoint(x: width, y: barHeight))
+                path.addLine(to: CGPoint(x: 0, y: barHeight))
+                path.closeSubpath()
+            }
+            .fill(Color.white)
+            .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
+
+            // Laterales: solo Dashboard y Settings
+            HStack {
+                TabButton(icon: "chart.bar.fill", tab: .dashboard, selectedTab: $selectedTab)
+                Spacer()
+                TabButton(icon: "gearshape.fill", tab: .settings, selectedTab: $selectedTab)
+            }
+            .padding(.horizontal, 55)
+
+            // Botón central elevado (Home)
+            Button(action: { selectedTab = .home }) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.71, blue: 0.737))
+                        .frame(width: 70, height: 70)
+                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .offset(y: -25)
+        }
+        .frame(height: barHeight)
+    }
+}
+
+struct TabButton: View {
+    let icon: String
+    let tab: Tab
+    @Binding var selectedTab: Tab
+
+    var body: some View {
+        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        Button(action: { selectedTab = tab }) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(selectedTab == tab ? darkBlue : Color.gray.opacity(0.5))
         }
     }
 }

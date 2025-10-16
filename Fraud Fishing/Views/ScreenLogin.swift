@@ -7,148 +7,223 @@
 
 import SwiftUI
 
+enum LoginRoute: Hashable {
+    case home
+}
 
 struct ScreenLogin: View {
+    // MARK: - Estados y Entorno
     @State private var emailOrUsername: String = ""
     @State private var password: String = ""
     @State private var isPasswordVisible: Bool = false
     @Environment(\.authenticationController) var authenticationController
 
+    @State private var isLoading: Bool = false
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+    @State private var loginExitoso: Bool = false
+    @State private var navPath: [LoginRoute] = []  // ← Nuevo path de navegación
+
+    // MARK: - Función de Inicio de Sesión
     func login() async {
+        isLoading = true
         do {
             let response = try await authenticationController.loginUser(email: emailOrUsername, password: password)
             print("Login exitoso: \(response)")
-            // Aquí puedes manejar la navegación a la siguiente vista o guardar los tokens
+            alertMessage = "Inicio de sesión exitoso."
+            loginExitoso = true
+            showAlert = true
+            await MainActor.run {
+                navPath.append(.home)  // ← Navegación programática con NavigationStack
+            }
         } catch {
             print("Error al iniciar sesión: \(error.localizedDescription)")
-            // Aquí puedes mostrar un mensaje de error al usuario
+            alertMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo."
+            showAlert = true
+            loginExitoso = false
         }
+        isLoading = false
     }
 
+    // MARK: - Vista Principal
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $navPath) {   // ← Usa path
             ZStack {
-                LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.71, blue: 0.737)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
-                               endPoint: .bottom)
-                    .edgesIgnoringSafeArea(.all)
+                // MARK: Fondo con gradiente oscuro
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                        Color(red: 0.043, green: 0.067, blue: 0.173)
+                    ]),
+                    startPoint: UnitPoint(x: 0.5, y: 0.1),
+                    endPoint: .bottom
+                )
+                .edgesIgnoringSafeArea(.all)
 
                 VStack {
-                    // Título "Iniciar Sesión"
+                    // MARK: - Título
                     Text("Iniciar Sesión")
-                        .font(.poppinsMedium(size: 34)) // Aplicando Poppins Bold
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Cambiado a blanco para contraste
+                        .font(.poppinsMedium(size: 34))
+                        .foregroundColor(.white)
                         .padding(.bottom, 40)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 30)
 
-                    // Campo de Correo
-                    VStack(alignment: .leading, spacing: 8) { // Alineación a la izquierda para el label
+                    // MARK: - Campo de Correo
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Correo")
-                            .font(.poppinsSemiBold(size: 14)) // Semibold más pequeño
-                            .foregroundColor(.gray) // Color gris
-                            .padding(.leading, 30) // Alineado con el contenido del campo
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.leading, 30)
 
                         HStack {
                             Image(systemName: "envelope")
-                                .foregroundColor(.gray)
-                                .padding(.leading, 30) // Alineación del icono
-                            TextField("ejemplo@email.com", text: $emailOrUsername)
-                                .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
-                                .padding(.vertical, 5) // Ajuste de padding vertical
+                                .foregroundColor(.white.opacity(0.5))
+                                .padding(.leading, 30)
+
+                            ZStack(alignment: .leading) {
+                                if emailOrUsername.isEmpty {
+                                    Text("ejemplo@email.com")
+                                        .font(.poppinsRegular(size: 18))
+                                        .foregroundColor(.white.opacity(0.6))
+                                        .padding(.vertical, 5)
+                                }
+                                TextField("", text: $emailOrUsername)
+                                    .font(.poppinsRegular(size: 18))
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 5)
+                                    .autocapitalization(.none)
+                                    .keyboardType(.emailAddress)
+                            }
                         }
-                        Rectangle() // Línea gris tenue
+
+                        Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30) // Alineado con el contenido del campo
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding(.horizontal, 30)
                     }
                     .padding(.bottom, 20)
 
-                    // Campo de Contraseña
-                    VStack(alignment: .leading, spacing: 8) { // Alineación a la izquierda para el label
+                    // MARK: - Campo de Contraseña
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Contraseña")
-                            .font(.poppinsSemiBold(size: 14)) // Semibold más pequeño
-                            .foregroundColor(.gray) // Color gris
-                            .padding(.leading, 30) // Alineado con el contenido del campo
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.leading, 30)
 
                         HStack {
                             Image(systemName: "lock")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.white.opacity(0.5))
                                 .padding(.leading, 30)
                                 .padding(.horizontal, 4)
+
                             if isPasswordVisible {
-                                TextField("••••••••", text: $password)
-                                    .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
-                                    .padding(.vertical, 5) // Ajuste de padding vertical
+                                ZStack(alignment: .leading) {
+                                    if password.isEmpty {
+                                        Text("••••••••")
+                                            .font(.poppinsRegular(size: 18))
+                                            .foregroundColor(.white.opacity(0.6))
+                                            .padding(.vertical, 5)
+                                    }
+                                    TextField("", text: $password)
+                                        .font(.poppinsRegular(size: 18))
+                                        .foregroundColor(.white)
+                                        .padding(.vertical, 5)
+                                }
                             } else {
-                                SecureField("••••••••", text: $password)
-                                    .font(.poppinsRegular(size: 18)) // Fuente más grande y clara
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Texto de entrada blanco
-                                    .padding(.vertical, 5) // Ajuste de padding vertical
+                                ZStack(alignment: .leading) {
+                                    if password.isEmpty {
+                                        Text("••••••••")
+                                            .font(.poppinsRegular(size: 18))
+                                            .foregroundColor(.white.opacity(0.6))
+                                            .padding(.vertical, 5)
+                                    }
+                                    SecureField("", text: $password)
+                                        .font(.poppinsRegular(size: 18))
+                                        .foregroundColor(.white)
+                                        .padding(.vertical, 5)
+                                }
                             }
-                            Button(action: {
-                                isPasswordVisible.toggle()
-                            }) {
+
+                            Button(action: { isPasswordVisible.toggle() }) {
                                 Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 30) // Alineación del icono
+                                    .foregroundColor(.white.opacity(0.5))
+                                    .padding(.trailing, 30)
                             }
                         }
-                        Rectangle() // Línea gris tenue
+
+                        Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.horizontal, 30) // Alineado con el contenido del campo
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding(.horizontal, 30)
                     }
 
-                    // ¿Olvidaste tu contraseña?
-                    Button(action: {
-                        // Acción para recuperar contraseña
-                    }) {
-                        Text("Olvidé mi contraseña") // Texto actualizado
-                            .font(.poppinsRegular(size: 15)) // Aplicando Poppins Regular
-                            .foregroundColor(.gray) // Color gris
+                    // MARK: - Olvidé mi Contraseña
+                    Button(action: {}) {
+                        Text("Olvidé mi contraseña")
+                            .font(.poppinsRegular(size: 15))
+                            .foregroundColor(.white.opacity(0.8))
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.trailing, 30)
                     .padding(.top, 10)
                     .padding(.bottom, 30)
 
-                    // Botón Iniciar Sesión
+                    // MARK: - Botón Iniciar Sesión
                     Button(action: {
-                        Task {
-                            await login()
-                        }
+                        Task { await login() }
                     }) {
-                        Text("Iniciar Sesión")
-                            .font(.poppinsBold(size: 20)) // Aplicando Poppins Bold
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color(red: 0.0, green: 0.2, blue: 0.4))
-                            .cornerRadius(10)
-                            .padding(.horizontal, 30)
+                        HStack {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Iniciar Sesión")
+                                    .font(.poppinsBold(size: 20))
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(isLoading ? Color.gray : Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .cornerRadius(10)
+                        .padding(.horizontal, 30)
                     }
+                    .disabled(isLoading)
                     .padding(.bottom, 10)
 
-                    // ¿No tienes cuenta? Regístrate aquí
+                    // MARK: - Enlace a Registro
                     HStack {
                         Text("Soy un nuevo usuario.")
-                            .font(.poppinsRegular(size: 17)) // Aplicando Poppins Regular
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Cambiado a blanco
+                            .font(.poppinsRegular(size: 17))
+                            .foregroundColor(.white.opacity(0.8))
                         NavigationLink(destination: ScreenRegister()) {
                             Text("Registrarme")
-                                .font(.poppinsBold(size: 17)) // Aplicando Poppins Bold
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4)) // Color de acento
+                                .font(.poppinsBold(size: 17))
+                                .foregroundColor(.white)
                         }
                     }
                     .padding(.bottom, 170)
                 }
             }
+
+            // MARK: - Navegación y Alertas
             .navigationBarHidden(true)
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text(loginExitoso ? "Éxito" : "Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .navigationDestination(for: LoginRoute.self) { route in   // ← Destino moderno
+                switch route {
+                case .home:
+                    ScreenHome()
+                        .navigationBarBackButtonHidden(true)
+                        .toolbar(.hidden, for: .navigationBar)
+                }
+            }
         }
     }
 }
