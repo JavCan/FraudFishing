@@ -1,5 +1,5 @@
 //
-//  ScreenHome.swift
+//  ScreenDashboard.swift
 //  Fraud Fishing
 //
 //  Created by Victor Bosquez on 02/10/25.
@@ -10,6 +10,7 @@ import SwiftUI
 struct ScreenDashboard: View {
     @State private var categoriaSeleccionada: String = "Todas"
     @State private var showNotificaciones: Bool = false
+    @State private var selectedTab: Tab = .dashboard
     
     let categorias = ["Todas", "Informacion falsa", "Envios falsos", "Productos falsos", "Phishing", "Estafas"]
     
@@ -73,9 +74,9 @@ struct ScreenDashboard: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Fondo con gradiente
+        ZStack(alignment: .bottom) {
+            // Contenido principal
+            ZStack(alignment: .topTrailing) {
                 LinearGradient(gradient: Gradient(colors: [
                     Color(red: 1, green: 1, blue: 1),
                     Color(red: 0.0, green: 0.8, blue: 0.7)]),
@@ -171,9 +172,38 @@ struct ScreenDashboard: View {
                     }
                 }
             }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showNotificaciones) {
-                NotificacionesView()
+            .padding(.bottom, 88)
+            
+            // Botón de notificaciones (esquina superior derecha)
+            NavigationLink(destination: ScreenNotificaciones()) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 40, height: 40)
+                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                    
+                    Image(systemName: "bell.fill")
+                        .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
+                        .font(.system(size: 20))
+                    
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 12, height: 12)
+                        .offset(x: 12, y: -12)
+                }
+            }
+            .padding(.trailing, 30)
+            .padding(.top, 30)
+            
+            // CustomTabBar
+            CustomTabBar(selectedTab: $selectedTab)
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .edgesIgnoringSafeArea(.bottom)
+        .sheet(isPresented: $showNotificaciones) {
+            NavigationView {
+                ScreenNotificaciones()
             }
         }
     }
@@ -189,6 +219,10 @@ struct ReporteDestacado: Identifiable {
     let categoria: String
     let hashtags: String
     let numeroReportes: Int
+}
+
+enum Tab {
+    case home, dashboard, settings
 }
 
 // MARK: - Componente Category Chip
@@ -524,7 +558,7 @@ struct DetalleReporteDestacadoView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                        Text("Inicio")
+                        Text("Atrás")
                             .font(.body)
                     }
                     .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
@@ -534,38 +568,88 @@ struct DetalleReporteDestacadoView: View {
     }
 }
 
-// MARK: - Vista de Notificaciones
+// MARK: - Custom Tab Bar
 
-struct NotificacionesView: View {
-    @Environment(\.dismiss) private var dismiss
+struct CustomTabBar: View {
+    @Binding var selectedTab: Tab
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color(red: 0.95, green: 0.95, blue: 0.97)
-                    .edgesIgnoringSafeArea(.all)
+        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        let barHeight: CGFloat = 88
+        
+        ZStack {
+            // Fondo blanco con curva hacia abajo al centro
+            Path { path in
+                let width = UIScreen.main.bounds.width
+                path.move(to: CGPoint(x: 0, y: 0))
+                path.addQuadCurve(to: CGPoint(x: width, y: 0),
+                                  control: CGPoint(x: width / 2, y: 40))
+                path.addLine(to: CGPoint(x: width, y: barHeight))
+                path.addLine(to: CGPoint(x: 0, y: barHeight))
+                path.closeSubpath()
+            }
+            .fill(Color.white)
+            .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
+            
+            // Laterales: Dashboard y Settings
+            HStack {
+                NavigationLink(destination: ScreenDashboard()) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(selectedTab == .dashboard ? darkBlue : Color.gray.opacity(0.5))
+                }
                 
-                VStack {
-                    EmptyStateView(
-                        icon: "bell.slash",
-                        message: "No tienes notificaciones",
-                        description: "Te notificaremos cuando haya actualizaciones importantes"
-                    )
-                    .padding(.top, 100)
-                    
-                    Spacer()
+                Spacer()
+                
+                NavigationLink(destination: ScreenAjustes()) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(selectedTab == .settings ? darkBlue : Color.gray.opacity(0.5))
                 }
             }
-            .navigationTitle("Notificaciones")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cerrar") {
-                        dismiss()
-                    }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+            .padding(.horizontal, 55)
+            
+            // Botón central elevado (Home)
+            NavigationLink(destination: ScreenHome()) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.71, blue: 0.737))
+                        .frame(width: 70, height: 70)
+                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
                 }
             }
+            .offset(y: -25)
+        }
+        .frame(height: barHeight)
+    }
+}
+
+// MARK: - Empty State View
+
+struct EmptyStateView: View {
+    let icon: String
+    let message: String
+    let description: String
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 60))
+                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5).opacity(0.6))
+            
+            Text(message)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+            
+            Text(description)
+                .font(.body)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
         }
     }
 }
@@ -573,5 +657,7 @@ struct NotificacionesView: View {
 // MARK: - Preview
 
 #Preview {
-    ScreenDashboard()
+    NavigationView {
+        ScreenDashboard()
+    }
 }
