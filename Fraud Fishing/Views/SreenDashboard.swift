@@ -1,5 +1,5 @@
 //
-//  ScreenDashboard.swift
+//  ScreenHome.swift
 //  Fraud Fishing
 //
 //  Created by Victor Bosquez on 02/10/25.
@@ -9,10 +9,11 @@ import SwiftUI
 
 struct ScreenDashboard: View {
     @State private var categoriaSeleccionada: String = "Todas"
-    @State private var selectedTab: Tab = .dashboard
+    @State private var showNotificaciones: Bool = false
     
     let categorias = ["Todas", "Informacion falsa", "Envios falsos", "Productos falsos", "Phishing", "Estafas"]
     
+    // Datos de ejemplo - Reportes destacados
     @State private var reportesDestacados: [ReporteDestacado] = [
         ReporteDestacado(
             id: "1",
@@ -72,8 +73,9 @@ struct ScreenDashboard: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            ZStack(alignment: .topTrailing) {
+        NavigationView {
+            ZStack {
+                // Fondo con gradiente
                 LinearGradient(gradient: Gradient(colors: [
                     Color(red: 1, green: 1, blue: 1),
                     Color(red: 0.0, green: 0.8, blue: 0.7)]),
@@ -82,6 +84,7 @@ struct ScreenDashboard: View {
                     .edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 0) {
+                    // Header con título y notificaciones
                     HStack {
                         Text("Reportes Destacados")
                             .font(.system(size: 24, weight: .bold))
@@ -89,7 +92,9 @@ struct ScreenDashboard: View {
                         
                         Spacer()
                         
-                        NavigationLink(destination: ScreenNotificaciones()) {
+                        Button(action: {
+                            showNotificaciones = true
+                        }) {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
@@ -100,6 +105,7 @@ struct ScreenDashboard: View {
                                     .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
                                     .font(.system(size: 20))
                                 
+                                // Badge de notificaciones
                                 Circle()
                                     .fill(Color.red)
                                     .frame(width: 12, height: 12)
@@ -111,6 +117,7 @@ struct ScreenDashboard: View {
                     .padding(.top, 10)
                     .padding(.bottom, 15)
                     
+                    // Filtro de categorías
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(categorias, id: \.self) { categoria in
@@ -129,6 +136,7 @@ struct ScreenDashboard: View {
                     }
                     .padding(.bottom, 20)
                     
+                    // Lista de sitios destacados
                     ScrollView {
                         VStack(spacing: 16) {
                             if reportesFiltrados.isEmpty {
@@ -139,6 +147,7 @@ struct ScreenDashboard: View {
                                 )
                                 .padding(.top, 60)
                             } else {
+                                // Top 3 sitios web destacados (cards pequeños)
                                 HStack(spacing: 12) {
                                     ForEach(Array(reportesFiltrados.prefix(3).enumerated()), id: \.element.id) { index, reporte in
                                         TopSiteCard(
@@ -149,6 +158,7 @@ struct ScreenDashboard: View {
                                 }
                                 .padding(.horizontal, 20)
                                 
+                                // Cards completos de reportes
                                 ForEach(reportesFiltrados) { reporte in
                                     NavigationLink(destination: DetalleReporteDestacadoView(reporte: reporte)) {
                                         ReporteDestacadoCard(reporte: reporte)
@@ -161,13 +171,11 @@ struct ScreenDashboard: View {
                     }
                 }
             }
-            .padding(.bottom, 88)
-            
-            DashboardTabBar(selectedTab: $selectedTab)
+            .navigationBarHidden(true)
+            .sheet(isPresented: $showNotificaciones) {
+                NotificacionesView()
+            }
         }
-        .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
-        .edgesIgnoringSafeArea(.bottom)
     }
 }
 
@@ -181,10 +189,6 @@ struct ReporteDestacado: Identifiable {
     let categoria: String
     let hashtags: String
     let numeroReportes: Int
-}
-
-enum Tab {
-    case home, dashboard, settings
 }
 
 // MARK: - Componente Category Chip
@@ -212,7 +216,7 @@ struct CategoryChip: View {
     }
 }
 
-// MARK: - Top Site Card
+// MARK: - Top Site Card (pequeño)
 
 struct TopSiteCard: View {
     let sitio: String
@@ -220,15 +224,16 @@ struct TopSiteCard: View {
     
     var medalColor: Color {
         switch position {
-        case 1: return Color(red: 1.0, green: 0.84, blue: 0.0)
-        case 2: return Color(red: 0.75, green: 0.75, blue: 0.75)
-        case 3: return Color(red: 0.8, green: 0.5, blue: 0.2)
+        case 1: return Color(red: 1.0, green: 0.84, blue: 0.0) // Oro
+        case 2: return Color(red: 0.75, green: 0.75, blue: 0.75) // Plata
+        case 3: return Color(red: 0.8, green: 0.5, blue: 0.2) // Bronce
         default: return Color.gray
         }
     }
     
     var body: some View {
         VStack(spacing: 8) {
+            // Medalla
             ZStack {
                 Circle()
                     .fill(medalColor)
@@ -239,6 +244,7 @@ struct TopSiteCard: View {
                     .foregroundColor(.white)
             }
             
+            // Nombre del sitio
             Text(sitio)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
@@ -261,6 +267,7 @@ struct ReporteDestacadoCard: View {
     
     var body: some View {
         VStack(spacing: 0) {
+            // Header con nombre del sitio y número de reportes
             HStack {
                 Text(reporte.nombre)
                     .font(.system(size: 18, weight: .bold))
@@ -288,7 +295,9 @@ struct ReporteDestacadoCard: View {
             Divider()
                 .padding(.horizontal, 16)
             
+            // Contenido
             HStack(alignment: .top, spacing: 14) {
+                // Logo/Imagen
                 RoundedRectangle(cornerRadius: 10)
                     .fill(
                         LinearGradient(
@@ -308,6 +317,7 @@ struct ReporteDestacadoCard: View {
                     )
                     .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
                 
+                // Descripción
                 VStack(alignment: .leading, spacing: 8) {
                     Text(reporte.descripcion)
                         .font(.system(size: 14))
@@ -315,6 +325,7 @@ struct ReporteDestacadoCard: View {
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                     
+                    // Categoría
                     Text(reporte.categoria)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.white)
@@ -328,6 +339,7 @@ struct ReporteDestacadoCard: View {
             .padding(.horizontal, 16)
             .padding(.top, 12)
             
+            // Hashtags
             HStack {
                 Text(reporte.hashtags)
                     .font(.system(size: 12, weight: .medium))
@@ -371,6 +383,7 @@ struct DetalleReporteDestacadoView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
+                    // Alerta de peligro
                     HStack(spacing: 12) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 24))
@@ -393,7 +406,9 @@ struct DetalleReporteDestacadoView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
                     
+                    // Card principal
                     VStack(spacing: 0) {
+                        // Logo grande
                         RoundedRectangle(cornerRadius: 12)
                             .fill(
                                 LinearGradient(
@@ -414,6 +429,7 @@ struct DetalleReporteDestacadoView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 20)
                         
+                        // Nombre del sitio
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Sitio web reportado", systemImage: "link.circle.fill")
                                 .font(.system(size: 14, weight: .semibold))
@@ -432,6 +448,7 @@ struct DetalleReporteDestacadoView: View {
                             .padding(.horizontal, 20)
                             .padding(.vertical, 16)
                         
+                        // Descripción
                         VStack(alignment: .leading, spacing: 8) {
                             Label("¿Por qué es peligroso?", systemImage: "info.circle.fill")
                                 .font(.system(size: 14, weight: .semibold))
@@ -449,6 +466,7 @@ struct DetalleReporteDestacadoView: View {
                             .padding(.horizontal, 20)
                             .padding(.vertical, 16)
                         
+                        // Categoría
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Tipo de fraude", systemImage: "tag.fill")
                                 .font(.system(size: 14, weight: .semibold))
@@ -473,6 +491,7 @@ struct DetalleReporteDestacadoView: View {
                             .padding(.horizontal, 20)
                             .padding(.vertical, 16)
                         
+                        // Hashtags
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Etiquetas", systemImage: "number")
                                 .font(.system(size: 14, weight: .semibold))
@@ -505,7 +524,7 @@ struct DetalleReporteDestacadoView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                        Text("Atrás")
+                        Text("Inicio")
                             .font(.body)
                     }
                     .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
@@ -515,93 +534,44 @@ struct DetalleReporteDestacadoView: View {
     }
 }
 
-// MARK: - Empty State View
+// MARK: - Vista de Notificaciones
 
-struct EmptyStateView: View {
-    let icon: String
-    let message: String
-    let description: String
+struct NotificacionesView: View {
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 60))
-                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5).opacity(0.6))
-            
-            Text(message)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-            
-            Text(description)
-                .font(.body)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-        }
-    }
-}
-
-// MARK: - Dashboard Tab Bar
-
-struct DashboardTabBar: View {
-    @Binding var selectedTab: Tab
-    
-    var body: some View {
-        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
-        let barHeight: CGFloat = 88
-        
-        ZStack {
-            Path { path in
-                let width = UIScreen.main.bounds.width
-                path.move(to: CGPoint(x: 0, y: 0))
-                path.addQuadCurve(to: CGPoint(x: width, y: 0),
-                                  control: CGPoint(x: width / 2, y: 40))
-                path.addLine(to: CGPoint(x: width, y: barHeight))
-                path.addLine(to: CGPoint(x: 0, y: barHeight))
-                path.closeSubpath()
-            }
-            .fill(Color.white)
-            .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
-            
-            HStack {
-                NavigationLink(destination: ScreenHome()) {
-                    Image(systemName: "house.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(Color.gray.opacity(0.5))
-                }
+        NavigationView {
+            ZStack {
+                Color(red: 0.95, green: 0.95, blue: 0.97)
+                    .edgesIgnoringSafeArea(.all)
                 
-                Spacer()
-                
-                NavigationLink(destination: ScreenAjustes()) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(selectedTab == .settings ? darkBlue : Color.gray.opacity(0.5))
+                VStack {
+                    EmptyStateView(
+                        icon: "bell.slash",
+                        message: "No tienes notificaciones",
+                        description: "Te notificaremos cuando haya actualizaciones importantes"
+                    )
+                    .padding(.top, 100)
+                    
+                    Spacer()
                 }
             }
-            .padding(.horizontal, 55)
-            
-            NavigationLink(destination: ScreenDashboard()) {
-                ZStack {
-                    Circle()
-                        .fill(Color(red: 0.0, green: 0.71, blue: 0.737))
-                        .frame(width: 70, height: 70)
-                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
-                    Image(systemName: "chart.bar.fill")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white)
+            .navigationTitle("Notificaciones")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cerrar") {
+                        dismiss()
+                    }
+                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
                 }
             }
-            .offset(y: -25)
         }
-        .frame(height: barHeight)
     }
 }
 
 // MARK: - Preview
 
 #Preview {
-    NavigationView {
-        ScreenDashboard()
-    }
+    ScreenDashboard()
 }
