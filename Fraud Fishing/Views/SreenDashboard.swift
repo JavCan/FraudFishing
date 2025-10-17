@@ -14,53 +14,10 @@ struct ScreenDashboard: View {
     
     let categorias = ["Todas", "Informacion falsa", "Envios falsos", "Productos falsos", "Phishing", "Estafas"]
     
-    // Datos de ejemplo - Reportes destacados
     @State private var reportesDestacados: [ReporteDestacado] = [
-        ReporteDestacado(
-            id: "1",
-            nombre: "PaginaFake.com",
-            logo: "pagina_fake",
-            descripcion: "Esta es una pagina falsa que vende productos",
-            categoria: "Productos falsos",
-            hashtags: "#Venta #Cobro #Envio",
-            numeroReportes: 45
-        ),
-        ReporteDestacado(
-            id: "2",
-            nombre: "TuEstafa.com",
-            logo: "estafa_logo",
-            descripcion: "Pagina que pone recomendaciones con links llenos de virus",
-            categoria: "Phishing",
-            hashtags: "#Bog #Desinformacion",
-            numeroReportes: 38
-        ),
-        ReporteDestacado(
-            id: "3",
-            nombre: "Roboblanco.com",
-            logo: "robo_logo",
-            descripcion: "Sitio que roba información personal",
-            categoria: "Informacion falsa",
-            hashtags: "#Datos #Robo",
-            numeroReportes: 52
-        ),
-        ReporteDestacado(
-            id: "4",
-            nombre: "BecaFalsa.mx",
-            logo: "beca_logo",
-            descripcion: "Ofrece becas falsas para obtener datos",
-            categoria: "Estafas",
-            hashtags: "#Becas #Educacion",
-            numeroReportes: 29
-        ),
-        ReporteDestacado(
-            id: "5",
-            nombre: "Asalto.mx",
-            logo: "asalto_logo",
-            descripcion: "Venta de productos que nunca llegan",
-            categoria: "Envios falsos",
-            hashtags: "#Compras #Envios",
-            numeroReportes: 41
-        )
+        ReporteDestacado(id: "1", nombre: "PaginaFake.com", logo: "pagina_fake", descripcion: "Esta es una página falsa que vende productos", categoria: "Productos falsos", hashtags: "#Venta #Cobro #Envio", numeroReportes: 45),
+        ReporteDestacado(id: "2", nombre: "TuEstafa.com", logo: "estafa_logo", descripcion: "Página que pone recomendaciones con links llenos de virus", categoria: "Phishing", hashtags: "#Blog #Desinformacion", numeroReportes: 38),
+        ReporteDestacado(id: "3", nombre: "Roboblanco.com", logo: "robo_logo", descripcion: "Sitio que roba información personal", categoria: "Informacion falsa", hashtags: "#Datos #Robo", numeroReportes: 52)
     ]
     
     var reportesFiltrados: [ReporteDestacado] {
@@ -74,42 +31,41 @@ struct ScreenDashboard: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
-                // Fondo con gradiente
-                LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
-                               endPoint: .bottom)
-                    .edgesIgnoringSafeArea(.all)
+                // 🔹 Fondo azul oscuro degradado
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                        Color(red: 0.043, green: 0.067, blue: 0.173)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 0) {
-                    // Header con título y notificaciones
+                    // MARK: - Header
                     HStack {
                         Text("Reportes Destacados")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                            .font(.poppinsSemiBold(size: 24))
+                            .foregroundColor(.white)
                         
                         Spacer()
                         
-                        Button(action: {
-                            showNotificaciones = true
-                        }) {
+                        Button(action: { showNotificaciones = true }) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.white)
+                                    .fill(Color.white.opacity(0.1))
                                     .frame(width: 40, height: 40)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
                                 
                                 Image(systemName: "bell.fill")
-                                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
+                                    .foregroundColor(.teal)
                                     .font(.system(size: 20))
                                 
-                                // Badge de notificaciones
                                 Circle()
                                     .fill(Color.red)
-                                    .frame(width: 12, height: 12)
+                                    .frame(width: 10, height: 10)
                                     .offset(x: 12, y: -12)
                             }
                         }
@@ -118,27 +74,26 @@ struct ScreenDashboard: View {
                     .padding(.top, 10)
                     .padding(.bottom, 15)
                     
-                    // Filtro de categorías
+                    // MARK: - Filtro de categorías
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(categorias, id: \.self) { categoria in
                                 CategoryChip(
                                     title: categoria,
-                                    isSelected: categoriaSeleccionada == categoria,
-                                    action: {
-                                        withAnimation(.spring(response: 0.3)) {
-                                            categoriaSeleccionada = categoria
-                                        }
+                                    isSelected: categoriaSeleccionada == categoria
+                                ) {
+                                    withAnimation(.spring(response: 0.3)) {
+                                        categoriaSeleccionada = categoria
                                     }
-                                )
+                                }
                             }
                         }
                         .padding(.horizontal, 20)
                     }
                     .padding(.bottom, 20)
                     
-                    // Lista de sitios destacados
-                    ScrollView {
+                    // MARK: - Lista
+                    ScrollView(showsIndicators: false) {
                         VStack(spacing: 16) {
                             if reportesFiltrados.isEmpty {
                                 EmptyStateView(
@@ -146,20 +101,17 @@ struct ScreenDashboard: View {
                                     message: "No hay reportes",
                                     description: "No se encontraron reportes en esta categoría"
                                 )
-                                .padding(.top, 60)
+                                .padding(.top, 80)
                             } else {
-                                // Top 3 sitios web destacados (cards pequeños)
+                                // Top 3
                                 HStack(spacing: 12) {
                                     ForEach(Array(reportesFiltrados.prefix(3).enumerated()), id: \.element.id) { index, reporte in
-                                        TopSiteCard(
-                                            sitio: reporte.nombre,
-                                            position: index + 1
-                                        )
+                                        TopSiteCard(sitio: reporte.nombre, position: index + 1)
                                     }
                                 }
                                 .padding(.horizontal, 20)
                                 
-                                // Cards completos de reportes
+                                // Cards completas
                                 ForEach(reportesFiltrados) { reporte in
                                     NavigationLink(destination: DetalleReporteDestacadoView(reporte: reporte)) {
                                         ReporteDestacadoCard(reporte: reporte)
@@ -180,6 +132,25 @@ struct ScreenDashboard: View {
     }
 }
 
+// MARK: - Chips actualizados
+struct CategoryChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.poppinsMedium(size: 14))
+                .foregroundColor(isSelected ? .white : .teal)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
+                .background(isSelected ? Color.teal.opacity(0.6) : Color.white.opacity(0.08))
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.15), radius: 3, x: 0, y: 2)
+        }
+    }
+}
 // MARK: - Modelo de Datos
 
 struct ReporteDestacado: Identifiable {
@@ -190,31 +161,6 @@ struct ReporteDestacado: Identifiable {
     let categoria: String
     let hashtags: String
     let numeroReportes: Int
-}
-
-// MARK: - Componente Category Chip
-
-struct CategoryChip: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
-                .foregroundColor(isSelected ? .white : Color(red: 0.0, green: 0.2, blue: 0.4))
-                .padding(.horizontal, 18)
-                .padding(.vertical, 10)
-                .background(
-                    isSelected ? 
-                    Color(red: 0.0, green: 0.8, blue: 0.7) :
-                    Color.white
-                )
-                .cornerRadius(20)
-                .shadow(color: Color.black.opacity(isSelected ? 0.15 : 0.08), radius: 4, x: 0, y: 2)
-        }
-    }
 }
 
 // MARK: - Top Site Card (pequeño)
@@ -234,32 +180,47 @@ struct TopSiteCard: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            // Medalla
+            // 🥇 Medalla
             ZStack {
                 Circle()
-                    .fill(medalColor)
-                    .frame(width: 35, height: 35)
+                    .fill(medalColor.opacity(0.9))
+                    .frame(width: 38, height: 38)
+                    .shadow(color: medalColor.opacity(0.4), radius: 6, x: 0, y: 2)
                 
                 Text("\(position)")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
             }
             
-            // Nombre del sitio
+            // 🌐 Nombre del sitio
             Text(sitio)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                .font(.poppinsSemiBold(size: 12))
+                .foregroundColor(.white)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .frame(height: 32)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 3)
+        .padding(.vertical, 14)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.white.opacity(0.08),
+                    Color.white.opacity(0.04)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.25), radius: 6, x: 0, y: 3)
     }
 }
+
 
 // MARK: - Reporte Destacado Card
 
@@ -375,163 +336,132 @@ struct DetalleReporteDestacadoView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
+            // 🔹 Fondo degradado azul oscuro coherente
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.9),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
-                    // Alerta de peligro
+                    
+                    // 🚨 Alerta de peligro
                     HStack(spacing: 12) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(.red)
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("¡Sitio Reportado!")
-                                .font(.system(size: 16, weight: .bold))
+                            Text("⚠️ Sitio Reportado")
+                                .font(.poppinsSemiBold(size: 16))
                                 .foregroundColor(.red)
                             Text("\(reporte.numeroReportes) usuarios han reportado este sitio")
-                                .font(.system(size: 13))
-                                .foregroundColor(.red.opacity(0.8))
+                                .font(.poppinsRegular(size: 13))
+                                .foregroundColor(.white.opacity(0.8))
                         }
                         
                         Spacer()
                     }
                     .padding(16)
-                    .background(Color.red.opacity(0.1))
+                    .background(Color.red.opacity(0.15))
                     .cornerRadius(12)
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
                     
-                    // Card principal
-                    VStack(spacing: 0) {
-                        // Logo grande
+                    // 💠 Card principal
+                    VStack(alignment: .leading, spacing: 20) {
+                        
+                        // Logo / Imagen
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color(red: 0.9, green: 0.9, blue: 0.95),
-                                        Color(red: 0.8, green: 0.95, blue: 0.95)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
+                            .fill(Color.white.opacity(0.08))
                             .frame(height: 180)
                             .overlay(
                                 Image(systemName: "exclamationmark.shield.fill")
-                                    .foregroundColor(Color.red.opacity(0.3))
+                                    .foregroundColor(Color.red.opacity(0.5))
                                     .font(.system(size: 60))
                             )
                             .padding(.horizontal, 20)
-                            .padding(.top, 20)
                         
-                        // Nombre del sitio
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Sitio web reportado", systemImage: "link.circle.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.nombre)
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .underline()
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
+                        // Sitio
+                        InfoSection(
+                            icon: "link.circle.fill",
+                            title: "Sitio web reportado",
+                            content: reporte.nombre,
+                            accentColor: .teal
+                        )
                         
-                        Divider()
+                        Divider().background(.white.opacity(0.25))
                             .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
                         
                         // Descripción
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("¿Por qué es peligroso?", systemImage: "info.circle.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.descripcion)
-                                .font(.system(size: 15))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
+                        InfoSection(
+                            icon: "info.circle.fill",
+                            title: "¿Por qué es peligroso?",
+                            content: reporte.descripcion,
+                            accentColor: .white.opacity(0.9)
+                        )
                         
-                        Divider()
+                        Divider().background(.white.opacity(0.25))
                             .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
                         
                         // Categoría
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Tipo de fraude", systemImage: "tag.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .font(.poppinsSemiBold(size: 14))
+                                .foregroundColor(.white.opacity(0.8))
                             
-                            HStack {
-                                Text(reporte.categoria)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 7)
-                                    .background(Color(red: 0.0, green: 0.8, blue: 0.7))
-                                    .cornerRadius(8)
-                                
-                                Spacer()
-                            }
+                            Text(reporte.categoria)
+                                .font(.poppinsSemiBold(size: 14))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
+                                .background(Color.teal.opacity(0.5))
+                                .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                         
-                        Divider()
+                        Divider().background(.white.opacity(0.25))
                             .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
                         
                         // Hashtags
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Etiquetas", systemImage: "number")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.hashtags)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 20)
+                        InfoSection(
+                            icon: "number",
+                            title: "Etiquetas",
+                            content: reporte.hashtags,
+                            accentColor: .teal.opacity(0.8)
+                        )
                     }
-                    .background(Color.white)
+                    .padding(.vertical, 20)
+                    .background(Color.white.opacity(0.05))
                     .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                     .padding(.horizontal, 20)
+                    .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .padding(.bottom, 40)
             }
         }
         .navigationTitle("Detalles del Reporte")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
+                Button(action: { dismiss() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
                         Text("Inicio")
-                            .font(.body)
                     }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .font(.poppinsRegular(size: 18))
+                    .foregroundColor(.white)
                 }
             }
         }
+        .toolbarBackground(Color(red: 0.043, green: 0.067, blue: 0.173), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 

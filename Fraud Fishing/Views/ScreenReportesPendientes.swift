@@ -10,14 +10,13 @@ import SwiftUI
 struct ScreenReportesPendientes: View {
     @Environment(\.dismiss) private var dismiss
     
-    // Datos de ejemplo - reemplazar con datos reales de API
     @State private var reportesPendientes: [Reporte] = [
         Reporte(
             id: "1",
             url: "https://www.lingscars.com",
             logo: "lingscars_logo",
             descripcion: "Los coches que muestran no son reales.",
-            categoria: "Informacion falsa",
+            categoria: "Información falsa",
             hashtags: "#Coches #Desinformacion",
             estado: .pendiente,
             fechaCreacion: "15 Sep 2025"
@@ -26,8 +25,8 @@ struct ScreenReportesPendientes: View {
             id: "2",
             url: "https://www.arngren.net",
             logo: "arngren_logo",
-            descripcion: "No se puede comprar nada en esta pagina web, pero te piden tus metodos de pago.",
-            categoria: "Envios falsos",
+            descripcion: "No se puede comprar nada en esta página web, pero te piden tus métodos de pago.",
+            categoria: "Envíos falsos",
             hashtags: "#Venta #Cobro #Envio",
             estado: .pendiente,
             fechaCreacion: "10 Sep 2025"
@@ -36,17 +35,20 @@ struct ScreenReportesPendientes: View {
     
     var body: some View {
         ZStack {
-            // Fondo con gradiente
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
+            // 🔹 Fondo azul oscuro degradado
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 0) {
                 // Lista de reportes
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         if reportesPendientes.isEmpty {
                             EmptyStateView(
@@ -54,7 +56,7 @@ struct ScreenReportesPendientes: View {
                                 message: "No tienes reportes pendientes",
                                 description: "Tus reportes aparecerán aquí mientras son revisados"
                             )
-                            .padding(.top, 100)
+                            .padding(.top, 120)
                         } else {
                             ForEach(reportesPendientes) { reporte in
                                 NavigationLink(destination: DetalleReporteView(reporte: reporte)) {
@@ -68,28 +70,26 @@ struct ScreenReportesPendientes: View {
                     .padding(.top, 20)
                     .padding(.bottom, 100)
                 }
-                
-                Spacer()
             }
         }
         .navigationTitle("Reportes Pendientes")
-        .navigationBarTitleDisplayMode(.large)
-        .navigationBarBackButtonHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
+                Button(action: { dismiss() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                         Text("Ajustes")
-                            .font(.body)
+                            .font(.poppinsRegular(size: 18))
                     }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
                 }
             }
         }
+        .toolbarBackground(Color(red: 0.043, green: 0.067, blue: 0.173), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 
@@ -98,14 +98,13 @@ struct ScreenReportesPendientes: View {
 struct ScreenReportesVerificados: View {
     @Environment(\.dismiss) private var dismiss
     
-    // Datos de ejemplo - reemplazar con datos reales de API
     @State private var reportesVerificados: [Reporte] = [
         Reporte(
             id: "3",
             url: "https://www.lingscars.com",
             logo: "lingscars_logo",
             descripcion: "Los coches que muestran no son reales.",
-            categoria: "Informacion falsa",
+            categoria: "Información falsa",
             hashtags: "#Coches #Desinformacion",
             estado: .verificado,
             fechaCreacion: "15 Sep 2025",
@@ -115,8 +114,8 @@ struct ScreenReportesVerificados: View {
             id: "4",
             url: "https://www.arngren.net",
             logo: "arngren_logo",
-            descripcion: "No se puede comprar nada en esta pagina web, pero te piden tus metodos de pago.",
-            categoria: "Envios falsos",
+            descripcion: "No se puede comprar nada en esta página web, pero te piden tus métodos de pago.",
+            categoria: "Envíos falsos",
             hashtags: "#Venta #Cobro #Envio",
             estado: .verificado,
             fechaCreacion: "10 Sep 2025",
@@ -126,17 +125,20 @@ struct ScreenReportesVerificados: View {
     
     var body: some View {
         ZStack {
-            // Fondo con gradiente
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
+            // 🔹 Fondo azul oscuro degradado (coherente con todo el proyecto)
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 0) {
                 // Lista de reportes
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         if reportesVerificados.isEmpty {
                             EmptyStateView(
@@ -144,7 +146,7 @@ struct ScreenReportesVerificados: View {
                                 message: "No tienes reportes verificados",
                                 description: "Tus reportes aceptados aparecerán aquí"
                             )
-                            .padding(.top, 100)
+                            .padding(.top, 120)
                         } else {
                             ForEach(reportesVerificados) { reporte in
                                 NavigationLink(destination: DetalleReporteView(reporte: reporte)) {
@@ -158,28 +160,26 @@ struct ScreenReportesVerificados: View {
                     .padding(.top, 20)
                     .padding(.bottom, 100)
                 }
-                
-                Spacer()
             }
         }
         .navigationTitle("Reportes Verificados")
-        .navigationBarTitleDisplayMode(.large)
-        .navigationBarBackButtonHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
+                Button(action: { dismiss() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                         Text("Ajustes")
-                            .font(.body)
+                            .font(.poppinsRegular(size: 18))
                     }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
                 }
             }
         }
+        .toolbarBackground(Color(red: 0.043, green: 0.067, blue: 0.173), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 
@@ -208,19 +208,17 @@ struct ReporteCard: View {
     let reporte: Reporte
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header con badge de estado
+        VStack(alignment: .leading, spacing: 12) {
+            // MARK: - Header (fecha + estado)
             HStack {
-                // Fecha de creación
                 HStack(spacing: 4) {
                     Image(systemName: "calendar")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white.opacity(0.7))
                     Text(reporte.fechaCreacion)
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .font(.poppinsRegular(size: 12))
+                        .foregroundColor(.white.opacity(0.7))
                 }
-                
                 Spacer()
                 
                 // Badge de estado
@@ -228,112 +226,89 @@ struct ReporteCard: View {
                     Image(systemName: reporte.estado == .pendiente ? "clock.fill" : "checkmark.circle.fill")
                         .font(.system(size: 12))
                     Text(reporte.estado == .pendiente ? "Pendiente" : "Verificado")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.poppinsSemiBold(size: 13))
                 }
                 .foregroundColor(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 6)
-                .background(reporte.estado == .pendiente ? 
-                           Color(red: 0.0, green: 0.2, blue: 0.4) : 
-                           Color.green)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(
+                    reporte.estado == .pendiente
+                    ? Color.yellow
+                    : Color.green.opacity(0.4)
+                )
                 .cornerRadius(20)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 14)
-            .padding(.bottom, 10)
-            .background(Color.white)
             
-            Divider()
-                .padding(.horizontal, 16)
-            
-            // URL del sitio
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Image(systemName: "link.circle.fill")
-                        .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                        .font(.system(size: 18))
-                    
-                    Text(reporte.url)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .underline()
-                        .lineLimit(1)
-                }
-                .padding(.top, 8)
-                
-                // Contenido del reporte
-                HStack(alignment: .top, spacing: 14) {
-                    // Logo/Imagen del sitio
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 0.9, green: 0.9, blue: 0.95),
-                                    Color(red: 0.8, green: 0.95, blue: 0.95)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 70, height: 70)
-                        .overlay(
-                            Image(systemName: "photo.fill")
-                                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5).opacity(0.4))
-                                .font(.system(size: 24))
-                        )
-                        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
-                    
-                    // Descripción
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(reporte.descripcion)
-                            .font(.system(size: 14))
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                
-                // Categoría y Hashtags
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "tag.fill")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
-                        
-                        Text(reporte.categoria)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 5)
-                            .background(Color(red: 0.0, green: 0.8, blue: 0.7))
-                            .cornerRadius(6)
-                    }
-                    
-                    Text(reporte.hashtags)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                }
-                
-                // Indicador de "ver más"
-                HStack {
-                    Spacer()
-                    HStack(spacing: 4) {
-                        Text("Ver detalles")
-                            .font(.system(size: 13, weight: .medium))
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold))
-                    }
-                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                }
-                .padding(.bottom, 8)
+            // MARK: - URL
+            HStack {
+                Image(systemName: "link.circle.fill")
+                    .foregroundColor(.teal)
+                    .font(.system(size: 18))
+                Text(reporte.url)
+                    .font(.poppinsSemiBold(size: 15))
+                    .foregroundColor(.white)
+                    .underline()
+                    .lineLimit(1)
             }
-            .padding(.horizontal, 16)
-            .background(Color.white)
+            
+            // MARK: - Contenido del reporte
+            HStack(alignment: .top, spacing: 14) {
+                // Imagen o logo
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white.opacity(0.08))
+                    .frame(width: 70, height: 70)
+                    .overlay(
+                        Image(systemName: "photo.fill")
+                            .foregroundColor(.white.opacity(0.3))
+                            .font(.system(size: 24))
+                    )
+                    .shadow(color: .black.opacity(0.15), radius: 3, x: 0, y: 2)
+                
+                // Descripción
+                Text(reporte.descripcion)
+                    .font(.poppinsRegular(size: 14))
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            // MARK: - Categoría y hashtags
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: "tag.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(.teal)
+                    
+                    Text(reporte.categoria)
+                        .font(.poppinsSemiBold(size: 12))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Color.teal.opacity(0.4))
+                        .cornerRadius(6)
+                }
+                
+                Text(reporte.hashtags)
+                    .font(.poppinsRegular(size: 12))
+                    .foregroundColor(.teal.opacity(0.8))
+            }
+            
+            // MARK: - Ver detalles
+            HStack {
+                Spacer()
+                HStack(spacing: 4) {
+                    Text("Ver detalles")
+                        .font(.poppinsMedium(size: 13))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(.teal)
+            }
         }
-        .background(Color.white)
+        .padding(16)
+        .background(Color.white.opacity(0.08))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -372,202 +347,190 @@ struct DetalleReporteView: View {
     
     var body: some View {
         ZStack {
-            // Fondo con gradiente
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
+            // 🔹 Fondo azul oscuro degradado (coherente con toda la app)
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
-                    // Card principal con toda la información
-                    VStack(spacing: 0) {
-                        // Header con estado
-                        HStack {
-                            HStack(spacing: 8) {
-                                Image(systemName: reporte.estado == .pendiente ? "clock.fill" : "checkmark.circle.fill")
-                                    .font(.system(size: 16))
-                                Text(reporte.estado == .pendiente ? "En revisión" : "Verificado")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 10)
-                            .background(reporte.estado == .pendiente ? 
-                                       Color(red: 0.0, green: 0.2, blue: 0.4) : 
-                                       Color.green)
-                            .cornerRadius(25)
-                            
-                            Spacer()
+                    // MARK: - Header con estado
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: reporte.estado == .pendiente ? "clock.fill" : "checkmark.circle.fill")
+                                .font(.system(size: 16))
+                            Text(reporte.estado == .pendiente ? "En revisión" : "Verificado")
+                                .font(.poppinsSemiBold(size: 16))
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
-                        .background(Color.white)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(
+                            reporte.estado == .pendiente
+                            ? Color.yellow.opacity(0.3)
+                            : Color.green.opacity(0.4)
+                        )
+                        .cornerRadius(25)
                         
-                        // Imagen del sitio
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color(red: 0.9, green: 0.9, blue: 0.95),
-                                        Color(red: 0.8, green: 0.95, blue: 0.95)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(height: 180)
-                            .overlay(
-                                Image(systemName: "photo.fill")
-                                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5).opacity(0.3))
-                                    .font(.system(size: 50))
-                            )
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
-                        
-                        // URL
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("URL reportada", systemImage: "link.circle.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.url)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .underline()
-                                .lineLimit(2)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Descripción
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Descripción del reporte", systemImage: "doc.text.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.descripcion)
-                                .font(.system(size: 15))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Categoría
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Categoría", systemImage: "tag.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            HStack {
-                                Text(reporte.categoria)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 7)
-                                    .background(Color(red: 0.0, green: 0.8, blue: 0.7))
-                                    .cornerRadius(8)
-                                
-                                Spacer()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Hashtags
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Etiquetas", systemImage: "number")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.hashtags)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Fechas
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Image(systemName: "calendar.badge.plus")
-                                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                                Text("Fecha de reporte:")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.gray)
-                                Spacer()
-                                Text(reporte.fechaCreacion)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                            }
-                            
-                            if let fechaVerificacion = reporte.fechaVerificacion {
-                                HStack {
-                                    Image(systemName: "calendar.badge.checkmark")
-                                        .foregroundColor(.green)
-                                    Text("Fecha de verificación:")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                    Text(fechaVerificacion)
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 20)
+                        Spacer()
                     }
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                     .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    
+                    // MARK: - Imagen del sitio
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 180)
+                        .overlay(
+                            Image(systemName: "photo.fill")
+                                .foregroundColor(.white.opacity(0.3))
+                                .font(.system(size: 50))
+                        )
+                        .padding(.horizontal, 20)
+                        .padding(.top, 10)
+                    
+                    // MARK: - URL
+                    InfoSection(
+                        icon: "link.circle.fill",
+                        title: "URL reportada",
+                        content: reporte.url,
+                        accentColor: .teal
+                    )
+                    
+                    Divider().background(.white.opacity(0.2))
+                        .padding(.horizontal, 20)
+                    
+                    // MARK: - Descripción
+                    InfoSection(
+                        icon: "doc.text.fill",
+                        title: "Descripción del reporte",
+                        content: reporte.descripcion,
+                        accentColor: .white.opacity(0.9)
+                    )
+                    
+                    Divider().background(.white.opacity(0.2))
+                        .padding(.horizontal, 20)
+                    
+                    // MARK: - Categoría
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Categoría", systemImage: "tag.fill")
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.white.opacity(0.8))
+                        
+                        Text(reporte.categoria)
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(Color.teal.opacity(0.4))
+                            .cornerRadius(8)
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    Divider().background(.white.opacity(0.2))
+                        .padding(.horizontal, 20)
+                    
+                    // MARK: - Hashtags
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Etiquetas", systemImage: "number")
+                            .font(.poppinsSemiBold(size: 14))
+                            .foregroundColor(.white.opacity(0.8))
+                        Text(reporte.hashtags)
+                            .font(.poppinsRegular(size: 14))
+                            .foregroundColor(.teal.opacity(0.9))
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    Divider().background(.white.opacity(0.2))
+                        .padding(.horizontal, 20)
+                    
+                    // MARK: - Fechas
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "calendar.badge.plus")
+                                .foregroundColor(.teal)
+                            Text("Fecha de reporte:")
+                                .font(.poppinsRegular(size: 14))
+                                .foregroundColor(.white.opacity(0.7))
+                            Spacer()
+                            Text(reporte.fechaCreacion)
+                                .font(.poppinsSemiBold(size: 14))
+                                .foregroundColor(.white)
+                        }
+                        
+                        if let fechaVerificacion = reporte.fechaVerificacion {
+                            HStack {
+                                Image(systemName: "calendar.badge.checkmark")
+                                    .foregroundColor(.green)
+                                Text("Fecha de verificación:")
+                                    .font(.poppinsRegular(size: 14))
+                                    .foregroundColor(.white.opacity(0.7))
+                                Spacer()
+                                Text(fechaVerificacion)
+                                    .font(.poppinsSemiBold(size: 14))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                    
                 }
-                .padding(.top, 20)
+                .padding(.top, 10)
                 .padding(.bottom, 40)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(16)
+                .padding(.horizontal, 20)
+                .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
             }
         }
         .navigationTitle("Detalle del Reporte")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
+                Button(action: { dismiss() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                         Text("Volver")
-                            .font(.body)
+                            .font(.poppinsRegular(size: 18))
                     }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
                 }
             }
         }
+        .toolbarBackground(Color(red: 0.043, green: 0.067, blue: 0.173), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 
+// MARK: - Sección de información reutilizable
+struct InfoSection: View {
+    let icon: String
+    let title: String
+    let content: String
+    var accentColor: Color = .white
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: icon)
+                .font(.poppinsSemiBold(size: 14))
+                .foregroundColor(.white.opacity(0.8))
+            Text(content)
+                .font(.poppinsRegular(size: 15))
+                .foregroundColor(accentColor)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 20)
+    }
+}
 // MARK: - Preview
 
 #Preview("Reportes Pendientes") {

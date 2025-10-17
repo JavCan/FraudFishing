@@ -69,7 +69,7 @@ struct ScreenNotifications: View {
         LinearGradient(
             gradient: Gradient(colors: [
                 Color(red: 0.043, green: 0.090, blue: 0.205, opacity: 0.89),
-                Color(red: 0.043, green: 0.067, blue: 0.31)
+                Color(red: 0.043, green: 0.067, blue: 0.28)
             ]),
             startPoint: UnitPoint(x: 0.5, y: 0.7),
             endPoint: .bottom
