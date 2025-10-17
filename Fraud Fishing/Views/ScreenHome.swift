@@ -69,7 +69,7 @@ struct ScreenHome: View {
                                 .foregroundColor(.white)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .background(Color(red: 0.0, green: 0.71, blue: 0.737))
                                 .cornerRadius(10)
                         }
                     }
@@ -84,7 +84,7 @@ struct ScreenHome: View {
                 NavigationLink(destination: ScreenNotifications()) {
                     Image(systemName: "bell.fill")
                         .font(.title)
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(Color(red: 0.0, green: 0.71, blue: 0.737))
                         .overlay(
                             Text("1")
                                 .font(.caption2)
@@ -115,7 +115,7 @@ struct CustomTabBar: View {
     @Binding var selectedTab: Tab
 
     var body: some View {
-        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        let turquoise = Color(red: 0.0, green: 0.71, blue: 0.737)
         let barHeight: CGFloat = 88
 
         ZStack {
@@ -129,7 +129,7 @@ struct CustomTabBar: View {
                 path.addLine(to: CGPoint(x: 0, y: barHeight))
                 path.closeSubpath()
             }
-            .fill(Color.white)
+            .fill(Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.6))
             .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
 
             // Laterales: solo Dashboard y Settings
@@ -164,11 +164,11 @@ struct TabButton: View {
     @Binding var selectedTab: Tab
 
     var body: some View {
-        let darkBlue = Color(red: 0.0, green: 0.2, blue: 0.4)
+        //let turquoise = Color(red: 0.0, green: 0.71, blue: 0.737)
         Button(action: { selectedTab = tab }) {
             Image(systemName: icon)
                 .font(.system(size: 24))
-                .foregroundColor(selectedTab == tab ? darkBlue : Color.gray.opacity(0.5))
+                .foregroundColor(selectedTab == tab ? .white : Color(red: 0.537, green: 0.616, blue: 0.733))
         }
     }
 }
