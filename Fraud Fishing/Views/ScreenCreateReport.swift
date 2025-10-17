@@ -12,7 +12,7 @@ import PhotosUI
 struct ScreenCreateReport: View {
     @State var reportedURL: String
     @State private var category: String = ""
-    @State private var tags: String = ""
+    @State private var tags: [String] = []
     @State private var description: String = ""
     @State private var selectedImage: PhotosPickerItem? = nil
     @State private var selectedImageData: Data? = nil
@@ -25,9 +25,9 @@ struct ScreenCreateReport: View {
             ZStack {
                 // Fondo con gradiente
                 LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.71, blue: 0.737)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                               startPoint: UnitPoint(x:0.5, y:0.1),
                                endPoint: .bottom)
                     .edgesIgnoringSafeArea(.all)
 
@@ -55,7 +55,7 @@ struct ScreenCreateReport: View {
                                 .font(.title)
                                 .foregroundColor(.white)
                                 .padding()
-                                .background(Color(red: 0.0, green: 0.2, blue: 0.4))
+                                .background(Color(red: 0.0, green: 0.71, blue: 0.737))
                                 .clipShape(Circle())
                                 .shadow(radius: 10)
                         }
@@ -83,7 +83,7 @@ struct ScreenCreateReport: View {
                         ForEach(0..<3) { index in
                             Capsule()
                                 .frame(width: index == currentPage ? 20 : 8, height: 8)
-                                .foregroundColor(index == currentPage ? Color(red: 0.0, green: 0.2, blue: 0.4) : .white.opacity(0.8))
+                                .foregroundColor(index == currentPage ? Color(red: 0.0, green: 0.71, blue: 0.737) : .white.opacity(0.8))
                         }
                     }
                     .padding(.bottom, 30)
@@ -102,9 +102,9 @@ struct ScreenCreateReport: View {
                         }
                     }) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(Color(red: 0.043, green: 0.067, blue: 0.173))
+                            .foregroundColor(.white.opacity(0.8))
                             .padding(10)
-                            .background(Color.gray.opacity(0.2))
+                            .background(Color(red: 0.0, green: 0.71, blue: 0.737))
                             .clipShape(Circle())
                     }.padding(.top, 25)
                 }
@@ -123,12 +123,14 @@ struct Step1_URLView: View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Para comenzar...")
                 .font(.poppinsMedium(size: 34))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-            
+                .foregroundColor(.white)
+                .padding(.horizontal, 30)
+
             Text("Confirma el URL de la página.")
                 .font(.poppinsRegular(size: 18))
-                .foregroundColor(.gray)
-            
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.horizontal, 30)
+
             StyledTextField(
                 label: "URL",
                 placeholder: "https://paginafake.com",
@@ -138,36 +140,46 @@ struct Step1_URLView: View {
             
             Spacer()
         }
-        .padding(30)
         .navigationBarBackButtonHidden(true)
+        .padding(.top, 35)
     }
 }
 
 // Paso 2: Clasificar la amenaza
 struct Step2_ClassificationView: View {
     @Binding var category: String
-    @Binding var tags: String
+    @Binding var tags: [String]
+    @State private var newTag = ""
+    @State private var showLimitMessage = false
+    private let maxTags = 5
+
+    // Grid adaptable para chips, mantiene el contenido dentro del ancho disponible
+    private var gridColumns: [GridItem] {
+        [GridItem(.adaptive(minimum: 80), spacing: 8)]
+    }
     let categories = ["Phishing", "Malware", "Scam", "Noticias Falsas", "Otro"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Clasifica la amenaza")
                 .font(.poppinsMedium(size: 34))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-            
+                .foregroundColor(.white)
+                .padding(.horizontal, 30)
+
             Text("Escoge una categoría de entre la lista y escribe algunas etiquetas.")
                 .font(.poppinsRegular(size: 18))
-                .foregroundColor(.gray)
-            
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.horizontal, 30)
+
             // Selector de Categoría
             VStack(alignment: .leading, spacing: 8) {
                 Text("Categoría")
                     .font(.poppinsSemiBold(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white.opacity(0.8))
                 
                 HStack {
                     Image(systemName: "chevron.down.circle")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white.opacity(0.6))
                     
                     Picker("Selecciona Categoría", selection: $category) {
                         ForEach(categories, id: \.self) {
@@ -175,24 +187,80 @@ struct Step2_ClassificationView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .accentColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .accentColor(.white.opacity(0.8))
                 }
                 
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(.gray.opacity(0.5))
+                    .foregroundColor(.white.opacity(0.5))
             }
+            .padding(.horizontal, 30)
             
+            // Campo para añadir etiquetas
             StyledTextField(
                 label: "Etiquetas",
-                placeholder: "Escribe las etiquetas",
-                text: $tags,
-                iconName: "tag"
+                placeholder: "Añade una etiqueta",
+                text: $newTag,
+                iconName: "tag",
+                onCommit: {
+                    let trimmed = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !trimmed.isEmpty else { return }
+                    guard !tags.contains(trimmed) else { newTag = ""; return }
+
+                    if tags.count >= maxTags {
+                        showLimitMessage = true
+                    } else {
+                        tags.append(trimmed)
+                        newTag = ""
+                        showLimitMessage = false
+                    }
+                }
             )
-            
+            .disabled(tags.count >= maxTags)
+
+            // Mensaje de límite alcanzado
+            if showLimitMessage {
+                Text("Has alcanzado el límite de 5 etiquetas.")
+                    .font(.poppinsRegular(size: 14))
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 30)
+            }
+
+            // Chips responsivos: se adaptan y envuelven a múltiples líneas dentro del ancho
+            LazyVGrid(columns: gridColumns, alignment: .leading, spacing: 8) {
+                ForEach(tags, id: \.self) { tag in
+                    HStack(spacing: 6) {
+                        Text(tag)
+                            .font(.poppinsRegular(size: 14))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+
+                        Button(action: {
+                            if let index = tags.firstIndex(of: tag) {
+                                tags.remove(at: index)
+                                if tags.count < maxTags { showLimitMessage = false }
+                            }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white.opacity(0.9))
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .cornerRadius(14)
+                }
+            }
+            .padding(.horizontal, 30)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Spacer()
-        }
-        .padding(30)
+        }.padding(.top, 35)
     }
 }
 
@@ -206,33 +274,37 @@ struct Step3_DescriptionView: View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Cuéntanos...")
                 .font(.poppinsMedium(size: 34))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-            
+                .foregroundColor(.white)
+                .padding(.horizontal, 30)
+
             Text("¿Cuál es el motivo de tu reporte?")
                 .font(.poppinsRegular(size: 18))
-                .foregroundColor(.gray)
-            
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.horizontal, 30)
+
             // Campo de Descripción
             VStack(alignment: .leading, spacing: 8) {
                 Text("Descripción")
                     .font(.poppinsSemiBold(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white.opacity(0.8))
                 
                 TextEditor(text: $description)
                     .font(.poppinsRegular(size: 18))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
+                    .background(Color.clear)
                     .frame(height: 150)
                 
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(.gray.opacity(0.5))
+                    .foregroundColor(.white.opacity(0.5))
             }
-            
+            .padding(.horizontal, 30)
+
             // Selector de Imagen
             VStack(alignment: .leading, spacing: 8) {
                 Text("Imagen")
                     .font(.poppinsSemiBold(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white.opacity(0.8))
                 
                 PhotosPicker(selection: $selectedImage, matching: .images, photoLibrary: .shared()) {
                     VStack {
@@ -244,9 +316,9 @@ struct Step3_DescriptionView: View {
                         } else {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.largeTitle)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.white.opacity(0.8))
                             Text("Selecciona Imagen")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.white.opacity(0.8))
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 100)
@@ -261,12 +333,12 @@ struct Step3_DescriptionView: View {
                 
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(.gray.opacity(0.5))
+                    .foregroundColor(.white.opacity(0.5))
             }
+            .padding(.horizontal, 30)
             
             Spacer()
-        }
-        .padding(30)
+        }.padding(.top, 35)
     }
 }
 
@@ -279,26 +351,37 @@ struct StyledTextField: View {
     var placeholder: String
     @Binding var text: String
     var iconName: String
+    var onCommit: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.poppinsSemiBold(size: 14))
-                .foregroundColor(.gray)
+                .foregroundColor(.white.opacity(0.8))
             
             HStack {
                 Image(systemName: iconName)
-                    .foregroundColor(.gray)
-                
-                TextField(placeholder, text: $text)
-                    .font(.poppinsRegular(size: 18))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white.opacity(0.6))
+
+                ZStack(alignment: .leading) {
+                    if text.isEmpty {
+                        Text(placeholder)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                    TextField("", text: $text, onCommit: {
+                        onCommit?()
+                    })
+                        .font(.poppinsRegular(size: 18))
+                        .foregroundColor(.white)
+                }
             }
             
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(.white.opacity(0.5))
         }
+        .padding(.horizontal, 30)
     }
 }
 

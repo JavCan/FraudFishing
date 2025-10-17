@@ -1,10 +1,3 @@
-//
-//  ScreenLogin.swift
-//  Fraud Fishing
-//
-//  Created by Javier Canella Ramos on 16/09/25.
-//
-
 import SwiftUI
 
 enum LoginRoute: Hashable {
@@ -12,153 +5,64 @@ enum LoginRoute: Hashable {
 }
 
 struct ScreenLogin: View {
-    // MARK: - Estados y Entorno
+    // 1. Recibimos el controlador compartido usando @EnvironmentObject.
+    @EnvironmentObject private var authController: AuthenticationController
+    
+    // Estados locales solo para los campos del formulario.
     @State private var emailOrUsername: String = ""
     @State private var password: String = ""
     @State private var isPasswordVisible: Bool = false
-    @Environment(\.authenticationController) var authenticationController
-
-    @State private var isLoading: Bool = false
+    
+    // Estados para manejar alertas y la navegación.
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
-    @State private var loginExitoso: Bool = false
-    @State private var navPath: [LoginRoute] = []  // ← Nuevo path de navegación
+    @State private var navPath: [LoginRoute] = []
 
-    // MARK: - Función de Inicio de Sesión
-    func login() async {
-        isLoading = true
-        do {
-            let response = try await authenticationController.loginUser(email: emailOrUsername, password: password)
-            print("Login exitoso: \(response)")
-            alertMessage = "Inicio de sesión exitoso."
-            loginExitoso = true
-            showAlert = true
-            await MainActor.run {
-                navPath.append(.home)  // ← Navegación programática con NavigationStack
-            }
-        } catch {
-            print("Error al iniciar sesión: \(error.localizedDescription)")
-            alertMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo."
-            showAlert = true
-            loginExitoso = false
-        }
-        isLoading = false
-    }
-
-    // MARK: - Vista Principal
     var body: some View {
-        NavigationStack(path: $navPath) {   // ← Usa path
+        NavigationStack(path: $navPath) {
             ZStack {
-                // MARK: Fondo con gradiente oscuro
+                // MARK: Fondo (sin cambios)
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
                         Color(red: 0.043, green: 0.067, blue: 0.173)
                     ]),
-                    startPoint: UnitPoint(x: 0.5, y: 0.1),
+                    startPoint: .top,
                     endPoint: .bottom
                 )
                 .edgesIgnoringSafeArea(.all)
 
                 VStack {
-                    // MARK: - Título
+                    // MARK: - Título (sin cambios)
                     Text("Iniciar Sesión")
-                        .font(.poppinsMedium(size: 34))
+                        .font(.poppinsMedium(size: 34)) // Se mantiene tu fuente personalizada
                         .foregroundColor(.white)
                         .padding(.bottom, 40)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 30)
 
-                    // MARK: - Campo de Correo
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Correo")
-                            .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.white.opacity(0.8))
-                            .padding(.leading, 30)
-
-                        HStack {
-                            Image(systemName: "envelope")
-                                .foregroundColor(.white.opacity(0.5))
-                                .padding(.leading, 30)
-
-                            ZStack(alignment: .leading) {
-                                if emailOrUsername.isEmpty {
-                                    Text("ejemplo@email.com")
-                                        .font(.poppinsRegular(size: 18))
-                                        .foregroundColor(.white.opacity(0.6))
-                                        .padding(.vertical, 5)
-                                }
-                                TextField("", text: $emailOrUsername)
-                                    .font(.poppinsRegular(size: 18))
-                                    .foregroundColor(.white)
-                                    .padding(.vertical, 5)
-                                    .autocapitalization(.none)
-                                    .keyboardType(.emailAddress)
-                            }
-                        }
-
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.white.opacity(0.5))
-                            .padding(.horizontal, 30)
-                    }
+                    // MARK: - Campo de Correo (sin cambios en UI)
+                    customLoginTextField(
+                        label: "Correo",
+                        icon: "envelope",
+                        placeholder: "ejemplo@email.com",
+                        text: $emailOrUsername,
+                        isSecure: false
+                    )
                     .padding(.bottom, 20)
 
-                    // MARK: - Campo de Contraseña
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Contraseña")
-                            .font(.poppinsSemiBold(size: 14))
-                            .foregroundColor(.white.opacity(0.8))
-                            .padding(.leading, 30)
+                    // MARK: - Campo de Contraseña (sin cambios en UI)
+                    customLoginTextField(
+                        label: "Contraseña",
+                        icon: "lock",
+                        placeholder: "••••••••",
+                        text: $password,
+                        isSecure: !isPasswordVisible,
+                        isPasswordToggle: true,
+                        isPasswordVisible: $isPasswordVisible
+                    )
 
-                        HStack {
-                            Image(systemName: "lock")
-                                .foregroundColor(.white.opacity(0.5))
-                                .padding(.leading, 30)
-                                .padding(.horizontal, 4)
-
-                            if isPasswordVisible {
-                                ZStack(alignment: .leading) {
-                                    if password.isEmpty {
-                                        Text("••••••••")
-                                            .font(.poppinsRegular(size: 18))
-                                            .foregroundColor(.white.opacity(0.6))
-                                            .padding(.vertical, 5)
-                                    }
-                                    TextField("", text: $password)
-                                        .font(.poppinsRegular(size: 18))
-                                        .foregroundColor(.white)
-                                        .padding(.vertical, 5)
-                                }
-                            } else {
-                                ZStack(alignment: .leading) {
-                                    if password.isEmpty {
-                                        Text("••••••••")
-                                            .font(.poppinsRegular(size: 18))
-                                            .foregroundColor(.white.opacity(0.6))
-                                            .padding(.vertical, 5)
-                                    }
-                                    SecureField("", text: $password)
-                                        .font(.poppinsRegular(size: 18))
-                                        .foregroundColor(.white)
-                                        .padding(.vertical, 5)
-                                }
-                            }
-
-                            Button(action: { isPasswordVisible.toggle() }) {
-                                Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
-                                    .foregroundColor(.white.opacity(0.5))
-                                    .padding(.trailing, 30)
-                            }
-                        }
-
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.white.opacity(0.5))
-                            .padding(.horizontal, 30)
-                    }
-
-                    // MARK: - Olvidé mi Contraseña
+                    // MARK: - Olvidé mi Contraseña (sin cambios)
                     Button(action: {}) {
                         Text("Olvidé mi contraseña")
                             .font(.poppinsRegular(size: 15))
@@ -174,7 +78,8 @@ struct ScreenLogin: View {
                         Task { await login() }
                     }) {
                         HStack {
-                            if isLoading {
+                            // 2. Reaccionamos al estado de carga DEL CONTROLADOR.
+                            if authController.isLoading {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
@@ -185,11 +90,12 @@ struct ScreenLogin: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(isLoading ? Color.gray : Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .background(authController.isLoading ? Color.gray : Color(red: 0.0, green: 0.2, blue: 0.4))
                         .cornerRadius(10)
                         .padding(.horizontal, 30)
                     }
-                    .disabled(isLoading)
+                    // Deshabilitamos el botón si el controlador está ocupado.
+                    .disabled(authController.isLoading)
                     .padding(.bottom, 10)
 
                     // MARK: - Enlace a Registro
@@ -197,7 +103,9 @@ struct ScreenLogin: View {
                         Text("Soy un nuevo usuario.")
                             .font(.poppinsRegular(size: 17))
                             .foregroundColor(.white.opacity(0.8))
-                        NavigationLink(destination: ScreenRegister()) {
+                        
+                        // 3. Pasamos el environmentObject a la vista de registro.
+                        NavigationLink(destination: ScreenRegister().environmentObject(authController)) {
                             Text("Registrarme")
                                 .font(.poppinsBold(size: 17))
                                 .foregroundColor(.white)
@@ -206,28 +114,107 @@ struct ScreenLogin: View {
                     .padding(.bottom, 170)
                 }
             }
-
-            // MARK: - Navegación y Alertas
             .navigationBarHidden(true)
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text(loginExitoso ? "Éxito" : "Error"),
-                    message: Text(alertMessage),
-                    dismissButton: .default(Text("OK"))
-                )
+            .alert("Inicio de Sesión", isPresented: $showAlert) {
+                Button("OK") {}
+            } message: {
+                Text(alertMessage)
             }
-            .navigationDestination(for: LoginRoute.self) { route in   // ← Destino moderno
-                switch route {
-                case .home:
+            .navigationDestination(for: LoginRoute.self) { route in
+                if route == .home {
+                    // ScreenHome también necesitará el controlador.
                     ScreenHome()
+                        .environmentObject(authController)
                         .navigationBarBackButtonHidden(true)
-                        .toolbar(.hidden, for: .navigationBar)
                 }
             }
         }
     }
+
+    // MARK: - Lógica de Inicio de Sesión
+    @MainActor
+    private func login() async {
+        // La vista ya no maneja 'isLoading', lo hace el controlador.
+        do {
+            let success = try await authController.loginUser(email: emailOrUsername, password: password)
+            if success {
+                // Si el login es exitoso y los tokens se guardan, navegamos.
+                navPath.append(.home)
+            } else {
+                // Este caso es raro, pero cubre si el guardado de tokens falla.
+                alertMessage = "No se pudo guardar la sesión de forma segura."
+                showAlert = true
+            }
+        } catch {
+            // Si el controlador lanza un error, lo mostramos.
+            alertMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo."
+            showAlert = true
+        }
+    }
+    
+    // MARK: - Componente de Campo de Texto Reutilizable (para mantener formato)
+    @ViewBuilder
+    func customLoginTextField(
+        label: String,
+        icon: String,
+        placeholder: String,
+        text: Binding<String>,
+        isSecure: Bool,
+        isPasswordToggle: Bool = false,
+        isPasswordVisible: Binding<Bool>? = nil
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.poppinsSemiBold(size: 14))
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.leading, 30)
+            
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(.white.opacity(0.5))
+                    .padding(.leading, 30)
+
+                ZStack(alignment: .leading) {
+                    if text.wrappedValue.isEmpty {
+                        Text(placeholder)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                    if isSecure {
+                        SecureField("", text: text)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white)
+                    } else {
+                        TextField("", text: text)
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white)
+                            .autocapitalization(.none)
+                            .keyboardType(.emailAddress)
+                    }
+                }
+                
+                if isPasswordToggle, let isVisible = isPasswordVisible {
+                    Button(action: { isVisible.wrappedValue.toggle() }) {
+                        Image(systemName: isVisible.wrappedValue ? "eye.fill" : "eye.slash.fill")
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding(.trailing, 30)
+                    }
+                }
+            }
+            
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(.white.opacity(0.5))
+                .padding(.horizontal, 30)
+        }
+    }
 }
 
+// MARK: - Vista Previa
 #Preview {
-    ScreenLogin()
+    // 4. Arreglamos la vista previa para que funcione.
+    NavigationStack {
+        ScreenLogin()
+            .environmentObject(AuthenticationController(httpClient: HTTPClient()))
+    }
 }
