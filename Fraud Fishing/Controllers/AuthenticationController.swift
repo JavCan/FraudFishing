@@ -12,28 +12,37 @@ class AuthenticationController: ObservableObject {
         self.httpClient = httpClient
     }
     
-    // MARK: - Registro de Usuario
+    // MARK: - Registro de Usuario (Corregido)
     @MainActor
     func registerUser(name: String, email: String, password: String) async throws {
         isLoading = true
         errorMessage = nil
         
+        // defer garantiza que isLoading se apague sin importar cómo termine la función.
+        defer { isLoading = false }
+        
         let request = UserRegisterRequest(name: name, email: email, password: password)
         
         do {
+            // Esta función no devuelve nada, solo puede lanzar un error.
             try await httpClient.UserRegistration(request)
+            // Si no hubo error, el registro fue exitoso.
         } catch {
+            // Si hubo un error de red o de status code, lo capturamos.
             self.errorMessage = error.localizedDescription
-            throw error
+            print("🛑 ERROR en registerUser: \(error)")
+            throw error // Lo volvemos a lanzar para que la vista muestre la alerta.
         }
-        isLoading = false
     }
     
-    // MARK: - Inicio de Sesión de Usuario
+    // MARK: - Inicio de Sesión de Usuario (Corregido)
     @MainActor
     func loginUser(email: String, password: String) async throws -> Bool {
         isLoading = true
         errorMessage = nil
+        
+        // Usamos defer aquí también para consistencia y seguridad.
+        defer { isLoading = false }
         
         do {
             let loginResponse = try await httpClient.UserLogin(email: email, password: password)
@@ -42,12 +51,10 @@ class AuthenticationController: ObservableObject {
             let accessTokenSaved = TokenStorage.set(.access, value: loginResponse.accessToken)
             let refreshTokenSaved = TokenStorage.set(.refresh, value: loginResponse.refreshToken)
             
-            isLoading = false
             return accessTokenSaved && refreshTokenSaved
             
         } catch {
             self.errorMessage = error.localizedDescription
-            isLoading = false
             throw error // Re-lanzamos el error para que la vista lo capture
         }
     }

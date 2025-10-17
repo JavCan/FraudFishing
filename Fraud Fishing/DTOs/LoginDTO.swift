@@ -12,11 +12,13 @@ struct UserLoginRequest: Codable {
     let password: String
 }
 
+
 struct User: Decodable {
     let id: Int
     let email: String
     let name: String
-    let is_admin: Bool
+    let is_admin: Int
+    let is_super_admin: Int
 }
 
 struct UserLoginResponse: Decodable {
