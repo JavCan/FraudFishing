@@ -2,24 +2,37 @@
 
 import Foundation
 
-func myProfile(email: String, name:String, password: String) async throws -> Bool {
-    
-    let dataRequest = UserRegisterRequest(name: name, email: email, password: password)
-    let jsonData = try JSONEncoder().encode(dataRequest)
-    
-    guard let url = URL(string: "http://localhost:3000/users") else {
-        throw URLError(.badURL)
-    }
-    
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.httpBody = jsonData
-    
-    let (data, response) = try await URLSession.shared.data(for: request)
-    
-    guard let httpResponse = response as? HTTPURLResponse else {
-        throw URLError(.badServerResponse)
+struct HTTPUsuario {
+    func getUserProfile() async throws -> UserProfile {
+        
+        guard let url = URL(string: "http://10.48.248.216:3099/users/me") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        guard let token = TokenStorage.get(.access) else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        // 2. Agregamos el encabezado de autorización.
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Imprimimos para depurar y ver que el token se está enviando
+        print("🚀 Petición a /users/me con Token: Bearer \(token)")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            print("❌ Error: No se pudo obtener el perfil. Status: \((response as? HTTPURLResponse)?.statusCode ?? 0)")
+            throw URLError(.badServerResponse)
+        }
+        
+        // Decodificamos la respuesta en nuestro nuevo modelo.
+        let userProfile = try JSONDecoder().decode(UserProfile.self, from: data)
+        print("✅ Perfil de usuario recibido: \(userProfile.name)")
+        return userProfile
     }
     
     // MARK: - Update User Profile
@@ -66,4 +79,3 @@ func myProfile(email: String, name:String, password: String) async throws -> Boo
         return updatedProfile
     }
 }
-
