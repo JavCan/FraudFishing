@@ -1,10 +1,3 @@
-//
-//  ScreenAjustes.swift
-//  Fraud Fishing
-//
-//  Created by Victor Bosquez on 30/09/25.
-//
-
 import SwiftUI
 
 struct ScreenAjustes: View {
@@ -12,231 +5,129 @@ struct ScreenAjustes: View {
     @State private var notificacionesActivadas: Bool = true
     @State private var showLogoutAlert: Bool = false
     
+    // Aquí iría la lógica para navegar a la pantalla de login después de cerrar sesión.
+    
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Fondo con gradiente
-                LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
-                               endPoint: .bottom)
-                    .edgesIgnoringSafeArea(.all)
+        ZStack {
+            // MARK: - Fondo
+            // Reutilizamos el gradiente oscuro de tu pantalla de login.
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 0) {
+                // MARK: - Header Personalizado
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white).padding(10)
+                            .background(Color.white.opacity(0.1)).clipShape(Circle())
+                    }
+                    Spacer()
+                    Text("Ajustes")
+                        .font(.title2).fontWeight(.bold).foregroundColor(.white)
+                    Spacer()
+                    Color.clear.frame(width: 40, height: 40)
+                }
+                .padding(.horizontal)
+                .padding(.vertical)
                 
+                // MARK: - Opciones de Ajustes
+                // Usamos un ScrollView por si en el futuro agregas más opciones.
                 ScrollView {
-                    VStack(spacing: 25) {
-                        // MARK: - Sección Cuenta
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("Cuenta")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .padding(.horizontal, 20)
-                                .padding(.bottom, 10)
-                            
-                            VStack(spacing: 0) {
-                                // Editar Perfil
-                                NavigationLink(destination: ScreenEditarPerfil()) {
-                                    SettingsRow(
-                                        icon: "person.circle.fill",
-                                        title: "Editar Perfil",
-                                        showChevron: true
-                                    )
-                                }
-                                
-                                Divider()
-                                    .padding(.leading, 60)
-                                
-                                // Notificaciones con Toggle
-                                HStack {
-                                    Image(systemName: "bell.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                                        .frame(width: 30)
-                                    
-                                    Text("Notificaciones")
-                                        .font(.body)
-                                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                    
-                                    Spacer()
-                                    
-                                    Toggle("", isOn: $notificacionesActivadas)
-                                        .labelsHidden()
-                                        .tint(Color(red: 0.0, green: 0.6, blue: 0.5))
-                                }
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 15)
-                                .background(Color.white)
-                                
-                                Divider()
-                                    .padding(.leading, 60)
-                                
-                                // Aviso de Privacidad
-                                NavigationLink(destination: ScreenAvisoPrivacidad()) {
-                                    SettingsRow(
-                                        icon: "lock.shield.fill",
-                                        title: "Aviso de Privacidad",
-                                        showChevron: true
-                                    )
+                    VStack(spacing: 35) {
+                        // --- Sección de Notificaciones ---
+                        SettingsSection(title: "NOTIFICACIONES") {
+                            Toggle(isOn: $notificacionesActivadas) {
+                                HStack(spacing: 15) {
+                                    Image(systemName: "bell.badge.fill")
+                                        .foregroundColor(.purple).frame(width: 25, alignment: .center)
+                                    Text("Notificaciones Push").foregroundColor(.white)
                                 }
                             }
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal)
+                            .padding(.vertical, 5)
+                            .tint(.cyan)
                         }
                         
-                        // MARK: - Sección Mis Reportes
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("Mis reportes")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .padding(.horizontal, 20)
-                                .padding(.bottom, 10)
-                            
-                            VStack(spacing: 0) {
-                                // Reportes Aceptados
-                                NavigationLink(destination: ScreenReportesVerificados()) {
-                                    SettingsRow(
-                                        icon: "checkmark.circle.fill",
-                                        title: "Mis reportes aceptados",
-                                        showChevron: true
-                                    )
-                                }
-                                
-                                Divider()
-                                    .padding(.leading, 60)
-                                
-                                // Reportes Pendientes
-                                NavigationLink(destination: ScreenReportesPendientes()) {
-                                    SettingsRow(
-                                        icon: "clock.fill",
-                                        title: "Mis reportes pendientes",
-                                        showChevron: true
-                                    )
-                                }
-                                
-                                Divider()
-                                    .padding(.leading, 60)
-                                
-                                // Términos y Condiciones
-                                NavigationLink(destination: ScreenTerminosCondiciones()) {
-                                    SettingsRow(
-                                        icon: "doc.text.fill",
-                                        title: "Términos y condiciones",
-                                        showChevron: true
-                                    )
-                                }
-                            }
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                            .padding(.horizontal, 20)
+                        // --- Sección de Ayuda y Soporte ---
+                        SettingsSection(title: "REPORTES") {
+                            SettingsRow(icon: "hourglass", title: "Reportes Pendientes", tintColor: .orange)
+                            Divider().background(Color.white.opacity(0.2)).padding(.leading, 60)
+                            SettingsRow(icon: "checkmark.shield.fill", title: "Reportes Aceptados", tintColor: .green)
                         }
                         
-                        // MARK: - Botón Cerrar Sesión
-                        Button(action: {
-                            showLogoutAlert = true
-                        }) {
-                            HStack {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
-                                    .font(.system(size: 18))
-                                Text("Cerrar Sesión")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(12)
-                            .shadow(color: Color.red.opacity(0.3), radius: 5, x: 0, y: 3)
+                        // --- Sección Legal ---
+                        SettingsSection(title: "LEGAL") {
+                            SettingsRow(icon: "doc.text.fill", title: "Términos y Condiciones", tintColor: .gray)
+                            Divider().background(Color.white.opacity(0.2)).padding(.leading, 60)
+                            SettingsRow(icon: "shield.lefthalf.filled", title: "Política de Privacidad", tintColor: .blue)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
-                        .padding(.bottom, 40)
                     }
-                    .padding(.top, 20)
+                    .padding(.top)
                 }
-            }
-            .navigationTitle("Ajustes")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("Home")
-                                .font(.body)
-                        }
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                    }
-                }
-            }
-            .alert("Cerrar Sesión", isPresented: $showLogoutAlert) {
-                Button("Cancelar", role: .cancel) { }
-                Button("Cerrar Sesión", role: .destructive) {
-                    cerrarSesion()
-                }
-            } message: {
-                Text("¿Estás seguro de que deseas cerrar sesión?")
             }
         }
     }
-    
-    // MARK: - Funciones
-    
-    private func cerrarSesion() {
-        // Aquí implementarías la lógica de cerrar sesión
-        // Por ejemplo: limpiar tokens, navegar a login, etc.
-        print("Cerrando sesión...")
-        
-        // Ejemplo de lo que podrías hacer:
-        // UserDefaults.standard.removeObject(forKey: "accessToken")
-        // UserDefaults.standard.removeObject(forKey: "refreshToken")
-        // Navegar a pantalla de login
-    }
 }
 
-// MARK: - Componente Reutilizable para Filas de Ajustes
+// MARK: - Componentes Reutilizables para Mejor Estructura
+
+struct SettingsSection<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .foregroundColor(.white.opacity(0.6))
+                .padding(.horizontal)
+            
+            VStack(spacing: 0) {
+                content
+            }
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(10)
+        }
+        .padding(.horizontal)
+    }
+}
 
 struct SettingsRow: View {
     let icon: String
     let title: String
-    let showChevron: Bool
-    
+    let tintColor: Color
+
     var body: some View {
         HStack(spacing: 15) {
             Image(systemName: icon)
-                .font(.system(size: 22))
-                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                .frame(width: 30)
+                .foregroundColor(tintColor)
+                .frame(width: 25, alignment: .center)
             
             Text(title)
-                .font(.body)
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                .foregroundColor(.white)
             
             Spacer()
             
-            if showChevron {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.gray)
-            }
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white.opacity(0.5))
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 15)
-        .background(Color.white)
-        .contentShape(Rectangle())
+        .padding()
     }
 }
 
-// MARK: - Preview
-
+// MARK: - Vista Previa
 #Preview {
-    ScreenAjustes()
+    NavigationStack {
+        ScreenAjustes()
+    }
 }

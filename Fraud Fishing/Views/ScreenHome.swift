@@ -12,7 +12,6 @@ struct ScreenHome: View {
     @State private var selectedTab: Tab = .home
 
     var body: some View {
-        // Eliminado NavigationView para evitar barra y botón “Back”
         ZStack(alignment: .bottom) {
             // Capa 1: Contenido principal con fondo
             ZStack(alignment: .topTrailing) {
@@ -24,12 +23,19 @@ struct ScreenHome: View {
                     .edgesIgnoringSafeArea(.all)
 
                 VStack {
+                    // Header con logo y botón de perfil
+                    HStack {
+                        Spacer()
+                        
                     // Logo
                     Image("LogoBlanco")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 400, height: 240)
                         .padding(.top, 60)
+                        
+                        Spacer()
+                    }
 
                     // Barra de entrada de URL
                     HStack {
@@ -101,14 +107,14 @@ struct ScreenHome: View {
             // Capa 2: CustomTabBar superpuesta
             CustomTabBar(selectedTab: $selectedTab)
         }
-        .navigationBarBackButtonHidden(true)   // ← Oculta botón atrás
-        .toolbar(.hidden, for: .navigationBar) // ← Oculta barra completa
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .edgesIgnoringSafeArea(.bottom)
     }
 }
 
 enum Tab {
-    case home, dashboard, settings
+    case home, dashboard, profile
 }
 
 struct CustomTabBar: View {
@@ -149,14 +155,14 @@ struct CustomTabBar: View {
 
                 Spacer()
 
-                // Botón derecho: Ajustes
-                if selectedTab == .settings {
-                    Image(systemName: "gearshape.fill")
+                // Botón derecho: Perfil
+                if selectedTab == .profile {
+                    Image(systemName: "person.circle.fill")
                         .font(.system(size: 24))
                         .foregroundColor(.white)
                 } else {
-                    NavigationLink(destination: ScreenAjustes()) {
-                        Image(systemName: "gearshape.fill")
+                    NavigationLink(destination: ScreenEditarPerfil()) {
+                        Image(systemName: "person.circle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(Color(red: 0.537, green: 0.616, blue: 0.733))
                     }
@@ -203,7 +209,6 @@ struct TabButton: View {
     @Binding var selectedTab: Tab
 
     var body: some View {
-        //let turquoise = Color(red: 0.0, green: 0.71, blue: 0.737)
         Button(action: { selectedTab = tab }) {
             Image(systemName: icon)
                 .font(.system(size: 24))
