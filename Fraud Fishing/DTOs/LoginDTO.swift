@@ -8,10 +8,19 @@
 import Foundation
 
 struct UserLoginRequest: Codable {
-    let email: String // Cambiado de username a email
+    let email: String 
     let password: String
 }
 
+struct User: Decodable {
+    let id: Int
+    let email: String
+    let name: String
+    let is_admin: Bool
+}
+
 struct UserLoginResponse: Decodable {
-    let accessToken, refreshToken: String
+    let accessToken: String
+    let refreshToken: String
+    let user: User
 }
