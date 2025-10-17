@@ -51,9 +51,9 @@ struct ScreenNotifications: View {
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.71, blue: 0.737)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
+                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                           startPoint: UnitPoint(x:0.5, y:0.1),
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
 
@@ -73,7 +73,7 @@ struct ScreenNotifications: View {
                     
                     Text("Notificaciones")
                         .font(.poppinsMedium(size: 28))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(.white)
                         .padding(.horizontal, 20)
                     
                     Spacer()
@@ -109,13 +109,13 @@ struct ScreenNotifications: View {
                         ForEach(groupNotifications(notifications).keys.sorted(by: >), id: \.self) { date in
                             Section(header: Text(sectionHeader(for: date))
                                 .font(.poppinsSemiBold(size: 18))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))) {
+                                .foregroundColor(.white.opacity(0.8))) {
                                 ForEach(groupNotifications(notifications)[date]!) { notification in
                                     NotificationRow(notification: notification)
                                 }
                             }
                         }
-                        .listRowBackground(Color.white.opacity(0.8))
+                        .listRowBackground(Color.white.opacity(0.9))
                     }
                     .listStyle(GroupedListStyle())
                     .background(Color.clear)
@@ -189,13 +189,13 @@ struct EmptyNotificationsView: View {
             
             Text("No tienes notificaciones nuevas")
                 .font(.poppinsMedium(size: 22))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                .foregroundColor(.white)
                 .padding(.top, 20)
                 .multilineTextAlignment(.center)
             
             Text("Tus notificaciones aparecerán\naquí cuando las recibas.")
                 .font(.poppinsRegular(size: 16))
-                .foregroundColor(.gray)
+                .foregroundColor(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
                 .padding(.top, 2)
             Spacer()

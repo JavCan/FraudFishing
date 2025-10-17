@@ -38,9 +38,9 @@ struct ScreenReportesPendientes: View {
         ZStack {
             // Fondo con gradiente
             LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
+                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                           startPoint: UnitPoint(x:0.5, y:0.1),
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
             
@@ -128,9 +128,9 @@ struct ScreenReportesVerificados: View {
         ZStack {
             // Fondo con gradiente
             LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
+                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                           startPoint: UnitPoint(x:0.5, y:0.1),
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
             

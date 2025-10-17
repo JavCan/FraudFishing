@@ -12,24 +12,23 @@ struct ScreenTerminosCondiciones: View {
     
     var body: some View {
         ZStack {
-            // Fondo blanco
-            Color.white
+            LinearGradient(gradient: Gradient(colors: [
+                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                           startPoint: UnitPoint(x:0.5, y:0.1),
+                           endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
-            
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Título principal
                     Text("Terminos y condiciones")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 20)
-                    
-                    // Texto introductorio
                     Text("Al descargar y utilizar Fraud Fishing, usted acepta los siguientes términos y condiciones:")
                         .font(.system(size: 15))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(.white.opacity(0.8))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 10)
@@ -106,22 +105,18 @@ struct TerminoSeccion: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Número y título
             HStack(alignment: .top, spacing: 4) {
                 Text(numero)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                
+                    .foregroundColor(.white)
                 Text(titulo)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
                     .underline()
             }
-            
-            // Contenido
             Text(contenido)
                 .font(.system(size: 15))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                .foregroundColor(.white.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.leading, 12)
         }
@@ -136,24 +131,23 @@ struct ScreenAvisoPrivacidad: View {
     
     var body: some View {
         ZStack {
-            // Fondo blanco
-            Color.white
+            LinearGradient(gradient: Gradient(colors: [
+                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                           startPoint: UnitPoint(x:0.5, y:0.1),
+                           endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
-            
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Título principal
                     Text("Aviso de Privacidad")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 20)
-                    
-                    // Texto introductorio
                     Text("En Fraud Fishing, respetamos y protegemos la privacidad de nuestros usuarios. Este aviso describe cómo recopilamos, usamos y protegemos su información personal.")
                         .font(.system(size: 15))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                        .foregroundColor(.white.opacity(0.8))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 10)
@@ -243,22 +237,18 @@ struct PrivacidadSeccion: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Número y título
             HStack(alignment: .top, spacing: 4) {
                 Text(numero)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                
+                    .foregroundColor(.white)
                 Text(titulo)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
                     .underline()
             }
-            
-            // Contenido
             Text(contenido)
                 .font(.system(size: 15))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
+                .foregroundColor(.white.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.leading, 12)
         }
