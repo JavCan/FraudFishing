@@ -9,60 +9,89 @@ import Foundation
 
 struct HTTPClient {
     
-    func UserRegistration(_ request: UserRegisterRequest) async throws -> UserLoginResponse {
-        guard let url = URL(string: "http://10.48.246.254:3000/users") else {
+    // ... (resto del archivo) ...
+
+    func UserRegistration(_ request: UserRegisterRequest) async throws {
+        guard let url = URL(string: "http://10.48.248.216:3099/users") else {
             throw URLError(.badURL)
-    }
+        }
         
         var httpRequest = URLRequest(url: url)
         httpRequest.httpMethod = "POST"
         httpRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        httpRequest.addValue("application/json", forHTTPHeaderField: "Accept")
         httpRequest.httpBody = try JSONEncoder().encode(request)
         
+        // DEBUG: Imprimir lo que se envía
+        if let jsonString = String(data: httpRequest.httpBody!, encoding: .utf8) {
+            print("➡️ ENVIANDO A /users (Registro):")
+            print(jsonString)
+        }
+
         let (data, response) = try await URLSession.shared.data(for: httpRequest)
-        guard let http = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
+        
+        // DEBUG: Imprimir lo que se recibe
+        if let http = response as? HTTPURLResponse {
+            print("⬅️ RECIBIDO DE /users (Registro):")
+            print("Status Code: \(http.statusCode)")
+            if let bodyString = String(data: data, encoding: .utf8), !bodyString.isEmpty {
+                print("Cuerpo de la Respuesta (Raw): \(bodyString)")
+            } else {
+                print("Cuerpo de la Respuesta: (Vacío)")
+            }
+        }
+        
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            print("❌ Error: El registro falló con un status de error.")
+            throw NSError(domain: "HTTPClient", code: (response as? HTTPURLResponse)?.statusCode ?? 0, userInfo: [NSLocalizedDescriptionKey: "El servidor respondió con un error."])
+        }
+        
+        // Si llegamos aquí, el registro fue exitoso (status 2xx).
+    }
+    
+    func UserLogin(email: String, password: String) async throws -> UserLoginResponse {
+            
+        let loginRequest = UserLoginRequest(email: email, password: password)
+        
+        guard let url = URL(string: "http://10.48.248.216:3099/auth/login") else {
+            throw URLError(.badURL)
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // ✅ 1. Usamos 'try' para capturar errores de codificación.
+        urlRequest.httpBody = try JSONEncoder().encode(loginRequest)
+        
+        // ✅ 2. Imprimimos el JSON para depurar y verificar qué se está enviando.
+        if let body = urlRequest.httpBody, let jsonString = String(data: body, encoding: .utf8) {
+            print("➡️ ENVIANDO A /auth/login:")
+            print(jsonString)
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        // Imprimimos la respuesta del servidor para tener más contexto.
+        if let httpResponse = response as? HTTPURLResponse {
+            print("⬅️ RESPUESTA DE /auth/login (Status: \(httpResponse.statusCode))")
+            if let bodyString = String(data: data, encoding: .utf8) {
+                print("Cuerpo: \(bodyString)")
+            }
         }
         
         guard let httpresponse = response as? HTTPURLResponse,
               (200...299).contains(httpresponse.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-        let loginResponse = try JSONDecoder().decode(UserLoginResponse.self, from: data)
-        return loginResponse
-    }
-    
-    func UserLogin(email:String, password:String) async throws -> UserLoginResponse {
-        let UserLoginRequest = UserLoginRequest(email:email, password:password)
-        guard let url = URL(string: "http://10.48.246.254:3000/auth/login") else {
-            throw URLError(.badURL)
-        }
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "POST"
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.httpBody = try? JSONEncoder().encode(UserLoginRequest)
-        
-        let (data,response) = try await URLSession.shared.data(for: urlRequest)
-        
-        // ... (Tu código para imprimir el status y el body, muy útil para debuggear)
-        
-        guard let httpresponse = response as? HTTPURLResponse,
-              (200...299).contains(httpresponse.statusCode) else{
-            // Es una buena práctica imprimir el error que viene del backend aquí
-            let errorMessage = String(data: data, encoding: .utf8)
-            print("Error en el login: \(errorMessage ?? "Sin mensaje")")
+            // Este error se lanzará si el status no es 2xx (ej. 401 Unauthorized)
             throw URLError(.badServerResponse)
         }
         
         let loginResponse = try JSONDecoder().decode(UserLoginResponse.self, from: data)
-        
         return loginResponse
     }
     
     func refreshAccessToken(refreshToken: String) async throws -> String{
         let refreshRequest = RefreshRequest(refreshToken: refreshToken)
-        guard let url = URL(string: "http://10.48.246.254:3000/auth/refresh") else {
+        guard let url = URL(string: "http://10.48.248.216:3099/auth/refresh") else {
             throw URLError(.badURL)
         }
         var urlRequest = URLRequest(url: url)
