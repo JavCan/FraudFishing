@@ -36,7 +36,7 @@ struct ScreenAjustes: View {
                             
                             VStack(spacing: 0) {
                                 // Editar Perfil
-                                NavigationLink(destination: Text("Editar Perfil")) {
+                                NavigationLink(destination: ScreenEditarPerfil()) {
                                     SettingsRow(
                                         icon: "person.circle.fill",
                                         title: "Editar Perfil",
@@ -72,7 +72,7 @@ struct ScreenAjustes: View {
                                     .padding(.leading, 60)
                                 
                                 // Aviso de Privacidad
-                                NavigationLink(destination: Text("Aviso de Privacidad")) {
+                                NavigationLink(destination: ScreenAvisoPrivacidad()) {
                                     SettingsRow(
                                         icon: "lock.shield.fill",
                                         title: "Aviso de Privacidad",
@@ -97,7 +97,7 @@ struct ScreenAjustes: View {
                             
                             VStack(spacing: 0) {
                                 // Reportes Aceptados
-                                NavigationLink(destination: Text("Reportes Aceptados")) {
+                                NavigationLink(destination: ScreenReportesVerificados()) {
                                     SettingsRow(
                                         icon: "checkmark.circle.fill",
                                         title: "Mis reportes aceptados",
@@ -109,7 +109,7 @@ struct ScreenAjustes: View {
                                     .padding(.leading, 60)
                                 
                                 // Reportes Pendientes
-                                NavigationLink(destination: Text("Reportes Pendientes")) {
+                                NavigationLink(destination: ScreenReportesPendientes()) {
                                     SettingsRow(
                                         icon: "clock.fill",
                                         title: "Mis reportes pendientes",
@@ -121,7 +121,7 @@ struct ScreenAjustes: View {
                                     .padding(.leading, 60)
                                 
                                 // Términos y Condiciones
-                                NavigationLink(destination: Text("Términos y Condiciones")) {
+                                NavigationLink(destination: ScreenTerminosCondiciones()) {
                                     SettingsRow(
                                         icon: "doc.text.fill",
                                         title: "Términos y condiciones",
