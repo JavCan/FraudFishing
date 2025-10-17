@@ -6,7 +6,7 @@ class UserProfileController: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    private let userClient = httpUsuario()
+    private let userClient = HTTPUsuario()
 
     // --- Cargar Perfil (Sin cambios) ---
     func fetchUserProfile() async {

@@ -11,9 +11,22 @@ class HTTPReport {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        guard let token = TokenStorage.get(.access) else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        // Adjuntar el token al encabezado Authorization
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
         request.httpBody = try JSONEncoder().encode(reportData)
 
-        let (data, httpResponse) = try await executor.send(request)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            // No es una respuesta HTTP (error de red bajo nivel)
+            throw URLError(.badServerResponse)
+        }
 
         // Si el código de estado NO es 2xx (200-299), decodificamos el error del servidor.
         if !(200...299).contains(httpResponse.statusCode) {
@@ -30,7 +43,7 @@ class HTTPReport {
             }
         }
         
-        // Verificamos el código de estado de éxito esperado (201).
+        // Verificamos el código de estado de éxito esperado (201). 
         // Si el servidor devuelve 200/202 en su lugar, esto seguirá siendo válido por el bloque 'if' anterior.
         // Mantenemos esta verificación si el DTO de éxito solo se espera con 201.
         if httpResponse.statusCode != 201 && httpResponse.statusCode != 200 {
