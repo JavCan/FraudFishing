@@ -49,77 +49,11 @@ struct ScreenNotifications: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
-                Color(red: 0.043, green: 0.067, blue: 0.173)]),
-                           startPoint: UnitPoint(x:0.5, y:0.1),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-
-            VStack {
-                HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color(red: 0.0, green: 0.71, blue: 0.737))
-                            .clipShape(Circle())
-                    }
-                    .padding(.leading)
-                    
-                    Text("Notificaciones")
-                        .font(.poppinsMedium(size: 28))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                    
-                    Spacer()
-                    
-                    // Botón de prueba para alternar vistas
-                    Button(action: {
-                        if showEmptyState {
-                            notifications = [
-                                Notification(type: .approved, title: "Reporte # 1", description: "Tu reporte ha sido aceptado", date: Date()),
-                                Notification(type: .inReview, title: "Reporte # 3", description: "Tu reporte está siendo revisado", date: Date().addingTimeInterval(-86400)), // Ayer
-                                Notification(type: .denied, title: "Reporte # 2", description: "Tu reporte fue denegado", date: Date().addingTimeInterval(-172800)) // Hace 2 días
-                            ]
-                        } else {
-                            notifications = []
-                        }
-                        showEmptyState.toggle()
-                    }) {
-                        Image(systemName: showEmptyState ? "bell.fill" : "bell.slash.fill")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.gray)
-                            .clipShape(Circle())
-                    }
-                    .padding(.trailing)
-                }
-                .padding(.top)
-
-                if showEmptyState {
-                    EmptyNotificationsView()
-                } else {
-                    List {
-                        ForEach(groupNotifications(notifications).keys.sorted(by: >), id: \.self) { date in
-                            Section(header: Text(sectionHeader(for: date))
-                                .font(.poppinsSemiBold(size: 18))
-                                .foregroundColor(.white.opacity(0.8))) {
-                                ForEach(groupNotifications(notifications)[date]!) { notification in
-                                    NotificationRow(notification: notification)
-                                }
-                            }
-                        }
-                        .listRowBackground(Color.white.opacity(0.9))
-                    }
-                    .listStyle(GroupedListStyle())
-                    .background(Color.clear)
-                    .scrollContentBackground(.hidden)
-                }
+            backgroundGradient
+            
+            VStack(spacing: 0) {
+                headerView
+                contentView
                 Spacer()
             }
             .navigationBarBackButtonHidden(true)
@@ -333,7 +267,7 @@ struct EmptyNotificationsView: View {
             
             Text("Tus notificaciones aparecerán\naquí cuando las recibas.")
                 .font(.poppinsRegular(size: 16))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(Color(red: 0.0, green: 0.71, blue: 0.737))
                 .multilineTextAlignment(.center)
                 .padding(.top, 2)
             
