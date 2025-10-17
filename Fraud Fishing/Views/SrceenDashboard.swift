@@ -11,6 +11,7 @@ import SwiftUI
 struct ScreenDashboard: View {
     @State private var categoriaSeleccionada: String = "Todas"
     @State private var showNotificaciones: Bool = false
+    @State private var selectedTab: Tab = .dashboard
     
     let categorias = ["Todas", "Informacion falsa", "Envios falsos", "Productos falsos", "Phishing", "Estafas"]
     
@@ -74,39 +75,32 @@ struct ScreenDashboard: View {
     }
     
     var body: some View {
-        NavigationView {
+        ZStack(alignment: .bottom) {
+            // Capa 1: Contenido principal con fondo
             ZStack {
-                // Fondo con gradiente
                 LinearGradient(gradient: Gradient(colors: [
-                    Color(red: 1, green: 1, blue: 1),
-                    Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                               startPoint: UnitPoint(x:0.5, y:0.7),
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                               startPoint: UnitPoint(x:0.5, y:0.1),
                                endPoint: .bottom)
                     .edgesIgnoringSafeArea(.all)
-                
+
                 VStack(spacing: 0) {
                     // Header con título y notificaciones
                     HStack {
                         Text("Reportes Destacados")
                             .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        
+                            .foregroundColor(.white)
                         Spacer()
-                        
-                        Button(action: {
-                            showNotificaciones = true
-                        }) {
+                        Button(action: { showNotificaciones = true }) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.white)
+                                    .fill(Color.white.opacity(0.0))
                                     .frame(width: 40, height: 40)
                                     .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
-                                
                                 Image(systemName: "bell.fill")
                                     .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
                                     .font(.system(size: 20))
-                                
-                                // Badge de notificaciones
                                 Circle()
                                     .fill(Color.red)
                                     .frame(width: 12, height: 12)
@@ -117,7 +111,7 @@ struct ScreenDashboard: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                     .padding(.bottom, 15)
-                    
+
                     // Filtro de categorías
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
@@ -136,7 +130,7 @@ struct ScreenDashboard: View {
                         .padding(.horizontal, 20)
                     }
                     .padding(.bottom, 20)
-                    
+
                     // Lista de sitios destacados
                     ScrollView {
                         VStack(spacing: 16) {
@@ -171,11 +165,18 @@ struct ScreenDashboard: View {
                         .padding(.bottom, 100)
                     }
                 }
+                .padding(.bottom, 88) // Espacio para la tab bar
             }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showNotificaciones) {
-                NotificacionesView()
-            }
+
+            // Capa 2: CustomTabBar como vista aparte
+            CustomTabBar(selectedTab: $selectedTab)
+        }
+        .navigationBarBackButtonHidden(true)
+        
+        .toolbar(.hidden, for: .navigationBar)
+        .edgesIgnoringSafeArea(.bottom)
+        .sheet(isPresented: $showNotificaciones) {
+            NotificacionesView()
         }
     }
 }
@@ -376,9 +377,9 @@ struct DetalleReporteDestacadoView: View {
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [
-                Color(red: 1, green: 1, blue: 1),
-                Color(red: 0.0, green: 0.8, blue: 0.7)]),
-                           startPoint: UnitPoint(x:0.5, y:0.7),
+                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                           startPoint: UnitPoint(x:0.5, y:0.1),
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
             

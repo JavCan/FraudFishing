@@ -160,7 +160,8 @@ struct ScreenRegister: View {
                 ZStack(alignment: .leading) {
                     if text.wrappedValue.isEmpty {
                         Text(placeholder)
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(.poppinsRegular(size: 18))
+                            .foregroundColor(.white.opacity(0.3))
                     }
                     
                     if isSecure {

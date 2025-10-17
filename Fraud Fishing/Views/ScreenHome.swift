@@ -132,27 +132,66 @@ struct CustomTabBar: View {
             .fill(Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.6))
             .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
 
-            // Laterales: solo Dashboard y Settings
+            // Laterales: Dashboard y Settings con navegación condicional
             HStack {
-                TabButton(icon: "chart.bar.fill", tab: .dashboard, selectedTab: $selectedTab)
+                // Botón izquierdo: Dashboard
+                if selectedTab == .dashboard {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                } else {
+                    NavigationLink(destination: ScreenDashboard()) {
+                        Image(systemName: "chart.bar.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color(red: 0.537, green: 0.616, blue: 0.733))
+                    }
+                }
+
                 Spacer()
-                TabButton(icon: "gearshape.fill", tab: .settings, selectedTab: $selectedTab)
+
+                // Botón derecho: Ajustes
+                if selectedTab == .settings {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                } else {
+                    NavigationLink(destination: ScreenAjustes()) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color(red: 0.537, green: 0.616, blue: 0.733))
+                    }
+                }
             }
             .padding(.horizontal, 55)
 
-            // Botón central elevado (Home)
-            Button(action: { selectedTab = .home }) {
-                ZStack {
-                    Circle()
-                        .fill(Color(red: 0.0, green: 0.71, blue: 0.737))
-                        .frame(width: 70, height: 70)
-                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
-                    Image(systemName: "house.fill")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white)
+            // Botón central elevado (Home) con navegación condicional
+            if selectedTab == .home {
+                Button(action: { /* ya estás en Home, no navega */ }) {
+                    ZStack {
+                        Circle()
+                            .fill(turquoise)
+                            .frame(width: 70, height: 70)
+                            .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                        Image(systemName: "house.fill")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(.white)
+                    }
                 }
+                .offset(y: -25)
+            } else {
+                NavigationLink(destination: ScreenHome()) {
+                    ZStack {
+                        Circle()
+                            .fill(turquoise)
+                            .frame(width: 70, height: 70)
+                            .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                        Image(systemName: "house.fill")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .offset(y: -25)
             }
-            .offset(y: -25)
         }
         .frame(height: barHeight)
     }

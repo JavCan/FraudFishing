@@ -114,6 +114,9 @@ struct ScreenLogin: View {
                     .padding(.bottom, 170)
                 }
             }
+
+            // MARK: - Navegación y Alertas
+            .ignoresSafeArea(.keyboard)
             .navigationBarHidden(true)
             .alert("Inicio de Sesión", isPresented: $showAlert) {
                 Button("OK") {}
