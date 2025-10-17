@@ -197,6 +197,21 @@ struct CustomTabBar: View {
     }
 }
 
+struct TabButton: View {
+    let icon: String
+    let tab: Tab
+    @Binding var selectedTab: Tab
+
+    var body: some View {
+        //let turquoise = Color(red: 0.0, green: 0.71, blue: 0.737)
+        Button(action: { selectedTab = tab }) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(selectedTab == tab ? .white : Color(red: 0.537, green: 0.616, blue: 0.733))
+        }
+    }
+}
+
 #Preview {
     ScreenHome()
 }
