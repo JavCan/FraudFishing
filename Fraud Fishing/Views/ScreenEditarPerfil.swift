@@ -4,16 +4,17 @@ import SwiftUI
 struct ScreenEditarPerfil: View {
     @StateObject private var profileController = UserProfileController()
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedTab: Tab = .profile
     
-    // Estados para controlar las vistas modales (sheets).
+    // Estados para las vistas modales y alertas.
     @State private var showChangeNameSheet: Bool = false
     @State private var showChangePasswordSheet: Bool = false
-    // ✅ 1. AÑADIDO: El estado que faltaba para la hoja de correo.
     @State private var showChangeEmailSheet: Bool = false
+    @State private var showLogoutAlert: Bool = false
 
     var body: some View {
-        ZStack {
-            // Fondo oscuro consistente.
+        ZStack(alignment: .bottom) {
+            // MARK: - Fondo
             LinearGradient(
                 gradient: Gradient(colors: [
                     Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
@@ -24,7 +25,7 @@ struct ScreenEditarPerfil: View {
             .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 20) {
-                // Header (sin cambios)
+                // MARK: - Header con Botón de Ajustes
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
@@ -32,52 +33,71 @@ struct ScreenEditarPerfil: View {
                             .background(Color.white.opacity(0.1)).clipShape(Circle())
                     }
                     Spacer()
-                    Text("Editar Perfil").font(.title2).fontWeight(.bold).foregroundColor(.white)
+                    Text("Perfil").font(.title2).fontWeight(.bold).foregroundColor(.white)
                     Spacer()
-                    Color.clear.frame(width: 40, height: 40)
+                    // Botón que navega a Ajustes
+                    NavigationLink(destination: ScreenAjustes()) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                            .padding(10)
+                    }
                 }
                 .padding(.horizontal).padding(.top)
 
-                // Contenido dinámico (Cargando / Perfil / Error)
+                // MARK: - Contenido Dinámico
                 if profileController.isLoading && profileController.userProfile == nil {
                     Spacer()
                     ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                     Spacer()
                 } else if let profile = profileController.userProfile {
-                    // ✅ 2. CORREGIDO: Pasamos el nuevo binding a la vista de contenido.
                     UserProfileContentView(profile: profile,
                                          showChangeNameSheet: $showChangeNameSheet,
                                          showChangePasswordSheet: $showChangePasswordSheet,
                                          showChangeEmailSheet: $showChangeEmailSheet)
+                    
+                    // Botón de Cerrar Sesión
+                    Button(role: .destructive) {
+                        showLogoutAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                            Text("Cerrar Sesión")
+                        }
+                        .fontWeight(.bold).foregroundColor(.red)
+                        .padding().frame(maxWidth: .infinity)
+                        .background(Color.red.opacity(0.15)).cornerRadius(10)
+                    }
+                    .padding(.horizontal).padding(.bottom)
+                    
                 } else if let errorMessage = profileController.errorMessage {
                     Spacer()
                     Text(errorMessage).foregroundColor(.red).padding().multilineTextAlignment(.center)
                     Spacer()
                 }
             }
+            .padding(.bottom, 88) // Espacio para la tab bar
+            
+            // Capa 2: CustomTabBar superpuesta
+            CustomTabBar(selectedTab: $selectedTab)
         }
         .navigationBarHidden(true)
-        .task {
-            // Carga el perfil cuando la vista aparece.
-            await profileController.fetchUserProfile()
+        .edgesIgnoringSafeArea(.bottom)
+        .task { await profileController.fetchUserProfile() }
+        .sheet(isPresented: $showChangeNameSheet) { ChangeNameView(profileController: profileController) }
+        .sheet(isPresented: $showChangePasswordSheet) { ChangePasswordView(profileController: profileController) }
+        .sheet(isPresented: $showChangeEmailSheet) { ChangeEmailView(profileController: profileController) }
+        .alert("Cerrar Sesión", isPresented: $showLogoutAlert) {
+            Button("Cancelar", role: .cancel) { }
+            Button("Confirmar", role: .destructive) { cerrarSesion() }
+        } message: {
+            Text("¿Estás seguro de que quieres cerrar sesión?")
         }
-        .sheet(isPresented: $showChangeNameSheet) {
-            ChangeNameView(profileController: profileController)
-        }
-        .sheet(isPresented: $showChangePasswordSheet) {
-            ChangePasswordView(profileController: profileController)
-        }
-        // ✅ 3. AÑADIDO: El .sheet que faltaba para el correo.
-        .sheet(isPresented: $showChangeEmailSheet) {
-            ChangeEmailView(profileController: profileController)
-        }
-        .overlay {
-            // Muestra un indicador de carga durante las actualizaciones.
-            if profileController.isLoading && profileController.userProfile != nil {
-                Color.black.opacity(0.4).ignoresSafeArea()
-                ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-            }
-        }
+    }
+    
+    private func cerrarSesion() {
+        TokenStorage.clearSession()
+        print("Sesión cerrada y tokens eliminados.")
     }
 }
 
@@ -89,16 +109,13 @@ struct UserProfileContentView: View {
     @Binding var showChangeEmailSheet: Bool
 
     var body: some View {
-        VStack {
-            VStack(spacing: 15) {
-                Image(systemName: "person.circle.fill")
-                    .font(.system(size: 80)).foregroundColor(.white.opacity(0.8))
-                
-                Text(profile.name)
-                    .font(.title).fontWeight(.bold).foregroundColor(.white)
-            }
-            .padding(.vertical, 20)
-
+        VStack(spacing: 20) {
+            Image(systemName: "person.circle.fill")
+                .font(.system(size: 80)).foregroundColor(.white.opacity(0.8))
+            
+            Text(profile.name)
+                .font(.title).fontWeight(.bold).foregroundColor(.white)
+            
             VStack(spacing: 0) {
                 ProfileRow(title: "Nombre", value: profile.name, action: { showChangeNameSheet = true })
                 ProfileRow(title: "Correo", value: profile.email, action: { showChangeEmailSheet = true })
@@ -108,15 +125,15 @@ struct UserProfileContentView: View {
             
             Spacer()
         }
+        .padding(.top)
     }
 }
 
-// MARK: - Componente reutilizable para las Filas de Opciones
+// MARK: - Componente Reutilizable
 struct ProfileRow: View {
     let title: String
     let value: String
     var action: (() -> Void)?
-
     var body: some View {
         Button(action: { action?() }) {
             VStack(spacing: 0) {
@@ -136,7 +153,7 @@ struct ProfileRow: View {
     }
 }
 
-// MARK: - Vista Modal para Cambiar Nombre
+// MARK: - Vistas Modales (Sheets)
 struct ChangeNameView: View {
     @ObservedObject var profileController: UserProfileController
     @Environment(\.dismiss) private var dismiss
@@ -150,10 +167,17 @@ struct ChangeNameView: View {
             VStack(spacing: 30) {
                 Text("Cambiar Nombre").font(.title2).fontWeight(.bold).foregroundColor(.white).padding()
                 
-                TextField("Nuevo nombre", text: $newName)
-                    .foregroundColor(.white).padding()
-                    .background(Color.white.opacity(0.1)).cornerRadius(10)
-                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Nuevo Nombre")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                    
+                    TextField("Escribe tu nuevo nombre", text: $newName)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                }
                 Button("Guardar") {
                     Task {
                         let success = await profileController.updateName(newName)
@@ -162,152 +186,111 @@ struct ChangeNameView: View {
                 }
                 .font(.headline).fontWeight(.bold).foregroundColor(.white)
                 .padding().frame(maxWidth: .infinity)
-                .background(Color(red: 0.0, green: 0.2, blue: 0.4)).cornerRadius(10)
+                .background(Color(red: 0.0, green: 0.2, blue: 0.4))
+                .cornerRadius(10)
                 
                 Spacer()
             }
             .padding()
             .onAppear { self.newName = profileController.userProfile?.name ?? "" }
-            .overlay {
-                if profileController.isLoading {
-                    Color.black.opacity(0.4).ignoresSafeArea()
-                    ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                }
-            }
+            .overlay { if profileController.isLoading { Color.black.opacity(0.4).ignoresSafeArea(); ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white)) } }
         }
     }
 }
 
-// MARK: - Change Email View
-struct ChangeEmailView: View {
-    @ObservedObject var profileController: UserProfileController
-    @Environment(\.dismiss) private var dismiss
-    
-    @State private var newEmail: String = ""
-
-    var body: some View {
-        ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88), Color(red: 0.043, green: 0.067, blue: 0.173)]), startPoint: .top, endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            
-            VStack(spacing: 30) {
-                Text("Cambiar Correo").font(.title2).fontWeight(.bold).foregroundColor(.white).padding()
-                
-                TextField("Nuevo correo electrónico", text: $newEmail)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(10)
-                    .keyboardType(.emailAddress) // Teclado especial para correos
-                    .autocapitalization(.none)
-                
-                if let errorMessage = profileController.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-
-                Button("Guardar") {
-                    Task {
-                        // Llama a la nueva función de actualización del controlador
-                        let success = await profileController.updateEmail(newEmail)
-                        if success {
-                            dismiss() // Cierra la hoja solo si la actualización fue exitosa
-                        }
-                    }
-                }
-                .font(.headline).fontWeight(.bold).foregroundColor(.white)
-                .padding().frame(maxWidth: .infinity)
-                .background(Color(red: 0.0, green: 0.2, blue: 0.4)).cornerRadius(10)
-                
-                Spacer()
-            }
-            .padding()
-            .onAppear {
-                // Precarga el campo de texto con el correo actual
-                self.newEmail = profileController.userProfile?.email ?? ""
-            }
-            .overlay {
-                // Muestra un indicador de carga si la vista está ocupada
-                if profileController.isLoading {
-                    Color.black.opacity(0.4).ignoresSafeArea()
-                    ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Vista Modal para Cambiar Contraseña
 struct ChangePasswordView: View {
     @ObservedObject var profileController: UserProfileController
     @Environment(\.dismiss) private var dismiss
-    
     @State private var newPassword: String = ""
     @State private var confirmPassword: String = ""
 
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88), Color(red: 0.043, green: 0.067, blue: 0.173)]), startPoint: .top, endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            
+            LinearGradient(gradient: Gradient(colors: [Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88), Color(red: 0.043, green: 0.067, blue: 0.173)]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
                 Text("Cambiar Contraseña").font(.title2).fontWeight(.bold).foregroundColor(.white).padding()
                 
                 VStack(spacing: 20) {
-                    SecureField("Nueva contraseña", text: $newPassword)
-                        .foregroundColor(.white).padding()
-                        .background(Color.white.opacity(0.1)).cornerRadius(10)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Nueva Contraseña")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                        SecureField("Escribe tu nueva contraseña", text: $newPassword)
+                            .foregroundColor(.white).padding()
+                            .background(Color.white.opacity(0.1)).cornerRadius(10)
+                    }
                     
-                    SecureField("Confirmar nueva contraseña", text: $confirmPassword)
-                        .foregroundColor(.white).padding()
-                        .background(Color.white.opacity(0.1)).cornerRadius(10)
-                }
-                
-                if let errorMessage = profileController.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-
-                Button("Guardar") {
-                    Task {
-                        // Llama a la nueva función de actualización del controlador
-                        let success = await profileController.updatePassword(
-                            newPassword: newPassword,
-                            confirmation: confirmPassword
-                        )
-                        if success {
-                            dismiss()
-                        }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Confirmar Contraseña")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                        SecureField("Confirma tu nueva contraseña", text: $confirmPassword)
+                            .foregroundColor(.white).padding()
+                            .background(Color.white.opacity(0.1)).cornerRadius(10)
                     }
                 }
-                .font(.headline).fontWeight(.bold).foregroundColor(.white)
-                .padding().frame(maxWidth: .infinity)
-                .background(Color(red: 0.0, green: 0.2, blue: 0.4)).cornerRadius(10)
                 
+                if let errorMessage = profileController.errorMessage { Text(errorMessage).foregroundColor(.red).font(.caption) }
+                Button("Guardar") {
+                    Task {
+                        let success = await profileController.updatePassword(newPassword: newPassword, confirmation: confirmPassword)
+                        if success { dismiss() }
+                    }
+                }
+                .font(.headline).fontWeight(.bold).foregroundColor(.white).padding().frame(maxWidth: .infinity).background(Color(red: 0.0, green: 0.2, blue: 0.4)).cornerRadius(10)
                 Spacer()
             }
             .padding()
-            .overlay {
-                // Muestra un indicador de carga si solo esta vista está ocupada
-                if profileController.isLoading {
-                    Color.black.opacity(0.4).ignoresSafeArea()
-                    ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                }
-            }
+            .overlay { if profileController.isLoading { Color.black.opacity(0.4).ignoresSafeArea(); ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white)) } }
         }
     }
 }
 
-// MARK: - Vista Previa con Token Hardcodeado
+struct ChangeEmailView: View {
+    @ObservedObject var profileController: UserProfileController
+    @Environment(\.dismiss) private var dismiss
+    @State private var newEmail: String = ""
+
+    var body: some View {
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88), Color(red: 0.043, green: 0.067, blue: 0.173)]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all)
+            VStack(spacing: 30) {
+                Text("Cambiar Correo").font(.title2).fontWeight(.bold).foregroundColor(.white).padding()
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Nuevo Correo Electrónico")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                    
+                    TextField("Escribe tu nuevo correo", text: $newEmail)
+                        .foregroundColor(.white).padding()
+                        .background(Color.white.opacity(0.1)).cornerRadius(10)
+                        .keyboardType(.emailAddress).autocapitalization(.none)
+                }
+
+                if let errorMessage = profileController.errorMessage { Text(errorMessage).foregroundColor(.red).font(.caption) }
+                Button("Guardar") {
+                    Task {
+                        let success = await profileController.updateEmail(newEmail)
+                        if success { dismiss() }
+                    }
+                }
+                .font(.headline).fontWeight(.bold).foregroundColor(.white).padding().frame(maxWidth: .infinity).background(Color(red: 0.0, green: 0.2, blue: 0.4)).cornerRadius(10)
+                Spacer()
+            }
+            .padding()
+            .onAppear { self.newEmail = profileController.userProfile?.email ?? "" }
+            .overlay { if profileController.isLoading { Color.black.opacity(0.4).ignoresSafeArea(); ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white)) } }
+        }
+    }
+}
+
+// MARK: - Vista Previa
 #Preview {
-    // 1. Pega aquí un token JWT válido que obtengas de un inicio de sesión exitoso.
-    let hardcodedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMCIsInR5cGUiOiJhY2Nlc3MiLCJwcm9maWxlIjp7ImlkIjoiMTAiLCJlbWFpbCI6InBydWViYUBwcnVlYmEuY29tIiwibmFtZSI6IlN1cGVyIFBydWViYSIsImlzX2FkbWluIjowLCJpc19zdXBlcl9hZG1pbiI6MH0sImlhdCI6MTc2MDY3NDYxNSwiZXhwIjoxNzYwNjc1MjE1fQ.Iiu5cSzFPQbW6fr1HsEj2d2BOz_u9mNc9NMAJOQ9HoQ"
-    
-    // 2. Simulamos el guardado del token antes de mostrar la vista.
+    let hardcodedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsInR5cGUiOiJhY2Nlc3MiLCJwcm9maWxlIjp7ImlkIjoiMTYiLCJlbWFpbCI6Im51ZXZvQHlhLmNvbSIsIm5hbWUiOiJOdWV2byIsImlzX2FkbWluIjowLCJpc19zdXBlcl9hZG1pbiI6MH0sImlhdCI6MTc2MDczNDE1NSwiZXhwIjoxNzYwNzM0NzU1fQ.GHJbCXL7KWhOMkPZD0wEKjJzzHZISn8BhUNS1MtbzKA"
     let _ = TokenStorage.set(.access, value: hardcodedToken)
     
-    // 3. Ahora la vista previa puede hacer la llamada de red autenticada.
-    return ScreenEditarPerfil()
+    return NavigationStack {
+        ScreenEditarPerfil()
+    }
 }

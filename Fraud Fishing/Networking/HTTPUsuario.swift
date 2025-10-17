@@ -1,11 +1,9 @@
-
-
 import Foundation
 
-struct HTTPUsuario {
+struct httpUsuario {
     func getUserProfile() async throws -> UserProfile {
         
-        guard let url = URL(string: "http://10.48.248.216:3099/users/me") else {
+        guard let url = URL(string: "http://10.48.249.14:3099/users/me") else {
             throw URLError(.badURL)
         }
         
@@ -38,7 +36,7 @@ struct HTTPUsuario {
     // MARK: - Update User Profile
     func updateUserProfile(name: String?, email: String?, password: String?) async throws -> UserProfile {
         
-        guard let url = URL(string: "http://10.48.248.216:3099/users/me") else {
+        guard let url = URL(string: "http://10.48.249.14:3099/users/me") else {
             throw URLError(.badURL)
         }
         
