@@ -7,7 +7,7 @@ func myProfile(email: String, name:String, password: String) async throws -> Boo
     let dataRequest = UserRegisterRequest(name: name, email: email, password: password)
     let jsonData = try JSONEncoder().encode(dataRequest)
     
-    guard let url = URL(string: "http://10.48.246.254:3000/users") else {
+    guard let url = URL(string: "http://localhost:3000/users") else {
         throw URLError(.badURL)
     }
     

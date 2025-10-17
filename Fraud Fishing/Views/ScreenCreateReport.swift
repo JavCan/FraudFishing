@@ -20,6 +20,9 @@ struct ScreenCreateReport: View {
     @State private var currentPage = 0
     @Environment(\.presentationMode) var presentationMode
 
+    // 1. Instanciar el Controller
+    @StateObject private var controller = CreateReportController()
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -61,21 +64,38 @@ struct ScreenCreateReport: View {
                         }
                         .padding(.bottom, 20)
                     } else {
-                        // Botón de Enviar Reporte
+                        // 2. Botón de Enviar Reporte (MODIFICADO)
                         Button(action: {
-                            // Lógica para enviar el reporte
-                            print("Reporte enviado")
+                            // Ejecutar la lógica de envío de forma asíncrona
+                            Task {
+                                await controller.sendReport(
+                                    reportedURL: reportedURL,
+                                    category: category,
+                                    tags: tags,
+                                    description: description,
+                                    selectedImageData: selectedImageData
+                                )
+                            }
                         }) {
-                            Text("Enviar reporte")
-                                .font(.poppinsBold(size: 20))
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.red)
-                                .cornerRadius(10)
-                                .padding(.horizontal, 30)
+                            // Mostrar cargando o texto normal
+                            if controller.isSending {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .padding()
+                            } else {
+                                Text("Enviar reporte")
+                                    .font(.poppinsBold(size: 20))
+                                    .foregroundColor(.white)
+                                    .padding()
+                            }
                         }
+                        .frame(maxWidth: .infinity)
+                        // Deshabilitar el botón y cambiar color mientras se envía
+                        .background(controller.isSending ? Color.gray : Color.red)
+                        .cornerRadius(10)
+                        .padding(.horizontal, 30)
                         .padding(.bottom, 20)
+                        .disabled(controller.isSending)
                     }
                     
                     // Indicadores de página personalizados
@@ -109,11 +129,26 @@ struct ScreenCreateReport: View {
                     }.padding(.top, 25)
                 }
             }
-        }.navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
+        // 3. Mostrar alerta de error
+        .alert("Error al Enviar", isPresented: .constant(controller.reportError != nil), actions: {
+            Button("OK") { controller.reportError = nil } // Limpiar el error al presionar OK
+        }, message: {
+            Text(controller.reportError?.localizedDescription ?? "Ocurrió un error desconocido.")
+        })
+        // 4. Mostrar alerta de éxito
+        .alert("Reporte Enviado", isPresented: $controller.isSuccess) {
+            Button("Aceptar") {
+                presentationMode.wrappedValue.dismiss() // Cerrar la vista al completar
+            }
+        } message: {
+            Text("¡Gracias! Tu reporte ha sido enviado con éxito.")
+        }
     }
 }
 
-// --- Vistas para cada paso ---
+// --- Vistas para cada paso (Sin cambios) ---
 
 // Paso 1: Confirmar URL
 struct Step1_URLView: View {
@@ -343,7 +378,7 @@ struct Step3_DescriptionView: View {
 }
 
 
-// --- Componentes Reutilizables ---
+// --- Componentes Reutilizables (Sin cambios) ---
 
 // Campo de texto con el estilo de ScreenLogin
 struct StyledTextField: View {
