@@ -2,7 +2,7 @@
 //  ScreenNotifications.swift
 //  Fraud Fishing
 //
-//  Created by Javier Canella Ramos on 01/10/25.
+//  Created by Ferro Ramos on 01/10/25.
 //
 
 import SwiftUI
