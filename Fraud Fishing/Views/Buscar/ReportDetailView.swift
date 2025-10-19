@@ -10,146 +10,125 @@ struct ReportDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             LinearGradient(gradient: Gradient(colors: [
                 Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
                 Color(red: 0.043, green: 0.067, blue: 0.173)
             ]), startPoint: UnitPoint(x:0.5, y:0.1), endPoint: .bottom)
             .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 16) {
-                HStack {
+            VStack(spacing: 0) {
+                // Header
+                HStack(spacing: 12) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(.white).padding(8)
-                            .background(Color.white.opacity(0.1)).clipShape(Circle())
+                            .foregroundColor(.white.opacity(0.8))
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(width: 40, height: 40)
+                            .background(Color(red: 0.0, green: 0.71, blue: 0.737))
+                            .clipShape(Circle())
                     }
-                    Spacer()
+                    
                     Text("Detalle del Reporte")
                         .foregroundColor(.white)
                         .font(.title3.bold())
+                    
                     Spacer()
-                    Color.clear.frame(width: 32, height: 32)
                 }
-                .padding(.horizontal, 16).padding(.top, 12)
+                .padding(.horizontal, 24)
+                .padding(.top, 25)
+                .padding(.bottom, 16)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        estadoBadge(statusId: report.statusId)
-                        Spacer()
-                    }
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.08))
-                        .frame(height: 120)
-                        .overlay(
-                            Image(systemName: "photo")
-                                .foregroundColor(.white.opacity(0.6))
-                                .font(.system(size: 36))
-                        )
-                    infoRow(icon: "link", title: "URL reportada", content: report.url)
-                    infoRow(icon: "text.quote", title: "Descripción del reporte", content: report.description)
-                    infoRow(icon: "tag", title: "Categoría", content: report.categoryName ?? "Categoría \(report.categoryId)")
-                    if let tags = report.tags, !tags.isEmpty {
-                        infoRow(
-                            icon: "number",
-                            title: "Etiquetas",
-                            content: "#" + tags.map { $0.name }.joined(separator: " #")
-                        )
-                    }
-                    infoRow(icon: "calendar", title: "Fecha de reporte", content: report.createdAt)
-                }
-                .padding(16)
-                .background(Color.white.opacity(0.06))
-                .cornerRadius(12)
-                .padding(.horizontal, 16)
-
-                Divider().background(Color.white.opacity(0.1)).padding(.horizontal, 16)
-
-                if isLoading {
-                    ProgressView("Cargando comentarios...")
-                        .tint(Color(red: 0.0, green: 0.71, blue: 0.737))
-                        .foregroundColor(.white)
-                        .padding(.top, 12)
-                } else if let errorMessage {
-                    Text(errorMessage).foregroundColor(.red).padding(.horizontal, 16)
-                } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            if comments.isEmpty {
-                                Text("Sin comentarios aún")
-                                    .foregroundColor(.white.opacity(0.8))
-                            } else {
-                                ForEach(comments) { comment in
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        HStack(spacing: 8) {
-                                            Image(systemName: "person.circle")
-                                                .foregroundColor(.white.opacity(0.8))
-                                            Text("Usuario \(comment.userId ?? 0)")
-                                                .foregroundColor(.white.opacity(0.9))
-                                                .font(.footnote)
-                                            Spacer()
-                                            HStack(spacing: 6) {
-                                                Image(systemName: "calendar")
-                                                    .foregroundColor(.white.opacity(0.8))
-                                                Text(comment.createdAt)
-                                                    .foregroundColor(.white.opacity(0.9))
-                                                    .font(.footnote)
-                                            }
-                                        }
-                                        Text(comment.text)
-                                            .foregroundColor(.white)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                    .padding(12)
-                                    .background(Color.white.opacity(0.06))
-                                    .cornerRadius(12)
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Tarjeta del reporte (mismo estilo que ReporteItemCard)
+                        ReportDetailCard(report: report)
+                            .padding(.horizontal, 20)
+                        
+                        // Sección de comentarios
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack(spacing: 8) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
+                                        .frame(width: 32, height: 32)
+                                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                        .font(.system(size: 14, weight: .semibold))
                                 }
+                                Text("Comentarios")
+                                    .font(.title3.bold())
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                                
+                                Text("\(comments.count)")
+                                    .font(.caption.bold())
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.3))
+                                    )
+                            }
+                            .padding(.horizontal, 20)
+                            
+                            if isLoading {
+                                VStack(spacing: 16) {
+                                    ProgressView()
+                                        .tint(Color(red: 0.0, green: 0.71, blue: 0.737))
+                                    Text("Cargando comentarios...")
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.6))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 40)
+                            } else if let errorMessage {
+                                Text(errorMessage)
+                                    .foregroundColor(.red)
+                                    .padding(.horizontal, 20)
+                            } else if comments.isEmpty {
+                                VStack(spacing: 12) {
+                                    Image(systemName: "bubble.left.and.exclamationmark.bubble.right")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.white.opacity(0.3))
+                                    Text("Sin comentarios aún")
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.6))
+                                    Text("Sé el primero en comentar")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.4))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 40)
+                            } else {
+                                VStack(spacing: 12) {
+                                    ForEach(comments) { comment in
+                                        CommentBubble(comment: comment)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 12)
+                        .padding(.bottom, 100) // Espacio para el input de comentarios
                     }
-                }
-
-                VStack(spacing: 10) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "bubble.right")
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("Añadir comentario")
-                            .foregroundColor(.white.opacity(0.9))
-                            .font(.subheadline)
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 16)
-
-                    TextEditor(text: $newComment)
-                        .frame(height: 100)
-                        .foregroundColor(.white)
-                        .padding(12)
-                        .background(Color.white.opacity(0.06))
-                        .cornerRadius(12)
-                        .padding(.horizontal, 16)
-
-                    Button {
-                        Task { await addComment() }
-                    } label: {
-                        Text("Enviar")
-                            .foregroundColor(.white)
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(newComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color(red: 0.0, green: 0.71, blue: 0.737))
-                            .cornerRadius(10)
-                    }
-                    .disabled(newComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                    .padding(.top, 10)
                 }
             }
-        }
-        .task { await loadComments() }
+            
+            // Barra de chat fija en la parte inferior
+            ChatInputBar(
+                newComment: $newComment,
+                isLoading: isLoading,
+                onSend: {
+                    Task { await addComment() }
+                }
+            )
     }
+    .navigationBarHidden(true)
+    .task { await loadComments() }
+}
 
     private func loadComments() async {
         isLoading = true
@@ -177,38 +156,399 @@ struct ReportDetailView: View {
         }
         isLoading = false
     }
+}
+struct ReportDetailCard: View {
+    let report: ReportResponse
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header con fecha y categoría
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
+                        .frame(width: 32, height: 32)
+                    Image(systemName: "calendar")
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                Text(formatDate(report.createdAt))
+                    .font(.footnote)
+                    .foregroundColor(.white.opacity(0.7))
+                Spacer()
+                
+                // Badge de estado
+                estadoBadge(statusId: report.statusId)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
+            
+            // Categoría
+            HStack {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7))
+                        .frame(width: 6, height: 6)
+                    Text(report.categoryName ?? "Desconocida")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7, opacity: 0.2))
+                        .overlay(
+                            Capsule()
+                                .stroke(Color(red: 0.0, green: 0.8, blue: 0.7, opacity: 0.3), lineWidth: 1)
+                        )
+                )
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
 
-    private func infoRow(icon: String, title: String, content: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Label(title, systemImage: icon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
-            Text(content)
-                .font(.system(size: 14))
-                .foregroundColor(.white)
-                .fixedSize(horizontal: false, vertical: true)
+            // Imagen
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15),
+                                Color(red: 0.0, green: 0.6, blue: 0.7).opacity(0.08)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+                
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.08))
+                            .frame(width: 70, height: 70)
+                        Image(systemName: "photo")
+                            .foregroundColor(.white.opacity(0.4))
+                            .font(.system(size: 30))
+                    }
+                    Text("Sin imagen")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.3))
+                }
+            }
+            .frame(height: 180)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+
+            // Contenido
+            VStack(alignment: .leading, spacing: 16) {
+                // URL
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.12))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "link")
+                            .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("URL detectada")
+                            .font(.caption2)
+                            .foregroundColor(.white.opacity(0.5))
+                        Text(report.url)
+                            .font(.callout.weight(.semibold))
+                            .foregroundColor(.white)
+                            .lineLimit(3)
+                    }
+                }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                )
+                
+                // Descripción
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "text.quote")
+                            .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("Descripción")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    Text(report.description)
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.95))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                
+                // Tags
+                if let tags = report.tags, !tags.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "tag.fill")
+                                .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                .font(.system(size: 11, weight: .semibold))
+                            Text("Etiquetas")
+                                .font(.caption2)
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(tags, id: \.id) { tag in
+                                    Text(tag.name)
+                                        .font(.caption.weight(.medium))
+                                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
+                                                .overlay(
+                                                    Capsule()
+                                                        .stroke(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.3), lineWidth: 1)
+                                                )
+                                        )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
         }
+        .background(
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.25),
+                        Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.15)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 6)
+        .shadow(color: Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.08), radius: 20, x: 0, y: 10)
     }
-
+    
+    private func formatDate(_ isoString: String) -> String {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso.date(from: isoString) {
+            let out = DateFormatter()
+            out.dateFormat = "dd/MM/yyyy HH:mm"
+            return out.string(from: date)
+        }
+        return isoString
+    }
+    
     private func estadoBadge(statusId: Int) -> some View {
         let (text, color): (String, Color) = {
             switch statusId {
-            case 2: return ("Verificado", .green)
-            case 1: return ("En revisión", .orange)
-            default: return ("Desconocido", .gray)
+            case 2: return ("Verificado", Color.green)
+            case 1: return ("En revisión", Color.orange)
+            default: return ("Desconocido", Color.gray)
             }
         }()
 
-        return HStack(spacing: 8) {
+        return HStack(spacing: 6) {
             Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 12))
                 .foregroundColor(.white)
             Text(text)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.caption2.weight(.bold))
                 .foregroundColor(.white)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 7)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
         .background(color)
-        .cornerRadius(20)
+        .cornerRadius(12)
     }
+}
+
+// MARK: - Comment Bubble Component
+
+struct CommentBubble: View {
+    let comment: CommentResponse
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.2))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: "person.fill")
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                        .font(.system(size: 14))
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Usuario \(comment.userId ?? 0)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.white)
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 10))
+                        Text(formatCommentDate(comment.createdAt))
+                            .font(.caption2)
+                    }
+                    .foregroundColor(.white.opacity(0.5))
+                }
+                
+                Spacer()
+            }
+            
+            Text(comment.text)
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.95))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+    }
+    
+    private func formatCommentDate(_ isoString: String) -> String {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso.date(from: isoString) {
+            let formatter = RelativeDateTimeFormatter()
+            formatter.unitsStyle = .short
+            formatter.locale = Locale(identifier: "es")
+            return formatter.localizedString(for: date, relativeTo: Date())
+        }
+        return isoString
+    }
+}
+
+// MARK: - Chat Input Bar Component
+
+struct ChatInputBar: View {
+    @Binding var newComment: String
+    let isLoading: Bool
+    let onSend: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Divider()
+                .background(Color.white.opacity(0.2))
+            
+            HStack(spacing: 12) {
+                // Text field
+                HStack(spacing: 8) {
+                    Image(systemName: "text.bubble")
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.6))
+                        .font(.system(size: 16))
+                    
+                    TextField("Escribe un comentario...", text: $newComment, axis: .vertical)
+                        .lineLimit(1...4)
+                        .foregroundColor(.white)
+                        .font(.subheadline)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
+                )
+                
+                // Send button
+                Button(action: onSend) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                newComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading
+                                ? Color.gray.opacity(0.5)
+                                : Color(red: 0.0, green: 0.71, blue: 0.737)
+                            )
+                            .frame(width: 44, height: 44)
+                        
+                        if isLoading {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "arrow.up")
+                                .foregroundColor(.white)
+                                .font(.system(size: 18, weight: .semibold))
+                        }
+                    }
+                }
+                .disabled(newComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.95),
+                        Color(red: 0.043, green: 0.067, blue: 0.173)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+        }
+    }
+}
+// MARK: - Preview
+
+struct ReportDetailView_PreviewContainer: View {
+    @State private var mockReport = ReportResponse(
+        id: 1,
+        userId: 17,
+        categoryId: 1,
+        title: "Correo Sospechoso de Banco",
+        description: "Recibí un correo sospechoso pidiéndome restablecer mi contraseña. El link me lleva a esta página que parece ser fraudulenta.",
+        url: "https://paginafake.com/login-banco-falso-muy-largo",
+        statusId: 2,
+        imageUrl: nil,
+        voteCount: 42,
+        commentCount: 3,
+        createdAt: "2025-10-17T14:30:00.000Z",
+        updatedAt: "2025-10-17T14:30:00.000Z",
+        tags: [
+            TagResponse(id: 1, name: "banco"),
+            TagResponse(id: 2, name: "urgente"),
+            TagResponse(id: 3, name: "credenciales")
+        ],
+        categoryName: "Phishing"
+    )
+    
+    var body: some View {
+        ReportDetailView(report: $mockReport)
+    }
+}
+
+#Preview {
+    ReportDetailView_PreviewContainer()
 }
