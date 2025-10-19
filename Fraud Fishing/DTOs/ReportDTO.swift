@@ -9,6 +9,11 @@ struct CreateReportRequest: Codable {
     let imageUrl: String?
 }
 
+struct TagResponse: Codable {
+    let id: Int
+    let name: String
+}
+
 struct ReportResponse: Codable {
     let id: Int
     let userId: Int
@@ -18,10 +23,12 @@ struct ReportResponse: Codable {
     let url: String
     let statusId: Int
     let imageUrl: String?
-    let voteCount: Int
+    var voteCount: Int
     let commentCount: Int
     let createdAt: String
     let updatedAt: String
+    let tags: [TagResponse]?
+    let categoryName: String?
 }
 
 // MARK: - Category Mapping Helper (NUEVA EXTENSIÓN)

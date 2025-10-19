@@ -1,7 +1,26 @@
 import Foundation
 
-class HTTPReport {
+final class HTTPReport {
     private let executor = RequestExecutor()
+
+    func searchReports(byURL urlString: String) async throws -> [ReportResponse] {
+        var components = URLComponents(string: "http://localhost:3000/reports")
+        components?.queryItems = [
+            URLQueryItem(name: "url", value: urlString),
+            URLQueryItem(name: "include", value: "tags"),
+            URLQueryItem(name: "include", value: "category"),
+            URLQueryItem(name: "limit", value: "50")
+        ]
+        guard let url = components?.url else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        let (data, _) = try await executor.send(request, requiresAuth: false)
+        return try JSONDecoder().decode([ReportResponse].self, from: data)
+    }
 
     func createReport(reportData: CreateReportRequest) async throws -> ReportResponse {
         guard let url = URL(string: "http://localhost:3000/reports") else {
@@ -55,5 +74,22 @@ class HTTPReport {
 
         // Si llegamos aquí, la respuesta fue 201 o 200 (éxito)
         return try JSONDecoder().decode(ReportResponse.self, from: data)
+    }
+    // Agrega voto a un reporte (PUT /reports/{id}/vote)
+    func voteReport(reportId: Int) async throws {
+        let urlString = "http://localhost:3000/reports/\(reportId)/vote"
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
     }
 }
