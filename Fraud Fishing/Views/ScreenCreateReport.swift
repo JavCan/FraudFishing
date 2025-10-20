@@ -16,6 +16,7 @@ struct ScreenCreateReport: View {
     @State private var description: String = ""
     @State private var selectedImage: PhotosPickerItem? = nil
     @State private var selectedImageData: Data? = nil
+    @State private var title: String = ""
     
     @State private var currentPage = 0
     @Environment(\.presentationMode) var presentationMode
@@ -39,7 +40,7 @@ struct ScreenCreateReport: View {
                     TabView(selection: $currentPage) {
                         Step1_URLView(reportedURL: $reportedURL)
                             .tag(0)
-                        Step2_ClassificationView(category: $category, tags: $tags)
+                        Step2_ClassificationView(category: $category, tags: $tags, title: $title)
                             .tag(1)
                         Step3_DescriptionView(description: $description, selectedImage: $selectedImage, selectedImageData: $selectedImageData)
                             .tag(2)
@@ -65,12 +66,13 @@ struct ScreenCreateReport: View {
                         .padding(.bottom, 20)
                     } else {
                         // 2. Botón de Enviar Reporte (MODIFICADO)
+                        // Dentro del botón "Enviar reporte"
                         Button(action: {
-                            // Ejecutar la lógica de envío de forma asíncrona
                             Task {
                                 await controller.sendReport(
                                     reportedURL: reportedURL,
                                     category: category,
+                                    title: title,
                                     tags: tags,
                                     description: description,
                                     selectedImageData: selectedImageData
@@ -184,6 +186,7 @@ struct Step1_URLView: View {
 struct Step2_ClassificationView: View {
     @Binding var category: String
     @Binding var tags: [String]
+    @Binding var title: String
     @State private var newTag = ""
     @State private var showLimitMessage = false
     private let maxTags = 5
@@ -206,7 +209,16 @@ struct Step2_ClassificationView: View {
                 .foregroundColor(.white.opacity(0.8))
                 .padding(.horizontal, 30)
 
-            // Selector de Categoría
+            
+            // Campo de Título
+            StyledTextField(
+                label: "Título",
+                placeholder: "Escribe un título corto",
+                text: $title,
+                iconName: "textformat"
+            )
+
+            // Campo de Categoría
             VStack(alignment: .leading, spacing: 8) {
                 Text("Categoría")
                     .font(.poppinsSemiBold(size: 14))
@@ -230,7 +242,7 @@ struct Step2_ClassificationView: View {
                     .foregroundColor(.white.opacity(0.5))
             }
             .padding(.horizontal, 30)
-            
+
             // Campo para añadir etiquetas
             StyledTextField(
                 label: "Etiquetas",

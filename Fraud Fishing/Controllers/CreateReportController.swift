@@ -35,6 +35,7 @@ class CreateReportController: ObservableObject {
     func sendReport(
         reportedURL: String,
         category: String,
+        title: String,
         tags: [String],
         description: String,
         selectedImageData: Data?
@@ -47,30 +48,24 @@ class CreateReportController: ObservableObject {
 
         do {
             // 1. Validate required fields
-            guard !reportedURL.isEmpty, !category.isEmpty, !description.isEmpty else {
-                throw ReportError.validationFailed(message: "Faltan campos obligatorios (URL, Categoría, Descripción).")
+            guard !reportedURL.isEmpty, !category.isEmpty, !title.isEmpty, !description.isEmpty else {
+                throw ReportError.validationFailed(message: "Faltan campos obligatorios (URL, Categoría, Título, Descripción).")
             }
-            
-            // 2. Map Category String to ID (CORREGIDO: Ahora el método existe gracias a la extensión)
             guard let categoryId = category.toCategoryId() else {
                 throw ReportError.validationFailed(message: "Categoría no válida.")
             }
-            
-            // 3. Handle Image Upload
             let imageUrl = try await uploadImageAndGetURL(imageData: selectedImageData)
 
-            // 4. Create DTO
             let reportRequest = CreateReportRequest(
                 categoryId: categoryId,
-                title: category, // Using category as title for simplicity
+                title: title,
                 description: description,
                 url: reportedURL,
                 tagNames: tags,
                 imageUrl: imageUrl
             )
 
-            // 5. Send Report
-            let response = try await httpReport.createReport(reportData: reportRequest) // 'response' ya está en scope
+            let response = try await httpReport.createReport(reportData: reportRequest)
 
             // 6. Handle Success
             print("Reporte enviado con éxito. ID: \(response.id)")
