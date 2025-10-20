@@ -76,7 +76,7 @@ final class HTTPReport {
         return try JSONDecoder().decode(ReportResponse.self, from: data)
     }
     // Agrega voto a un reporte (PUT /reports/{id}/vote)
-    func voteReport(reportId: Int) async throws {
+    func voteReport(reportId: Int) async throws -> VoteResponse {
         let urlString = "http://localhost:3000/reports/\(reportId)/vote"
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
@@ -85,11 +85,19 @@ final class HTTPReport {
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        guard let token = TokenStorage.get(.access) else {
+            throw URLError(.userAuthenticationRequired)
+        }
 
-        let (_, response) = try await URLSession.shared.data(for: request)
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
+        
+        return try JSONDecoder().decode(VoteResponse.self, from: data)
     }
 }

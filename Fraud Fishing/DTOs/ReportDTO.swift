@@ -14,6 +14,12 @@ struct TagResponse: Codable {
     let name: String
 }
 
+// MARK: - VoteResponse
+struct VoteResponse: Codable {
+    let voteCount: Int
+    let hasVoted: Bool
+}
+
 struct ReportResponse: Codable {
     let id: Int
     let userId: Int
@@ -29,6 +35,7 @@ struct ReportResponse: Codable {
     let updatedAt: String
     let tags: [TagResponse]?
     let categoryName: String?
+    var hasVoted: Bool?
 }
 
 // MARK: - Category Mapping Helper (NUEVA EXTENSIÓN)
