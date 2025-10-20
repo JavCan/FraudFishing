@@ -1,41 +1,46 @@
 import Foundation
-import UIKit // Necesario para la compresión de UIImage
-import SwiftUI // Necesario para el tipo Color
+import UIKit
+import SwiftUI
 
 class CreateReportController: ObservableObject {
     private let httpReport = HTTPReport()
-
+    
     // MARK: - Published Properties
     @Published var isSending = false
     @Published var reportError: Error?
     @Published var isSuccess = false
-
+    
     // MARK: - Image Upload Placeholder
     private func uploadImageAndGetURL(imageData: Data?) async throws -> String? {
         guard let data = imageData else { return nil }
-
-        // 1. Convert Data to UIImage for potential compression
+        
         guard let uiImage = UIImage(data: data) else {
             throw ReportError.imageProcessingFailed
         }
-
-        // 2. Compress image (e.g., to JPEG with 70% quality)
+        
         guard let compressedData = uiImage.jpegData(compressionQuality: 0.7) else {
             throw ReportError.imageProcessingFailed
         }
-
-        // --- Simulated Upload Logic (Replace with actual API call) ---
+        
         print("Simulando subida de imagen de \(data.count) bytes a \(compressedData.count) bytes (comprimido)...")
-        try await Task.sleep(nanoseconds: 1_000_000_000) // Simulate network delay
-
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        
         return "https://report-images.com/\(UUID().uuidString).jpg"
     }
-
-    // MARK: - Public API
+    
+    // MARK: - Public API (ACTUALIZADO)
+    /// Envía un reporte usando el ID de categoría directamente
+    /// - Parameters:
+    ///   - reportedURL: URL del sitio reportado
+    ///   - categoryId: ID de la categoría (obtenido desde CategoriesController)
+    ///   - categoryName: Nombre de la categoría (para usar como título)
+    ///   - tags: Array de tags
+    ///   - description: Descripción del reporte
+    ///   - selectedImageData: Datos de la imagen opcional
     func sendReport(
         reportedURL: String,
-        category: String,
-        title: String,
+        categoryId: Int,
+        categoryName: String,
         tags: [String],
         description: String,
         selectedImageData: Data?
@@ -45,36 +50,37 @@ class CreateReportController: ObservableObject {
             self.reportError = nil
             self.isSuccess = false
         }
-
+        
         do {
             // 1. Validate required fields
-            guard !reportedURL.isEmpty, !category.isEmpty, !title.isEmpty, !description.isEmpty else {
-                throw ReportError.validationFailed(message: "Faltan campos obligatorios (URL, Categoría, Título, Descripción).")
+            guard !reportedURL.isEmpty, !description.isEmpty else {
+                throw ReportError.validationFailed(message: "Faltan campos obligatorios (URL, Descripción).")
             }
-            guard let categoryId = category.toCategoryId() else {
-                throw ReportError.validationFailed(message: "Categoría no válida.")
-            }
+            
+            // 2. Handle Image Upload
             let imageUrl = try await uploadImageAndGetURL(imageData: selectedImageData)
-
+            
+            // 3. Create DTO
             let reportRequest = CreateReportRequest(
                 categoryId: categoryId,
-                title: title,
+                title: categoryName,
                 description: description,
                 url: reportedURL,
                 tagNames: tags,
                 imageUrl: imageUrl
             )
-
+            
+            // 4. Send Report
             let response = try await httpReport.createReport(reportData: reportRequest)
-
-            // 6. Handle Success
+            
+            // 5. Handle Success
             print("Reporte enviado con éxito. ID: \(response.id)")
             DispatchQueue.main.async {
                 self.isSuccess = true
             }
-
+            
         } catch {
-            // 7. Handle Error
+            // 6. Handle Error
             print("Error al enviar reporte: \(error)")
             DispatchQueue.main.async {
                 self.reportError = error
@@ -85,19 +91,19 @@ class CreateReportController: ObservableObject {
             self.isSending = false
         }
     }
-}
-
-// MARK: - Error Handling
-enum ReportError: LocalizedError {
-    case validationFailed(message: String)
-    case imageProcessingFailed
     
-    var errorDescription: String? {
-        switch self {
-        case .validationFailed(let message):
-            return message
-        case .imageProcessingFailed:
-            return "Error al procesar la imagen para subir."
+    // MARK: - Error Handling
+    enum ReportError: LocalizedError {
+        case validationFailed(message: String)
+        case imageProcessingFailed
+        
+        var errorDescription: String? {
+            switch self {
+            case .validationFailed(let message):
+                return message
+            case .imageProcessingFailed:
+                return "Error al procesar la imagen para subir."
+            }
         }
     }
 }

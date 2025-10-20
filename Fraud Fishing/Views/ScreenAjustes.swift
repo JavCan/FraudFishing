@@ -75,9 +75,15 @@ struct ScreenAjustes: View {
                         
                         // --- Sección Legal ---
                         SettingsSection(title: "LEGAL") {
-                            SettingsRow(icon: "doc.text.fill", title: "Términos y Condiciones", tintColor: .gray)
+                            NavigationLink(destination: ScreenTerminosCondiciones()) {
+                                SettingsRow(icon: "doc.text.fill", title: "Términos y Condiciones", tintColor: .gray)
+                            }
+                            
+                            NavigationLink(destination: ScreenAvisoPrivacidad()) {
+                                SettingsRow(icon: "shield.lefthalf.filled", title: "Política de Privacidad", tintColor: .blue)
+                            }
+
                             Divider().background(Color.white.opacity(0.2)).padding(.leading, 60)
-                            SettingsRow(icon: "shield.lefthalf.filled", title: "Política de Privacidad", tintColor: .blue)
                         }
                     }
                     .padding(.top)
