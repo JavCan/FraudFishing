@@ -11,7 +11,9 @@ struct ScreenEditarPerfil: View {
     @State private var showChangePasswordSheet: Bool = false
     @State private var showChangeEmailSheet: Bool = false
     @State private var showLogoutAlert: Bool = false
-
+    @State private var navigateToLogin: Bool = false
+    
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             // MARK: - Fondo
@@ -44,7 +46,7 @@ struct ScreenEditarPerfil: View {
                     }
                 }
                 .padding(.horizontal).padding(.top)
-
+                
                 // MARK: - Contenido Dinámico
                 if profileController.isLoading && profileController.userProfile == nil {
                     Spacer()
@@ -52,9 +54,9 @@ struct ScreenEditarPerfil: View {
                     Spacer()
                 } else if let profile = profileController.userProfile {
                     UserProfileContentView(profile: profile,
-                                         showChangeNameSheet: $showChangeNameSheet,
-                                         showChangePasswordSheet: $showChangePasswordSheet,
-                                         showChangeEmailSheet: $showChangeEmailSheet)
+                                           showChangeNameSheet: $showChangeNameSheet,
+                                           showChangePasswordSheet: $showChangePasswordSheet,
+                                           showChangeEmailSheet: $showChangeEmailSheet)
                     
                     // Botón de Cerrar Sesión
                     Button(role: .destructive) {
@@ -93,11 +95,18 @@ struct ScreenEditarPerfil: View {
         } message: {
             Text("¿Estás seguro de que quieres cerrar sesión?")
         }
+        .background(
+            NavigationLink(destination: ScreenLogin().navigationBarBackButtonHidden(true),
+                           isActive: $navigateToLogin) {
+                               EmptyView()
+                           }
+        )
     }
     
     private func cerrarSesion() {
         TokenStorage.clearSession()
         print("Sesión cerrada y tokens eliminados.")
+        navigateToLogin = true
     }
 }
 

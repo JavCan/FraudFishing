@@ -1,16 +1,14 @@
 import SwiftUI
+import UserNotifications
 
 struct ScreenAjustes: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var notificacionesActivadas: Bool = true
-    @State private var showLogoutAlert: Bool = false
-    
-    // Aquí iría la lógica para navegar a la pantalla de login después de cerrar sesión.
-    
+    @State private var notificacionesActivadas: Bool = false
+    @State private var viewDidAppear: Bool = false
+
     var body: some View {
         ZStack {
             // MARK: - Fondo
-            // Reutilizamos el gradiente oscuro de tu pantalla de login.
             LinearGradient(
                 gradient: Gradient(colors: [
                     Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
@@ -39,7 +37,6 @@ struct ScreenAjustes: View {
                 .padding(.vertical)
                 
                 // MARK: - Opciones de Ajustes
-                // Usamos un ScrollView por si en el futuro agregas más opciones.
                 ScrollView {
                     VStack(spacing: 35) {
                         // --- Sección de Notificaciones ---
@@ -51,16 +48,29 @@ struct ScreenAjustes: View {
                                     Text("Notificaciones Push").foregroundColor(.white)
                                 }
                             }
+                            .onChange(of: notificacionesActivadas) { _ in
+                                if viewDidAppear {
+                                    abrirAjustesDeApp()
+                                }
+                            }
                             .padding(.horizontal)
                             .padding(.vertical, 5)
                             .tint(.cyan)
                         }
                         
-                        // --- Sección de Ayuda y Soporte ---
+                        // --- Sección de Reportes con NavigationLink ---
                         SettingsSection(title: "REPORTES") {
-                            SettingsRow(icon: "hourglass", title: "Reportes Pendientes", tintColor: .orange)
+                            NavigationLink(destination: ScreenReportesPendientes()) {
+                                SettingsRow(icon: "hourglass", title: "Reportes Pendientes", tintColor: .orange)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
                             Divider().background(Color.white.opacity(0.2)).padding(.leading, 60)
-                            SettingsRow(icon: "checkmark.shield.fill", title: "Reportes Aceptados", tintColor: .green)
+                            
+                            NavigationLink(destination: ScreenReportesVerificados()) {
+                                SettingsRow(icon: "checkmark.shield.fill", title: "Reportes Aceptados", tintColor: .green)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         
                         // --- Sección Legal ---
@@ -74,11 +84,35 @@ struct ScreenAjustes: View {
                 }
             }
         }
+        .navigationBarHidden(true)
+        .onAppear(perform: inicializarVista)
+    }
+
+    private func inicializarVista() {
+        verificarEstadoNotificaciones()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            viewDidAppear = true
+        }
+    }
+
+    private func verificarEstadoNotificaciones() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                self.notificacionesActivadas = (settings.authorizationStatus == .authorized)
+            }
+        }
+    }
+
+    private func abrirAjustesDeApp() {
+        guard let url = URL(string: UIApplication.openSettingsURLString),
+              UIApplication.shared.canOpenURL(url) else {
+            return
+        }
+        UIApplication.shared.open(url)
     }
 }
 
-// MARK: - Componentes Reutilizables para Mejor Estructura
-
+// MARK: - Componentes Reutilizables
 struct SettingsSection<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
@@ -125,7 +159,6 @@ struct SettingsRow: View {
     }
 }
 
-// MARK: - Vista Previa
 #Preview {
     NavigationStack {
         ScreenAjustes()

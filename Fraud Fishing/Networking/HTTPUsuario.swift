@@ -1,6 +1,6 @@
 import Foundation
 
-struct httpUsuario {
+struct HTTPUsuario {
     func getUserProfile() async throws -> UserProfile {
         
         guard let url = URL(string: "http://10.48.249.14:3099/users/me") else {
