@@ -3,7 +3,7 @@ import Foundation
 struct HTTPUsuario {
     func getUserProfile() async throws -> UserProfile {
         
-        guard let url = URL(string: "http://10.48.249.14:3099/users/me") else {
+        guard let url = URL(string: "http://10.48.248.174:3099/users/me") else {
             throw URLError(.badURL)
         }
         
@@ -36,7 +36,7 @@ struct HTTPUsuario {
     // MARK: - Update User Profile
     func updateUserProfile(name: String?, email: String?, password: String?) async throws -> UserProfile {
         
-        guard let url = URL(string: "http://10.48.249.14:3099/users/me") else {
+        guard let url = URL(string: "http://10.48.248.174:3099/users/me") else {
             throw URLError(.badURL)
         }
         

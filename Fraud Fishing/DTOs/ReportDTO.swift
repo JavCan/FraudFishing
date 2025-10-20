@@ -24,26 +24,6 @@ struct ReportResponse: Codable {
     let updatedAt: String
 }
 
-// MARK: - Category Mapping Helper (NUEVA EXTENSIÓN)
-// Convierte el nombre de la categoría a su ID entero para el DTO.
-extension String {
-    func toCategoryId() -> Int? {
-        switch self {
-        case "Phishing":
-            return 1
-        case "Malware":
-            return 2
-        case "Scam":
-            return 3
-        case "Noticias Falsas":
-            return 4
-        case "Otro":
-            return 5
-        default:
-            return nil
-        }
-    }
-}
 // AÑADIR ESTO a ReportDTO.swift (o un archivo similar)
 struct ServerErrorResponse: Decodable {
     let message: String
@@ -61,3 +41,15 @@ struct TagResponse: Codable {
 // Si el endpoint devuelve un array directamente
 typealias TagsResponse = [TagResponse]
 
+// Categories
+struct CategoryDTO: Codable, Identifiable, Hashable {
+    let id: Int
+    let name: String
+    let description: String
+}
+
+typealias CategoriesResponse = [CategoryDTO]
+
+struct ReportCategoryResponse: Codable {
+    let categoryName: String
+}

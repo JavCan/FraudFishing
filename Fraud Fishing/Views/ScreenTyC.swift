@@ -7,120 +7,99 @@
 
 import SwiftUI
 
+// MARK: - Pantalla de Términos y Condiciones
+
 struct ScreenTerminosCondiciones: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
-                Color(red: 0.043, green: 0.067, blue: 0.173)]),
-                           startPoint: UnitPoint(x:0.5, y:0.1),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Terminos y condiciones")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 20)
-                    Text("Al descargar y utilizar Fraud Fishing, usted acepta los siguientes términos y condiciones:")
-                        .font(.system(size: 15))
-                        .foregroundColor(.white.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 10)
-                    
-                    // Sección 1: Uso de la App
-                    TerminoSeccion(
-                        numero: "1.",
-                        titulo: "Uso de la App",
-                        contenido: "La App se proporciona para fines [informativos / de servicio / de entretenimiento, según corresponda]. Usted se compromete a usarla de manera legal y responsable."
-                    )
-                    
-                    // Sección 2: Propiedad intelectual
-                    TerminoSeccion(
-                        numero: "2.",
-                        titulo: "Propiedad intelectual",
-                        contenido: "Todo el contenido, diseño y funciones de la App son propiedad de [Nombre de la empresa/ desarrollador]. No está permitido copiar, modificar o distribuir dicho contenido sin autorización previa."
-                    )
-                    
-                    // Sección 3: Limitación de responsabilidad
-                    TerminoSeccion(
-                        numero: "3.",
-                        titulo: "Limitación de responsabilidad",
-                        contenido: "La App se ofrece \"tal cual\" y no garantizamos que esté libre de errores o interrupciones. [Nombre de la empresa/desarrollador] no se hace responsable por daños derivados del uso de la App."
-                    )
-                    
-                    // Sección 4: Datos personales
-                    TerminoSeccion(
-                        numero: "4.",
-                        titulo: "Datos personales",
-                        contenido: "El uso de la App implica el tratamiento de datos personales conforme a nuestro Aviso de Privacidad."
-                    )
-                    
-                    // Sección 5: Modificaciones
-                    TerminoSeccion(
-                        numero: "5.",
-                        titulo: "Modificaciones",
-                        contenido: "[Nombre de la empresa/desarrollador] podrá modificar estos Términos y Condiciones en cualquier momento, publicando las actualizaciones en la App."
-                    )
-                    
-                    // Texto final
-                    Text("Si no está de acuerdo con estos términos, le solicitamos no utilizar la App.")
-                        .font(.system(size: 15))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 10)
-                        .padding(.bottom, 40)
+            // MARK: - Fondo
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 0) {
+                // MARK: - Header Personalizado
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    Spacer()
+                    Text("Términos y Condiciones")
+                        .font(.title3).fontWeight(.bold).foregroundColor(.white)
+                    Spacer()
+                    Color.clear.frame(width: 40, height: 40) // Espaciador para centrar
+                }
+                .padding(.horizontal)
+                .padding(.vertical)
+                
+                // MARK: - Contenido de Términos
+                ScrollView {
+                    VStack(spacing: 25) {
+                        Text("Al descargar y utilizar Fraud Fishing, usted acepta los siguientes términos y condiciones:")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.bottom, 10)
+
+                        // --- Secciones de Términos ---
+                        LegalSection(title: "USO DE LA APP") {
+                            LegalRow(
+                                title: "Finalidad",
+                                content: "La App se proporciona para fines informativos y de servicio. Usted se compromete a usarla de manera legal y responsable."
+                            )
+                        }
+                        
+                        LegalSection(title: "PROPIEDAD INTELECTUAL") {
+                            LegalRow(
+                                title: "Derechos de Autor",
+                                content: "Todo el contenido, diseño y funciones de la App son propiedad de Fraud Fishing. No está permitido copiar, modificar o distribuir dicho contenido sin autorización previa."
+                            )
+                        }
+                        
+                        LegalSection(title: "RESPONSABILIDAD") {
+                            LegalRow(
+                                title: "Limitación",
+                                content: "La App se ofrece \"tal cual\". No garantizamos que esté libre de errores. Fraud Fishing no se hace responsable por daños derivados del uso de la App."
+                            )
+                        }
+                        
+                        LegalSection(title: "DATOS PERSONALES Y MODIFICACIONES") {
+                            LegalRow(
+                                title: "Privacidad",
+                                content: "El uso de la App implica el tratamiento de datos personales conforme a nuestro Aviso de Privacidad."
+                            )
+                            Divider().background(Color.white.opacity(0.2)).padding(.leading, 20)
+                            LegalRow(
+                                title: "Actualizaciones",
+                                content: "Podremos modificar estos Términos y Condiciones en cualquier momento, publicando las actualizaciones en la App."
+                            )
+                        }
+                        
+                        Text("Si no está de acuerdo con estos términos, le solicitamos no utilizar la App.")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.vertical, 20)
+                    }
+                    .padding(.top)
                 }
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Componente para cada sección de términos
-
-struct TerminoSeccion: View {
-    let numero: String
-    let titulo: String
-    let contenido: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 4) {
-                Text(numero)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                Text(titulo)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .underline()
-            }
-            Text(contenido)
-                .font(.system(size: 15))
-                .foregroundColor(.white.opacity(0.85))
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.leading, 12)
-        }
-        .padding(.horizontal, 20)
+        .navigationBarHidden(true) // Ocultamos la barra de navegación original
     }
 }
 
@@ -131,141 +110,143 @@ struct ScreenAvisoPrivacidad: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
-                Color(red: 0.043, green: 0.067, blue: 0.173)]),
-                           startPoint: UnitPoint(x:0.5, y:0.1),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Aviso de Privacidad")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 20)
-                    Text("En Fraud Fishing, respetamos y protegemos la privacidad de nuestros usuarios. Este aviso describe cómo recopilamos, usamos y protegemos su información personal.")
-                        .font(.system(size: 15))
-                        .foregroundColor(.white.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 10)
-                    
-                    // Sección 1: Información que recopilamos
-                    PrivacidadSeccion(
-                        numero: "1.",
-                        titulo: "Información que recopilamos",
-                        contenido: "Recopilamos información personal que usted nos proporciona directamente, como nombre, correo electrónico y datos de registro. También recopilamos información sobre los reportes que realiza en la aplicación."
-                    )
-                    
-                    // Sección 2: Uso de la información
-                    PrivacidadSeccion(
-                        numero: "2.",
-                        titulo: "Uso de la información",
-                        contenido: "Utilizamos su información para proporcionar y mejorar nuestros servicios, procesar sus reportes de fraude, comunicarnos con usted y garantizar la seguridad de la plataforma."
-                    )
-                    
-                    // Sección 3: Protección de datos
-                    PrivacidadSeccion(
-                        numero: "3.",
-                        titulo: "Protección de datos",
-                        contenido: "Implementamos medidas de seguridad técnicas y organizativas para proteger su información personal contra accesos no autorizados, pérdida o alteración."
-                    )
-                    
-                    // Sección 4: Compartir información
-                    PrivacidadSeccion(
-                        numero: "4.",
-                        titulo: "Compartir información",
-                        contenido: "No vendemos ni compartimos su información personal con terceros, excepto cuando sea necesario para proporcionar nuestros servicios o cuando lo requiera la ley."
-                    )
-                    
-                    // Sección 5: Sus derechos
-                    PrivacidadSeccion(
-                        numero: "5.",
-                        titulo: "Sus derechos",
-                        contenido: "Usted tiene derecho a acceder, rectificar, cancelar u oponerse al tratamiento de sus datos personales. Para ejercer estos derechos, puede contactarnos a través de la aplicación."
-                    )
-                    
-                    // Sección 6: Cambios al aviso
-                    PrivacidadSeccion(
-                        numero: "6.",
-                        titulo: "Cambios al aviso de privacidad",
-                        contenido: "Nos reservamos el derecho de actualizar este Aviso de Privacidad en cualquier momento. Le notificaremos sobre cambios significativos a través de la aplicación."
-                    )
-                    
-                    // Texto de contacto
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Contacto")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                            .underline()
-                        
-                        Text("Si tiene preguntas sobre este Aviso de Privacidad, puede contactarnos a través del correo: privacidad@fraudfishing.com")
-                            .font(.system(size: 15))
-                            .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                            .fixedSize(horizontal: false, vertical: true)
+            // MARK: - Fondo
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 0) {
+                // MARK: - Header Personalizado
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                    .padding(.bottom, 40)
+                    Spacer()
+                    Text("Aviso de Privacidad")
+                        .font(.title3).fontWeight(.bold).foregroundColor(.white)
+                    Spacer()
+                    Color.clear.frame(width: 40, height: 40) // Espaciador para centrar
+                }
+                .padding(.horizontal)
+                .padding(.vertical)
+                
+                // MARK: - Contenido de Privacidad
+                ScrollView {
+                    VStack(spacing: 25) {
+                        Text("Respetamos y protegemos la privacidad de nuestros usuarios. Este aviso describe cómo recopilamos, usamos y protegemos su información personal.")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.bottom, 10)
+
+                        // --- Secciones de Privacidad ---
+                        LegalSection(title: "INFORMACIÓN RECOPILADA") {
+                            LegalRow(
+                                title: "Datos del Usuario",
+                                content: "Recopilamos información que usted nos proporciona directamente, como nombre, correo electrónico y datos de registro, además de la información de los reportes que realiza."
+                            )
+                        }
+                        
+                        LegalSection(title: "USO Y PROTECCIÓN DE LA INFORMACIÓN") {
+                            LegalRow(
+                                title: "Finalidad",
+                                content: "Utilizamos su información para proporcionar y mejorar nuestros servicios, procesar sus reportes, comunicarnos con usted y garantizar la seguridad de la plataforma."
+                            )
+                            Divider().background(Color.white.opacity(0.2)).padding(.leading, 20)
+                            LegalRow(
+                                title: "Seguridad",
+                                content: "Implementamos medidas de seguridad técnicas y organizativas para proteger su información personal contra accesos no autorizados, pérdida o alteración."
+                            )
+                        }
+                        
+                        LegalSection(title: "SUS DERECHOS Y CONTACTO") {
+                            LegalRow(
+                                title: "Derechos ARCO",
+                                content: "Usted tiene derecho a acceder, rectificar, cancelar u oponerse al tratamiento de sus datos. Puede contactarnos a través de la aplicación para ejercerlos."
+                            )
+                            Divider().background(Color.white.opacity(0.2)).padding(.leading, 20)
+                            LegalRow(
+                                title: "Contacto",
+                                content: "Si tiene preguntas, puede contactarnos en: privacidad@fraudfishing.com"
+                            )
+                        }
+                    }
+                    .padding(.top)
                 }
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                }
-            }
-        }
+        .navigationBarHidden(true) // Ocultamos la barra de navegación original
     }
 }
 
-// MARK: - Componente para cada sección de privacidad
+// MARK: - Componentes Reutilizables para Estilo Legal
 
-struct PrivacidadSeccion: View {
-    let numero: String
-    let titulo: String
-    let contenido: String
-    
+struct LegalSection<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 4) {
-                Text(numero)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                Text(titulo)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .underline()
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .foregroundColor(.white.opacity(0.6))
+                .padding(.horizontal)
+            
+            VStack(spacing: 0) {
+                content
             }
-            Text(contenido)
-                .font(.system(size: 15))
-                .foregroundColor(.white.opacity(0.85))
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.leading, 12)
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(10)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal)
     }
 }
 
-// MARK: - Preview
+struct LegalRow: View {
+    let title: String
+    let content: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+            
+            Text(content)
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.8))
+                .lineSpacing(4) // Mejora la legibilidad
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+    }
+}
+
+
+// MARK: - Previews
 
 #Preview("Términos y Condiciones") {
     NavigationView {
         ScreenTerminosCondiciones()
     }
+    .preferredColorScheme(.dark)
 }
 
 #Preview("Aviso de Privacidad") {
     NavigationView {
         ScreenAvisoPrivacidad()
     }
+    .preferredColorScheme(.dark)
 }
