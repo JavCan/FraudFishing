@@ -39,9 +39,10 @@ struct ScreenEditarPerfil: View {
                     Spacer()
                     // Botón que navega a Ajustes
                     NavigationLink(destination: ScreenAjustes()) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title3)
-                            .foregroundColor(.white)
+                        Image("ajustes")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 36, height: 36)
                             .padding(10)
                     }
                 }
@@ -70,7 +71,7 @@ struct ScreenEditarPerfil: View {
                         .padding().frame(maxWidth: .infinity)
                         .background(Color.red.opacity(0.15)).cornerRadius(10)
                     }
-                    .padding(.horizontal).padding(.bottom)
+                    Spacer()
                     
                 } else if let errorMessage = profileController.errorMessage {
                     Spacer()
@@ -78,7 +79,7 @@ struct ScreenEditarPerfil: View {
                     Spacer()
                 }
             }
-            .padding(.bottom, 88) // Espacio para la tab bar
+            .padding(.bottom, 140) // Espacio para la tab bar
             
             // Capa 2: CustomTabBar superpuesta
             CustomTabBar(selectedTab: $selectedTab)
@@ -119,8 +120,13 @@ struct UserProfileContentView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "person.circle.fill")
-                .font(.system(size: 80)).foregroundColor(.white.opacity(0.8))
+            Image("mascotaFF")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 100, height: 100)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 4))
+                .shadow(radius: 5)
             
             Text(profile.name)
                 .font(.title).fontWeight(.bold).foregroundColor(.white)

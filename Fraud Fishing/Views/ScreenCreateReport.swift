@@ -11,7 +11,7 @@ import PhotosUI
 // Vista principal que orquesta el flujo de creación de reportes
 struct ScreenCreateReport: View {
     @State var reportedURL: String
-    @State private var category: String = ""
+    @State private var selectedCategory: CategoryDTO? = nil
     @State private var tags: [String] = []
     @State private var description: String = ""
     @State private var selectedImage: PhotosPickerItem? = nil
@@ -21,8 +21,9 @@ struct ScreenCreateReport: View {
     @State private var currentPage = 0
     @Environment(\.presentationMode) var presentationMode
 
-    // 1. Instanciar el Controller
+    // Controllers
     @StateObject private var controller = CreateReportController()
+    @StateObject private var categoriesController = CategoriesController()
 
     var body: some View {
         NavigationView {
@@ -40,12 +41,20 @@ struct ScreenCreateReport: View {
                     TabView(selection: $currentPage) {
                         Step1_URLView(reportedURL: $reportedURL)
                             .tag(0)
-                        Step2_ClassificationView(category: $category, tags: $tags, title: $title)
+                        Step2_ClassificationView(
+                            selectedCategory: $selectedCategory,
+                            tags: $tags,
+                            categoriesController: categoriesController
+                        )
                             .tag(1)
-                        Step3_DescriptionView(description: $description, selectedImage: $selectedImage, selectedImageData: $selectedImageData)
+                        Step3_DescriptionView(
+                            description: $description,
+                            selectedImage: $selectedImage,
+                            selectedImageData: $selectedImageData
+                        )
                             .tag(2)
                     }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // Oculta los indicadores por defecto
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
 
                     // Navegación y botones
                     if currentPage < 2 {
@@ -65,21 +74,21 @@ struct ScreenCreateReport: View {
                         }
                         .padding(.bottom, 20)
                     } else {
-                        // 2. Botón de Enviar Reporte (MODIFICADO)
-                        // Dentro del botón "Enviar reporte"
+                        // Botón de Enviar Reporte
                         Button(action: {
+                            guard let category = selectedCategory else { return }
+                            
                             Task {
                                 await controller.sendReport(
                                     reportedURL: reportedURL,
-                                    category: category,
-                                    title: title,
+                                    categoryId: category.id,
+                                    categoryName: category.name,
                                     tags: tags,
                                     description: description,
                                     selectedImageData: selectedImageData
                                 )
                             }
                         }) {
-                            // Mostrar cargando o texto normal
                             if controller.isSending {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -92,12 +101,15 @@ struct ScreenCreateReport: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        // Deshabilitar el botón y cambiar color mientras se envía
-                        .background(controller.isSending ? Color.gray : Color.red)
+                        .background(
+                            (controller.isSending || selectedCategory == nil || description.isEmpty)
+                            ? Color.gray
+                            : Color.red
+                        )
                         .cornerRadius(10)
                         .padding(.horizontal, 30)
                         .padding(.bottom, 20)
-                        .disabled(controller.isSending)
+                        .disabled(controller.isSending || selectedCategory == nil || description.isEmpty)
                     }
                     
                     // Indicadores de página personalizados
@@ -133,16 +145,20 @@ struct ScreenCreateReport: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        // 3. Mostrar alerta de error
+        // Cargar categorías al aparecer
+        .task {
+            await categoriesController.fetchCategories()
+        }
+        // Alerta de error
         .alert("Error al Enviar", isPresented: .constant(controller.reportError != nil), actions: {
-            Button("OK") { controller.reportError = nil } // Limpiar el error al presionar OK
+            Button("OK") { controller.reportError = nil }
         }, message: {
             Text(controller.reportError?.localizedDescription ?? "Ocurrió un error desconocido.")
         })
-        // 4. Mostrar alerta de éxito
+        // Alerta de éxito
         .alert("Reporte Enviado", isPresented: $controller.isSuccess) {
             Button("Aceptar") {
-                presentationMode.wrappedValue.dismiss() // Cerrar la vista al completar
+                presentationMode.wrappedValue.dismiss()
             }
         } message: {
             Text("¡Gracias! Tu reporte ha sido enviado con éxito.")
@@ -150,7 +166,7 @@ struct ScreenCreateReport: View {
     }
 }
 
-// --- Vistas para cada paso (Sin cambios) ---
+// --- Vistas para cada paso ---
 
 // Paso 1: Confirmar URL
 struct Step1_URLView: View {
@@ -182,20 +198,19 @@ struct Step1_URLView: View {
     }
 }
 
-// Paso 2: Clasificar la amenaza
+// Paso 2: Clasificar la amenaza (MODIFICADO)
 struct Step2_ClassificationView: View {
-    @Binding var category: String
+    @Binding var selectedCategory: CategoryDTO?
     @Binding var tags: [String]
-    @Binding var title: String
+    @ObservedObject var categoriesController: CategoriesController
+    
     @State private var newTag = ""
     @State private var showLimitMessage = false
     private let maxTags = 5
 
-    // Grid adaptable para chips, mantiene el contenido dentro del ancho disponible
     private var gridColumns: [GridItem] {
         [GridItem(.adaptive(minimum: 80), spacing: 8)]
     }
-    let categories = ["Phishing", "Malware", "Scam", "Noticias Falsas", "Otro"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -209,32 +224,57 @@ struct Step2_ClassificationView: View {
                 .foregroundColor(.white.opacity(0.8))
                 .padding(.horizontal, 30)
 
-            
-            // Campo de Título
-            StyledTextField(
-                label: "Título",
-                placeholder: "Escribe un título corto",
-                text: $title,
-                iconName: "textformat"
-            )
-
-            // Campo de Categoría
+            // Selector de Categoría con carga dinámica
             VStack(alignment: .leading, spacing: 8) {
                 Text("Categoría")
                     .font(.poppinsSemiBold(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                 
-                HStack {
-                    Image(systemName: "chevron.down.circle")
-                        .foregroundColor(.white.opacity(0.6))
-                    
-                    Picker("Selecciona Categoría", selection: $category) {
-                        ForEach(categories, id: \.self) {
-                            Text($0)
-                        }
+                if categoriesController.isLoading {
+                    HStack {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        Text("Cargando categorías...")
+                            .font(.poppinsRegular(size: 14))
+                            .foregroundColor(.white.opacity(0.6))
                     }
-                    .pickerStyle(.menu)
-                    .accentColor(.white.opacity(0.8))
+                    .padding(.vertical, 8)
+                } else if let error = categoriesController.errorMessage {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(error)
+                            .font(.poppinsRegular(size: 12))
+                            .foregroundColor(.red)
+                        Button("Reintentar") {
+                            Task {
+                                await categoriesController.fetchCategories(forceRefresh: true)
+                            }
+                        }
+                        .font(.poppinsSemiBold(size: 14))
+                        .foregroundColor(Color(red: 0.0, green: 0.71, blue: 0.737))
+                    }
+                } else {
+                    HStack {
+                        Image(systemName: "chevron.down.circle")
+                            .foregroundColor(.white.opacity(0.6))
+                        
+                        Picker("Selecciona Categoría", selection: $selectedCategory) {
+                            Text("Selecciona una categoría").tag(nil as CategoryDTO?)
+                            ForEach(categoriesController.categories) { category in
+                                Text(category.name).tag(category as CategoryDTO?)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .accentColor(.white.opacity(0.8))
+                    }
+                    
+                    // Mostrar descripción de la categoría seleccionada
+                    if let category = selectedCategory {
+                        Text(category.description)
+                            .font(.poppinsRegular(size: 12))
+                            .foregroundColor(.white.opacity(0.6))
+                            .italic()
+                            .padding(.top, 4)
+                    }
                 }
                 
                 Rectangle()
@@ -273,7 +313,7 @@ struct Step2_ClassificationView: View {
                     .padding(.horizontal, 30)
             }
 
-            // Chips responsivos: se adaptan y envuelven a múltiples líneas dentro del ancho
+            // Chips responsivos
             LazyVGrid(columns: gridColumns, alignment: .leading, spacing: 8) {
                 ForEach(tags, id: \.self) { tag in
                     HStack(spacing: 6) {
@@ -390,9 +430,8 @@ struct Step3_DescriptionView: View {
 }
 
 
-// --- Componentes Reutilizables (Sin cambios) ---
+// --- Componentes Reutilizables ---
 
-// Campo de texto con el estilo de ScreenLogin
 struct StyledTextField: View {
     var label: String
     var placeholder: String
