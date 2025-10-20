@@ -66,9 +66,7 @@ struct ScreenHome: View {
                                 .cornerRadius(10)
                         }
 
-                        Button(action: {
-                            print("Buscar URL reportada: \(urlInput)")
-                        }) {
+                        NavigationLink(destination: ScreenBuscar(searchedURL: urlInput)) {
                             Text("Buscar")
                                 .font(.title2)
                                 .fontWeight(.bold)
@@ -102,7 +100,7 @@ struct ScreenHome: View {
                         )
                 }
                 .padding(.trailing, 30)
-                .padding(.top, 30)
+                .padding(.top, 20)
             }
             // Capa 2: CustomTabBar superpuesta
             CustomTabBar(selectedTab: $selectedTab)

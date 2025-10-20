@@ -1,7 +1,26 @@
 import Foundation
 
-class HTTPReport {
+final class HTTPReport {
     private let executor = RequestExecutor()
+
+    func searchReports(byURL urlString: String) async throws -> [ReportResponse] {
+        var components = URLComponents(string: "http://localhost:3000/reports")
+        components?.queryItems = [
+            URLQueryItem(name: "url", value: urlString),
+            URLQueryItem(name: "include", value: "tags"),
+            URLQueryItem(name: "include", value: "category"),
+            URLQueryItem(name: "limit", value: "50")
+        ]
+        guard let url = components?.url else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        let (data, _) = try await executor.send(request, requiresAuth: false)
+        return try JSONDecoder().decode([ReportResponse].self, from: data)
+    }
 
     func createReport(reportData: CreateReportRequest) async throws -> ReportResponse {
         guard let url = URL(string: "http://10.48.248.174:3099/reports") else {
@@ -67,8 +86,8 @@ class HTTPReport {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "PUT"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
         
         guard let token = TokenStorage.get(.access) else {
             throw URLError(.userAuthenticationRequired)
@@ -172,61 +191,14 @@ class HTTPReport {
             throw URLError(.badURL)
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        guard let token = TokenStorage.get(.access) else {
-            throw URLError(.userAuthenticationRequired)
-        }
-        
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse else {
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
-
-        if !(200...299).contains(httpResponse.statusCode) {
-            if let serverError = try? JSONDecoder().decode(ServerErrorResponse.self, from: data) {
-                throw NSError(domain: "ServerError", code: serverError.statusCode, userInfo: [NSLocalizedDescriptionKey: serverError.message])
-            } else {
-                throw URLError(.badServerResponse, userInfo: [
-                    NSLocalizedDescriptionKey: "Solicitud fallida. Código de estado: \(httpResponse.statusCode)",
-                    "StatusCode": httpResponse.statusCode
-                ])
-            }
-        }
-
-        return try JSONDecoder().decode([TagResponse].self, from: data)
-    }
-    
-    // MARK: - Helper para extraer userId del token
-    private func getUserIdFromToken() -> Int? {
-        guard let token = TokenStorage.get(.access) else {
-            return nil
-        }
         
-        // Decodificar JWT para obtener el userId
-        let segments = token.components(separatedBy: ".")
-        guard segments.count > 1 else { return nil }
-        
-        let base64String = segments[1]
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        
-        let padded = base64String.padding(toLength: ((base64String.count + 3) / 4) * 4,
-                                          withPad: "=",
-                                          startingAt: 0)
-        
-        guard let data = Data(base64Encoded: padded),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let sub = json["sub"] as? String,
-              let userId = Int(sub) else {
-            return nil
-        }
-        
-        return userId
+        return try JSONDecoder().decode(VoteResponse.self, from: data)
     }
 }

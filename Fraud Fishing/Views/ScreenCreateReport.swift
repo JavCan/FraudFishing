@@ -16,6 +16,7 @@ struct ScreenCreateReport: View {
     @State private var description: String = ""
     @State private var selectedImage: PhotosPickerItem? = nil
     @State private var selectedImageData: Data? = nil
+    @State private var title: String = ""
     
     @State private var currentPage = 0
     @Environment(\.presentationMode) var presentationMode
@@ -281,7 +282,7 @@ struct Step2_ClassificationView: View {
                     .foregroundColor(.white.opacity(0.5))
             }
             .padding(.horizontal, 30)
-            
+
             // Campo para añadir etiquetas
             StyledTextField(
                 label: "Etiquetas",
