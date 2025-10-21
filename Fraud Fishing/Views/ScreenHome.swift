@@ -112,7 +112,7 @@ struct ScreenHome: View {
 }
 
 enum Tab {
-    case home, dashboard, profile
+    case home, dashboard, profile, settings
 }
 
 struct CustomTabBar: View {
@@ -126,12 +126,13 @@ struct CustomTabBar: View {
             // Fondo blanco con curva hacia abajo al centro
             Path { path in
                 let width = UIScreen.main.bounds.width
-                path.move(to: CGPoint(x: 0, y: 0))
-                path.addQuadCurve(to: CGPoint(x: width, y: 0),
+                path.move(to: CGPoint(x: -20, y: 0)) // <- sobresale un poco a la izquierda
+                path.addQuadCurve(to: CGPoint(x: width + 20, y: 0), // <- sobresale a la derecha
                                   control: CGPoint(x: width / 2, y: 40))
-                path.addLine(to: CGPoint(x: width, y: barHeight))
-                path.addLine(to: CGPoint(x: 0, y: barHeight))
+                path.addLine(to: CGPoint(x: width + 20, y: barHeight))
+                path.addLine(to: CGPoint(x: -20, y: barHeight))
                 path.closeSubpath()
+
             }
             .fill(Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.6))
             .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)

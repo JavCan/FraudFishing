@@ -87,7 +87,8 @@ class ReportesController: ObservableObject {
             hashtags: hashtags,
             estado: estado,
             fechaCreacion: fechaCreacion,
-            fechaVerificacion: fechaVerificacion
+            fechaVerificacion: fechaVerificacion,
+            imageUrl: response.imageUrl ?? ""
         )
     }
     

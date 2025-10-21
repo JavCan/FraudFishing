@@ -75,10 +75,7 @@ struct ScreenReportesPendientes: View {
                                 .padding(.top, 100)
                             } else {
                                 ForEach(controller.reportesPendientes) { reporte in
-                                    NavigationLink(destination: DetalleReporteView(reporte: reporte)) {
-                                        ReporteCard(reporte: reporte)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
+                                    ReporteCard(reporte: reporte)
                                 }
                             }
                         }
@@ -170,10 +167,7 @@ struct ScreenReportesVerificados: View {
                                 .padding(.top, 100)
                             } else {
                                 ForEach(controller.reportesVerificados) { reporte in
-                                    NavigationLink(destination: DetalleReporteView(reporte: reporte)) {
-                                        ReporteCard(reporte: reporte)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
+                                    ReporteCard(reporte: reporte)
                                 }
                             }
                         }
@@ -192,6 +186,7 @@ struct ScreenReportesVerificados: View {
 }
 
 // MARK: - Modelo de Datos
+// Estructura del reporte actualizada para incluir imageUrl
 struct Reporte: Identifiable {
     let id: String
     let url: String
@@ -202,6 +197,7 @@ struct Reporte: Identifiable {
     let estado: EstadoReporte
     let fechaCreacion: String
     var fechaVerificacion: String?
+    let imageUrl: String? // Nueva propiedad para la imagen del reporte
 }
 
 enum EstadoReporte {
@@ -215,19 +211,22 @@ struct ReporteCard: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header con fecha y badge
-            HStack {
-                HStack(spacing: 4) {
+            // Header con fecha y badge de estado
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
+                        .frame(width: 32, height: 32)
                     Image(systemName: "calendar")
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.7))
-                    Text(reporte.fechaCreacion)
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                        .font(.system(size: 14, weight: .semibold))
                 }
-                
+                Text(reporte.fechaCreacion)
+                    .font(.poppinsRegular(size: 14))
+                    .foregroundColor(.white.opacity(0.7))
                 Spacer()
                 
+                // Badge de estado del reporte
                 HStack(spacing: 6) {
                     Image(systemName: reporte.estado == .pendiente ? "clock.fill" : "checkmark.circle.fill")
                         .font(.system(size: 11))
@@ -240,133 +239,245 @@ struct ReporteCard: View {
                 .background(reporte.estado == .pendiente ? Color.orange : Color.green)
                 .cornerRadius(15)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 12)
-            
-            Divider()
-                .background(Color.white.opacity(0.2))
-                .padding(.horizontal, 16)
-            
-            // URL del sitio
-            HStack(spacing: 10) {
-                Image(systemName: "link.circle.fill")
-                    .foregroundColor(.cyan)
-                    .font(.system(size: 16))
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
+
+            // Imagen con diseño mejorado
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15),
+                                Color(red: 0.0, green: 0.6, blue: 0.7).opacity(0.08)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
                 
-                Text(reporte.url)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            
-            Divider()
-                .background(Color.white.opacity(0.2))
-                .padding(.horizontal, 16)
-            
-            // Contenido del reporte
-            HStack(alignment: .top, spacing: 12) {
-                // Logo/Imagen del sitio
-                if !reporte.logo.isEmpty, let url = URL(string: reporte.logo) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white.opacity(0.15))
-                            .overlay(
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            )
+                // Patrón de puntos decorativo
+                Canvas { context, size in
+                    let dotSize: CGFloat = 2
+                    let spacing: CGFloat = 20
+                    for x in stride(from: 0, to: size.width, by: spacing) {
+                        for y in stride(from: 0, to: size.height, by: spacing) {
+                            let rect = CGRect(x: x, y: y, width: dotSize, height: dotSize)
+                            context.fill(Path(ellipseIn: rect), with: .color(.white.opacity(0.05)))
+                        }
                     }
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                
+                // Área de imagen mejorada con soporte para imagen del reporte
+                if let imageUrl = reporte.imageUrl, !imageUrl.isEmpty, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .tint(Color(red: 0.0, green: 0.71, blue: 0.737))
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 180)
+                                .clipped()
+                        case .failure:
+                            VStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundColor(.red.opacity(0.6))
+                                    .font(.system(size: 30))
+                                Text("Error al cargar imagen")
+                                    .font(.poppinsRegular(size: 12))
+                                    .foregroundColor(.white.opacity(0.5))
+                            }
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                } else if !reporte.logo.isEmpty, let url = URL(string: reporte.logo) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .tint(Color(red: 0.0, green: 0.71, blue: 0.737))
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 180)
+                                .clipped()
+                        case .failure:
+                            VStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundColor(.red.opacity(0.6))
+                                    .font(.system(size: 30))
+                                Text("Error al cargar")
+                                    .font(.poppinsRegular(size: 12))
+                                    .foregroundColor(.white.opacity(0.5))
+                            }
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
                 } else {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.white.opacity(0.15))
-                        .frame(width: 60, height: 60)
+                    VStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.08))
+                                .frame(width: 70, height: 70)
+                            Image(systemName: "photo")
+                                .foregroundColor(.white.opacity(0.4))
+                                .font(.system(size: 30))
+                        }
+                        Text("Sin imagen")
+                            .font(.poppinsRegular(size: 12))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                }
+            }
+            .frame(height: 180)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+
+            // Contenido principal
+            VStack(alignment: .leading, spacing: 16) {
+                // URL con diseño mejorado
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.12))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "link")
+                            .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("URL detectada")
+                            .font(.caption2)
+                            .foregroundColor(.white.opacity(0.5))
+                        Text(reporte.url)
+                            .font(.callout)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .truncationMode(.tail)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white.opacity(0.05))
                         .overlay(
-                            Image(systemName: "photo.fill")
-                                .foregroundColor(.white.opacity(0.3))
-                                .font(.system(size: 20))
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                )
+                
+                // Descripción
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "text.alignleft")
+                            .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("Descripción")
+                            .font(.poppinsRegular(size: 12))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    Text(reporte.descripcion)
+                        .font(.poppinsRegular(size: 15))
+                        .foregroundColor(.white.opacity(0.95))
+                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                
+                // Categoría
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "diamond.fill")
+                            .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                            .font(.poppinsSemiBold(size: 12))
+                        Text("Categoría")
+                            .font(.poppinsRegular(size: 12))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    Text(reporte.categoria)
+                        .font(.poppinsSemiBold(size: 12))
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.3), lineWidth: 1)
+                                )
                         )
                 }
                 
-                // Descripción
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(reporte.descripcion)
-                        .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            
-            Divider()
-                .background(Color.white.opacity(0.2))
-                .padding(.horizontal, 16)
-            
-            // Categoría
-            VStack(alignment: .leading, spacing: 10) { // Aumentamos el espaciado para mejor separación
-                // Categoría (sin cambios)
-                HStack(spacing: 8) {
-                    Image(systemName: "tag.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(.purple)
-                    
-                    Text(reporte.categoria)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Color.purple.opacity(0.6))
-                        .cornerRadius(5)
-                }
-                
-                // NUEVO ESTILO PARA HASHTAGS
+                // Etiquetas como chips individuales
                 if !reporte.hashtags.isEmpty {
-                    HStack(spacing: 8) {
-                        // 1. Añadimos el ícono de "hashtag"
-                        Image(systemName: "number")
-                            .font(.system(size: 10))
-                            .foregroundColor(.cyan)
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "tag.fill")
+                                .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                .font(.poppinsSemiBold(size: 12))
+                            Text("Etiquetas")
+                                .font(.poppinsRegular(size: 12))
+                                .foregroundColor(.white.opacity(0.5))
+                        }
                         
-                        // 2. Mostramos el texto de los hashtags
-                        Text(reporte.hashtags)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.cyan)
-                            .lineLimit(1) // Limitamos a una línea para que no ocupe mucho espacio
+                        // Convertir hashtags en chips individuales
+                        let tags = reporte.hashtags.components(separatedBy: " ").filter { !$0.isEmpty }
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 2), alignment: .leading, spacing: 6) {
+                            ForEach(tags, id: \.self) { tag in
+                                Text(tag.replacingOccurrences(of: "#", with: ""))
+                                    .font(.poppinsSemiBold(size: 12))
+                                    .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.3), lineWidth: 1)
+                                            )
+                                    )
+                            }
+                        }
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-
-            // Indicador de "ver más"
-            HStack {
-                Spacer()
-                HStack(spacing: 4) {
-                    Text("Ver detalles")
-                        .font(.system(size: 12, weight: .medium))
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
-                }
-                .foregroundColor(.white.opacity(0.7))
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
         }
-        .background(Color.white.opacity(0.1))
-        .cornerRadius(10)
+        .background(
+            ZStack {
+                // Fondo principal con gradiente sutil
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.25),
+                        Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.15)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                
+                // Borde sutil
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 6)
+        .shadow(color: Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.08), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -393,174 +504,6 @@ struct EmptyStateView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
-    }
-}
-
-// MARK: - Vista de Detalle del Reporte
-struct DetalleReporteView: View {
-    @Environment(\.dismiss) private var dismiss
-    let reporte: Reporte
-    
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
-                    Color(red: 0.043, green: 0.067, blue: 0.173)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .edgesIgnoringSafeArea(.all)
-            
-            VStack(spacing: 0) {
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.white).padding(10)
-                            .background(Color.white.opacity(0.1)).clipShape(Circle())
-                    }
-                    Spacer()
-                    Text("Detalle del Reporte")
-                        .font(.title2).fontWeight(.bold).foregroundColor(.white)
-                    Spacer()
-                    Color.clear.frame(width: 40, height: 40)
-                }
-                .padding(.horizontal)
-                .padding(.vertical)
-                
-                ScrollView {
-                    VStack(spacing: 20) {
-                        VStack(spacing: 0) {
-                            HStack {
-                                HStack(spacing: 8) {
-                                    Image(systemName: reporte.estado == .pendiente ? "clock.fill" : "checkmark.circle.fill")
-                                        .font(.system(size: 14))
-                                    Text(reporte.estado == .pendiente ? "En revisión" : "Verificado")
-                                        .font(.system(size: 14, weight: .semibold))
-                                }
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(reporte.estado == .pendiente ? Color.orange : Color.green)
-                                .cornerRadius(20)
-                                
-                                Spacer()
-                            }
-                            .padding(16)
-                            
-                            Divider()
-                                .background(Color.white.opacity(0.2))
-                                .padding(.horizontal, 16)
-                            
-                            // Imagen del sitio
-                            if !reporte.logo.isEmpty, let url = URL(string: reporte.logo) {
-                                AsyncImage(url: url) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                } placeholder: {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color.white.opacity(0.15))
-                                        .overlay(ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white)))
-                                }
-                                .frame(height: 160)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 16)
-                            } else {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white.opacity(0.15))
-                                    .frame(height: 160)
-                                    .overlay(
-                                        Image(systemName: "photo.fill")
-                                            .foregroundColor(.white.opacity(0.3))
-                                            .font(.system(size: 40))
-                                    )
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 16)
-                            }
-                            
-                            Divider().background(Color.white.opacity(0.2)).padding(.horizontal, 16)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "link.circle.fill").foregroundColor(.cyan)
-                                    Text("URL reportada").font(.system(size: 12, weight: .semibold)).foregroundColor(.white.opacity(0.7))
-                                }
-                                Text(reporte.url).font(.system(size: 14, weight: .medium)).foregroundColor(.white).lineLimit(2)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
-                            
-                            Divider().background(Color.white.opacity(0.2)).padding(.horizontal, 16)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "doc.text.fill").foregroundColor(.cyan)
-                                    Text("Descripción del reporte").font(.system(size: 12, weight: .semibold)).foregroundColor(.white.opacity(0.7))
-                                }
-                                Text(reporte.descripcion).font(.system(size: 14)).foregroundColor(.white.opacity(0.9)).fixedSize(horizontal: false, vertical: true)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
-                            
-                            Divider().background(Color.white.opacity(0.2)).padding(.horizontal, 16)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "tag.fill").foregroundColor(.purple)
-                                    Text("Categoría").font(.system(size: 12, weight: .semibold)).foregroundColor(.white.opacity(0.7))
-                                }
-                                Text(reporte.categoria).font(.system(size: 13, weight: .semibold)).foregroundColor(.white).padding(.horizontal, 12).padding(.vertical, 6).background(Color.purple.opacity(0.6)).cornerRadius(8)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
-                            
-                            if !reporte.hashtags.isEmpty {
-                                Divider().background(Color.white.opacity(0.2)).padding(.horizontal, 16)
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "number").foregroundColor(.cyan)
-                                        Text("Etiquetas").font(.system(size: 12, weight: .semibold)).foregroundColor(.white.opacity(0.7))
-                                    }
-                                    Text(reporte.hashtags).font(.system(size: 13, weight: .medium)).foregroundColor(.cyan)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(16)
-                            }
-                            
-                            Divider().background(Color.white.opacity(0.2)).padding(.horizontal, 16)
-                            
-                            VStack(alignment: .leading, spacing: 12) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "calendar.badge.plus").foregroundColor(.cyan)
-                                    Text("Fecha de reporte:").font(.system(size: 13)).foregroundColor(.white.opacity(0.7))
-                                    Spacer()
-                                    Text(reporte.fechaCreacion).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
-                                }
-                                
-                                if let fechaVerificacion = reporte.fechaVerificacion {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "calendar.badge.checkmark").foregroundColor(.green)
-                                        Text("Fecha de verificación:").font(.system(size: 13)).foregroundColor(.white.opacity(0.7))
-                                        Spacer()
-                                        Text(fechaVerificacion).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
-                                    }
-                                }
-                            }
-                            .padding(16)
-                        }
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.horizontal, 20)
-                    }
-                    .padding(.top, 20)
-                    .padding(.bottom, 40)
-                }
-            }
-        }
-        .navigationBarHidden(true)
     }
 }
 

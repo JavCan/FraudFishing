@@ -13,7 +13,7 @@ extension HTTPClient {
     
     func fetchNotificaciones(userId: Int) async throws -> [NotificacionDTO] {
         
-        let urlString = "http://10.48.248.174:3000/notificaciones/user/\(userId)"
+        let urlString = "http://localhost:3000/notificaciones/user/\(userId)"
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }

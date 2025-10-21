@@ -8,70 +8,230 @@
 
 import SwiftUI
 
+// MARK: - URLItem para navegación
+struct URLItem: Identifiable {
+    let id = UUID()
+    let url: String
+}
+
+// MARK: - Controller para reportes por URL
+@MainActor
+class URLReportsController: ObservableObject {
+    @Published var reports: [ReportResponse] = []
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    
+    private let httpReport = HTTPReport()
+    
+    var totalVotes: Int {
+        reports.reduce(0) { $0 + $1.voteCount }
+    }
+    
+    var mainCategory: String? {
+        let categories = reports.compactMap { $0.categoryName }
+        let categoryCount = Dictionary(grouping: categories, by: { $0 })
+            .mapValues { $0.count }
+        return categoryCount.max(by: { $0.value < $1.value })?.key
+    }
+    
+    func loadReports(for url: String) async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            reports = try await httpReport.searchReports(byURL: url)
+        } catch {
+            errorMessage = "Error al cargar reportes: \(error.localizedDescription)"
+            print("Error loading reports for URL \(url): \(error)")
+        }
+        
+        isLoading = false
+    }
+}
+
+// MARK: - Vista de reportes filtrados por URL
+struct URLReportsView: View {
+    let url: String
+    @Binding var isPresented: URLItem?
+    @StateObject private var controller = URLReportsController()
+    @Environment(\.dismiss) private var dismiss
+    
+    private var displayURL: String {
+        if url.hasPrefix("http://") {
+            return String(url.dropFirst(7))
+        } else if url.hasPrefix("https://") {
+            return String(url.dropFirst(8))
+        }
+        return url
+    }
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                // Fondo con gradiente
+                LinearGradient(gradient: Gradient(colors: [
+                    Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
+                    Color(red: 0.043, green: 0.067, blue: 0.173)]),
+                               startPoint: UnitPoint(x:0.5, y:0.1),
+                               endPoint: .bottom)
+                    .edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 0) {
+                    // Header
+                    HStack {
+                        Button("Cerrar") {
+                            isPresented = nil
+                        }
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .medium))
+                        
+                        Spacer()
+                        
+                        VStack(spacing: 4) {
+                            Text("Reportes para")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.8))
+                            Text(displayURL)
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                        }
+                        
+                        Spacer()
+                        
+                        // Placeholder para balance visual
+                        Color.clear.frame(width: 50)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    
+                    // Contenido
+                    if controller.isLoading {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .tint(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                .scaleEffect(1.2)
+                            Text("Cargando reportes...")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                        Spacer()
+                    } else if let errorMessage = controller.errorMessage {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 50))
+                                .foregroundColor(.red.opacity(0.7))
+                            Text("Error al cargar reportes")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                            Text(errorMessage)
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                        }
+                        Spacer()
+                    } else if controller.reports.isEmpty {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 50))
+                                .foregroundColor(.white.opacity(0.3))
+                            Text("No hay reportes")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                            Text("No se encontraron reportes para esta URL")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                        }
+                        Spacer()
+                    } else {
+                        // Lista de reportes
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                // Estadísticas resumidas
+                                VStack(spacing: 12) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Total de reportes")
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.white.opacity(0.7))
+                                            Text("\(controller.reports.count)")
+                                                .font(.system(size: 24, weight: .bold))
+                                                .foregroundColor(.white)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        VStack(alignment: .trailing, spacing: 4) {
+                                            Text("Total de votos")
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.white.opacity(0.7))
+                                            Text("\(controller.totalVotes)")
+                                                .font(.system(size: 24, weight: .bold))
+                                                .foregroundColor(Color(red: 0.8, green: 0.2, blue: 0.2))
+                                        }
+                                    }
+                                    
+                                    if let mainCategory = controller.mainCategory {
+                                        HStack {
+                                            Text("Categoría principal:")
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.white.opacity(0.7))
+                                            Text(mainCategory)
+                                                .font(.system(size: 12, weight: .semibold))
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 3)
+                                                .background(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                                .cornerRadius(6)
+                                            Spacer()
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 16)
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(12)
+                                .padding(.horizontal, 20)
+                                
+                                // Lista de reportes
+                                ForEach(controller.reports.indices, id: \.self) { index in
+                                    NavigationLink(destination: ReportDetailView(report: $controller.reports[index])) {
+                                        CompactReportCard(report: $controller.reports[index])
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .padding(.horizontal, 20)
+                                }
+                            }
+                            .padding(.bottom, 20)
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            Task {
+                await controller.loadReports(for: url)
+            }
+        }
+    }
+}
+
 struct ScreenDashboard: View {
-    @State private var categoriaSeleccionada: String = "Todas"
+    @StateObject private var dashboardController = DashboardController()
     @State private var showNotificaciones: Bool = false
     @State private var selectedTab: Tab = .dashboard
+    @State private var showReportsForURL: URLItem? = nil
+    @State private var hasAnimatedScroll = false
     
-    let categorias = ["Todas", "Informacion falsa", "Envios falsos", "Productos falsos", "Phishing", "Estafas"]
-    
-    // Datos de ejemplo - Reportes destacados
-    @State private var reportesDestacados: [ReporteDestacado] = [
-        ReporteDestacado(
-            id: "1",
-            nombre: "PaginaFake.com",
-            logo: "pagina_fake",
-            descripcion: "Esta es una pagina falsa que vende productos",
-            categoria: "Productos falsos",
-            hashtags: "#Venta #Cobro #Envio",
-            numeroReportes: 45
-        ),
-        ReporteDestacado(
-            id: "2",
-            nombre: "TuEstafa.com",
-            logo: "estafa_logo",
-            descripcion: "Pagina que pone recomendaciones con links llenos de virus",
-            categoria: "Phishing",
-            hashtags: "#Bog #Desinformacion",
-            numeroReportes: 38
-        ),
-        ReporteDestacado(
-            id: "3",
-            nombre: "Roboblanco.com",
-            logo: "robo_logo",
-            descripcion: "Sitio que roba información personal",
-            categoria: "Informacion falsa",
-            hashtags: "#Datos #Robo",
-            numeroReportes: 52
-        ),
-        ReporteDestacado(
-            id: "4",
-            nombre: "BecaFalsa.mx",
-            logo: "beca_logo",
-            descripcion: "Ofrece becas falsas para obtener datos",
-            categoria: "Estafas",
-            hashtags: "#Becas #Educacion",
-            numeroReportes: 29
-        ),
-        ReporteDestacado(
-            id: "5",
-            nombre: "Asalto.mx",
-            logo: "asalto_logo",
-            descripcion: "Venta de productos que nunca llegan",
-            categoria: "Envios falsos",
-            hashtags: "#Compras #Envios",
-            numeroReportes: 41
-        )
-    ]
-    
-    var reportesFiltrados: [ReporteDestacado] {
-        if categoriaSeleccionada == "Todas" {
-            return reportesDestacados.sorted { $0.numeroReportes > $1.numeroReportes }
-        } else {
-            return reportesDestacados
-                .filter { $0.categoria == categoriaSeleccionada }
-                .sorted { $0.numeroReportes > $1.numeroReportes }
-        }
+    // Computed property for all categories
+    private var allCategories: [String] {
+        var categories = ["Todas"]
+        categories.append(contentsOf: dashboardController.categories.map { $0.name })
+        return categories
     }
     
     var body: some View {
@@ -92,77 +252,139 @@ struct ScreenDashboard: View {
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { showNotificaciones = true }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white.opacity(0.0))
-                                    .frame(width: 40, height: 40)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
-                                Image(systemName: "bell.fill")
-                                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                                    .font(.system(size: 20))
-                                Circle()
-                                    .fill(Color.red)
-                                    .frame(width: 12, height: 12)
-                                    .offset(x: 12, y: -12)
-                            }
-                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                     .padding(.bottom, 15)
 
-                    // Filtro de categorías
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(categorias, id: \.self) { categoria in
-                                CategoryChip(
-                                    title: categoria,
-                                    isSelected: categoriaSeleccionada == categoria,
-                                    action: {
-                                        withAnimation(.spring(response: 0.3)) {
-                                            categoriaSeleccionada = categoria
+                    // Filtros de categorías con scroll horizontal
+                    ScrollViewReader { proxy in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(allCategories, id: \.self) { categoria in
+                                    CategoryChip(
+                                        title: categoria,
+                                        isSelected: dashboardController.selectedCategory == categoria,
+                                        action: {
+                                            withAnimation(.spring(response: 0.3)) {
+                                                dashboardController.selectCategory(categoria)
+                                            }
+                                        }
+                                    )
+                                    .id(categoria)
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        .onAppear {
+                            if !hasAnimatedScroll && allCategories.count > 3 {
+                                hasAnimatedScroll = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    withAnimation(.easeInOut(duration: 2.0)) {
+                                        proxy.scrollTo(allCategories.last, anchor: .trailing)
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                        withAnimation(.easeInOut(duration: 2.0)) {
+                                            proxy.scrollTo(allCategories.first, anchor: .leading)
                                         }
                                     }
-                                )
+                                }
                             }
                         }
-                        .padding(.horizontal, 20)
                     }
                     .padding(.bottom, 20)
 
-                    // Lista de sitios destacados
+                    // Contenido principal con scroll vertical
                     ScrollView {
                         VStack(spacing: 16) {
-                            if reportesFiltrados.isEmpty {
-                                EmptyStateView(
+                            if dashboardController.isLoading {
+                                // Estado de carga
+                                VStack(spacing: 16) {
+                                    ProgressView()
+                                        .tint(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                        .scaleEffect(1.2)
+                                    Text("Cargando reportes...")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                .padding(.top, 60)
+                            } else if let errorMessage = dashboardController.errorMessage {
+                                // Estado de error
+                                VStack(spacing: 16) {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(.red.opacity(0.7))
+                                    Text("Error al cargar")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.white)
+                                    Text(errorMessage)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.white.opacity(0.7))
+                                        .multilineTextAlignment(.center)
+                                    Button("Reintentar") {
+                                        Task {
+                                            await dashboardController.refreshData()
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 10)
+                                    .background(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                                }
+                                .padding(.top, 60)
+                            } else if dashboardController.reports.filter({ dashboardController.selectedCategory == "Todas" || $0.categoryName == dashboardController.selectedCategory }).isEmpty {
+                                // Estado vacío
+                                DashboardEmptyStateView(
                                     icon: "magnifyingglass",
                                     message: "No hay reportes",
                                     description: "No se encontraron reportes en esta categoría"
                                 )
                                 .padding(.top, 60)
                             } else {
-                                // Top 3 sitios web destacados (cards pequeños)
+                                // Top 3 sitios más reportados
                                 HStack(spacing: 12) {
-                                    ForEach(Array(reportesFiltrados.prefix(3).enumerated()), id: \.element.id) { index, reporte in
+                                    let filteredReports = dashboardController.selectedCategory == "Todas" ? 
+                                        dashboardController.reports.sorted { $0.voteCount > $1.voteCount } :
+                                        dashboardController.reports
+                                            .filter { $0.categoryName == dashboardController.selectedCategory }
+                                            .sorted { $0.voteCount > $1.voteCount }
+                                    let topReports = Array(filteredReports.prefix(3))
+                                    
+                                    ForEach(Array(topReports.enumerated()), id: \.element.id) { index, reporte in
                                         TopSiteCard(
-                                            sitio: reporte.nombre,
-                                            position: index + 1
+                                            report: reporte,
+                                            position: index + 1,
+                                            onTap: {
+                                                // Filtrar reportes por esta URL en la vista principal
+                                                withAnimation(.spring(response: 0.3)) {
+                                                    dashboardController.selectURL(reporte.url)
+                                                }
+                                            }
                                         )
                                     }
                                 }
                                 .padding(.horizontal, 20)
                                 
-                                // Cards completos de reportes
-                                ForEach(reportesFiltrados) { reporte in
-                                    NavigationLink(destination: DetalleReporteDestacadoView(reporte: reporte)) {
-                                        ReporteDestacadoCard(reporte: reporte)
+                                // Cards compactos de reportes con scroll vertical
+                                LazyVStack(spacing: 16) {
+                                    ForEach(dashboardController.reports.indices, id: \.self) { index in
+                                        let report = dashboardController.reports[index]
+                                        if dashboardController.selectedCategory == "Todas" || report.categoryName == dashboardController.selectedCategory {
+                                            NavigationLink(destination: ReportDetailView(report: $dashboardController.reports[index])) {
+                                                CompactReportCard(report: $dashboardController.reports[index])
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            .padding(.horizontal, 20)
+                                        }
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                         }
                         .padding(.bottom, 100)
+                    }
+                    .refreshable {
+                        await dashboardController.refreshData()
                     }
                 }
                 .padding(.bottom, 88) // Espacio para la tab bar
@@ -172,25 +394,79 @@ struct ScreenDashboard: View {
             CustomTabBar(selectedTab: $selectedTab)
         }
         .navigationBarBackButtonHidden(true)
-        
         .toolbar(.hidden, for: .navigationBar)
         .edgesIgnoringSafeArea(.bottom)
         .sheet(isPresented: $showNotificaciones) {
-            NotificacionesView()
+            ScreenNotifications()
+        }
+        .sheet(item: $showReportsForURL) { urlItem in
+            URLReportsView(url: urlItem.url, isPresented: $showReportsForURL)
+        }
+        .onAppear {
+            Task {
+                await dashboardController.loadData()
+            }
         }
     }
 }
 
-// MARK: - Modelo de Datos
+// MARK: - Image Overlay View
+struct ImageOverlayView: View {
+    let imageURL: String
+    @Binding var isPresented: Bool
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    Button("Cerrar") {
+                        isPresented = false
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                }
+                
+                Spacer()
+                
+                AsyncImage(url: URL(string: imageURL)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    ProgressView()
+                        .tint(.white)
+                }
+                
+                Spacer()
+            }
+        }
+    }
+}
 
-struct ReporteDestacado: Identifiable {
-    let id: String
-    let nombre: String
-    let logo: String
-    let descripcion: String
-    let categoria: String
-    let hashtags: String
-    let numeroReportes: Int
+
+// MARK: - Empty State View
+struct DashboardEmptyStateView: View {
+    let icon: String
+    let message: String
+    let description: String
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 50))
+                .foregroundColor(.white.opacity(0.3))
+            Text(message)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+            Text(description)
+                .font(.system(size: 14))
+                .foregroundColor(.white.opacity(0.7))
+                .multilineTextAlignment(.center)
+        }
+    }
 }
 
 // MARK: - Componente Category Chip
@@ -208,7 +484,7 @@ struct CategoryChip: View {
                 .padding(.horizontal, 18)
                 .padding(.vertical, 10)
                 .background(
-                    isSelected ? 
+                    isSelected ?
                     Color(red: 0.0, green: 0.8, blue: 0.7) :
                     Color.white
                 )
@@ -218,11 +494,11 @@ struct CategoryChip: View {
     }
 }
 
-// MARK: - Top Site Card (pequeño)
-
+// MARK: - TopSiteCard
 struct TopSiteCard: View {
-    let sitio: String
+    let report: ReportResponse
     let position: Int
+    let onTap: () -> Void
     
     var medalColor: Color {
         switch position {
@@ -233,321 +509,74 @@ struct TopSiteCard: View {
         }
     }
     
-    var body: some View {
-        VStack(spacing: 8) {
-            // Medalla
-            ZStack {
-                Circle()
-                    .fill(medalColor)
-                    .frame(width: 35, height: 35)
-                
-                Text("\(position)")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-            }
-            
-            // Nombre del sitio
-            Text(sitio)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .frame(height: 32)
+    var medalGradient: LinearGradient {
+        switch position {
+        case 1: return LinearGradient(colors: [Color(red: 1.0, green: 0.84, blue: 0.0), Color(red: 0.9, green: 0.7, blue: 0.0)], startPoint: .top, endPoint: .bottom)
+        case 2: return LinearGradient(colors: [Color(red: 0.75, green: 0.75, blue: 0.75), Color(red: 0.6, green: 0.6, blue: 0.6)], startPoint: .top, endPoint: .bottom)
+        case 3: return LinearGradient(colors: [Color(red: 0.8, green: 0.5, blue: 0.2), Color(red: 0.7, green: 0.4, blue: 0.1)], startPoint: .top, endPoint: .bottom)
+        default: return LinearGradient(colors: [Color.gray, Color.gray.opacity(0.8)], startPoint: .top, endPoint: .bottom)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 3)
     }
-}
-
-// MARK: - Reporte Destacado Card
-
-struct ReporteDestacadoCard: View {
-    let reporte: ReporteDestacado
+    
+    private var displayURL: String {
+        let url = report.url
+        if url.hasPrefix("http://") {
+            return String(url.dropFirst(7))
+        } else if url.hasPrefix("https://") {
+            return String(url.dropFirst(8))
+        }
+        return url
+    }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header con nombre del sitio y número de reportes
-            HStack {
-                Text(reporte.nombre)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                
-                Spacer()
-                
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                    Text("\(reporte.numeroReportes)")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.red)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.red.opacity(0.1))
-                .cornerRadius(12)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            
-            Divider()
-                .padding(.horizontal, 16)
-            
-            // Contenido
-            HStack(alignment: .top, spacing: 14) {
-                // Logo/Imagen
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.9, green: 0.9, blue: 0.95),
-                                Color(red: 0.8, green: 0.95, blue: 0.95)
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 80, height: 80)
-                    .overlay(
-                        Image(systemName: "exclamationmark.shield.fill")
-                            .foregroundColor(Color.red.opacity(0.4))
-                            .font(.system(size: 30))
-                    )
-                    .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
-                
-                // Descripción
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(reporte.descripcion)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
+        Button(action: onTap) {
+            VStack(spacing: 16) {
+                // Medalla de posición
+                ZStack {
+                    Circle()
+                        .fill(medalGradient)
+                        .frame(width: 50, height: 50)
+                        .shadow(color: medalColor.opacity(0.4), radius: 6, x: 0, y: 3)
                     
-                    // Categoría
-                    Text(reporte.categoria)
-                        .font(.system(size: 11, weight: .semibold))
+                    Text("\(position)")
+                        .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Color(red: 0.0, green: 0.8, blue: 0.7))
-                        .cornerRadius(6)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            
-            // Hashtags
-            HStack {
-                Text(reporte.hashtags)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
                 
-                Spacer()
+                // URL
+                Text(displayURL)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 
-                HStack(spacing: 4) {
-                    Text("Ver más")
+                // Votos
+                VStack(spacing: 4) {
+                    Text("\(report.voteCount)")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("votos")
                         .font(.system(size: 12, weight: .medium))
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.8))
                 }
-                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 14)
+            .padding(.vertical, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.6))
+                    .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(medalColor.opacity(0.3), lineWidth: 2)
+            )
         }
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-        .padding(.horizontal, 20)
+        .buttonStyle(PlainButtonStyle())
     }
 }
-
-// MARK: - Vista de Detalle del Reporte Destacado
-
-struct DetalleReporteDestacadoView: View {
-    @Environment(\.dismiss) private var dismiss
-    let reporte: ReporteDestacado
-    
-    var body: some View {
-        ZStack {
-            LinearGradient(gradient: Gradient(colors: [
-                Color(red: 0.043, green: 0.067, blue: 0.173, opacity: 0.88),
-                Color(red: 0.043, green: 0.067, blue: 0.173)]),
-                           startPoint: UnitPoint(x:0.5, y:0.1),
-                           endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Alerta de peligro
-                    HStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.red)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("¡Sitio Reportado!")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.red)
-                            Text("\(reporte.numeroReportes) usuarios han reportado este sitio")
-                                .font(.system(size: 13))
-                                .foregroundColor(.red.opacity(0.8))
-                        }
-                        
-                        Spacer()
-                    }
-                    .padding(16)
-                    .background(Color.red.opacity(0.1))
-                    .cornerRadius(12)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    
-                    // Card principal
-                    VStack(spacing: 0) {
-                        // Logo grande
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color(red: 0.9, green: 0.9, blue: 0.95),
-                                        Color(red: 0.8, green: 0.95, blue: 0.95)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(height: 180)
-                            .overlay(
-                                Image(systemName: "exclamationmark.shield.fill")
-                                    .foregroundColor(Color.red.opacity(0.3))
-                                    .font(.system(size: 60))
-                            )
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
-                        
-                        // Nombre del sitio
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Sitio web reportado", systemImage: "link.circle.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.nombre)
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .underline()
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Descripción
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("¿Por qué es peligroso?", systemImage: "info.circle.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.descripcion)
-                                .font(.system(size: 15))
-                                .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Categoría
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Tipo de fraude", systemImage: "tag.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            HStack {
-                                Text(reporte.categoria)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 7)
-                                    .background(Color(red: 0.0, green: 0.8, blue: 0.7))
-                                    .cornerRadius(8)
-                                
-                                Spacer()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                        
-                        // Hashtags
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Etiquetas", systemImage: "number")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text(reporte.hashtags)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.5))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 20)
-                    }
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                    .padding(.horizontal, 20)
-                }
-                .padding(.bottom, 40)
-            }
-        }
-        .navigationTitle("Detalles del Reporte")
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                        Text("Inicio")
-                            .font(.body)
-                    }
-                    .foregroundColor(Color(red: 0.0, green: 0.2, blue: 0.4))
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Enlace a Notificaciones
-
-struct NotificacionesView: View {
-    var body: some View {
-        NavigationLink(destination: ScreenNotifications()) {
-            Label("Notificaciones", systemImage: "bell")
-                .foregroundColor(.primary)
-                .padding()
-        }
-    }
-}
-
 
 // MARK: - Preview
 
