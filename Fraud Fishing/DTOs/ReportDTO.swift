@@ -45,12 +45,6 @@ struct ServerErrorResponse: Decodable {
     let statusCode: Int
 }
 
-// MARK: - Tag Response DTO
-struct TagResponse: Codable {
-    let id: Int
-    let name: String
-}
-
 // MARK: - Tags Array Response
 // Si el endpoint devuelve un array directamente
 typealias TagsResponse = [TagResponse]
