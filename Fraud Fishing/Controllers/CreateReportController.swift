@@ -4,13 +4,14 @@ import SwiftUI
 
 class CreateReportController: ObservableObject {
     private let httpReport = HTTPReport()
+    private let httpFile = HTTPFile()
     
     // MARK: - Published Properties
     @Published var isSending = false
     @Published var reportError: Error?
     @Published var isSuccess = false
     
-    // MARK: - Image Upload Placeholder
+    // MARK: - Image Upload Implementation
     private func uploadImageAndGetURL(imageData: Data?) async throws -> String? {
         guard let data = imageData else { return nil }
         
@@ -22,21 +23,15 @@ class CreateReportController: ObservableObject {
             throw ReportError.imageProcessingFailed
         }
         
-        print("Simulando subida de imagen de \(data.count) bytes a \(compressedData.count) bytes (comprimido)...")
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-        
-        return "https://report-images.com/\(UUID().uuidString).jpg"
+        do {
+            let httpFile = HTTPFile()
+            let response = try await httpFile.uploadImage(imageData: compressedData)
+            return response.path
+        } catch {
+            throw ReportError.imageUploadFailed(error)
+        }
     }
     
-    // MARK: - Public API (ACTUALIZADO)
-    /// Envía un reporte usando el ID de categoría directamente
-    /// - Parameters:
-    ///   - reportedURL: URL del sitio reportado
-    ///   - categoryId: ID de la categoría (obtenido desde CategoriesController)
-    ///   - categoryName: Nombre de la categoría (para usar como título)
-    ///   - tags: Array de tags
-    ///   - description: Descripción del reporte
-    ///   - selectedImageData: Datos de la imagen opcional
     func sendReport(
         reportedURL: String,
         categoryId: Int,
@@ -96,6 +91,7 @@ class CreateReportController: ObservableObject {
     enum ReportError: LocalizedError {
         case validationFailed(message: String)
         case imageProcessingFailed
+        case imageUploadFailed(Error)
         
         var errorDescription: String? {
             switch self {
@@ -103,6 +99,8 @@ class CreateReportController: ObservableObject {
                 return message
             case .imageProcessingFailed:
                 return "Error al procesar la imagen para subir."
+            case .imageUploadFailed(let error):
+                return "Error al subir la imagen: \(error.localizedDescription)"
             }
         }
     }

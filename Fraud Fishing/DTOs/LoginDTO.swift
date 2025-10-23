@@ -13,7 +13,7 @@ struct UserLoginRequest: Codable {
 }
 
 
-struct User: Decodable {
+struct User: Codable {
     let id: Int
     let email: String
     let name: String

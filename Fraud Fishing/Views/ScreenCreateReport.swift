@@ -44,6 +44,7 @@ struct ScreenCreateReport: View {
                         Step2_ClassificationView(
                             selectedCategory: $selectedCategory,
                             tags: $tags,
+                            title: $title,
                             categoriesController: categoriesController
                         )
                             .tag(1)
@@ -109,7 +110,7 @@ struct ScreenCreateReport: View {
                         .cornerRadius(10)
                         .padding(.horizontal, 30)
                         .padding(.bottom, 20)
-                        .disabled(controller.isSending || selectedCategory == nil || description.isEmpty)
+                        .disabled(controller.isSending || selectedCategory == nil || title.isEmpty || description.isEmpty)
                     }
                     
                     // Indicadores de página personalizados
@@ -202,6 +203,7 @@ struct Step1_URLView: View {
 struct Step2_ClassificationView: View {
     @Binding var selectedCategory: CategoryDTO?
     @Binding var tags: [String]
+    @Binding var title: String
     @ObservedObject var categoriesController: CategoriesController
     
     @State private var newTag = ""
@@ -219,10 +221,18 @@ struct Step2_ClassificationView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 30)
 
-            Text("Escoge una categoría de entre la lista y escribe algunas etiquetas.")
+            Text("Escoge una categoría de entre la lista, escribe un título y algunas etiquetas.")
                 .font(.poppinsRegular(size: 18))
                 .foregroundColor(.white.opacity(0.8))
                 .padding(.horizontal, 30)
+
+            // Campo de Título
+            StyledTextField(
+                label: "Título del reporte",
+                placeholder: "Ej: Sitio web fraudulento de banco",
+                text: $title,
+                iconName: "text.alignleft"
+            )
 
             // Selector de Categoría con carga dinámica
             VStack(alignment: .leading, spacing: 8) {
@@ -375,15 +385,29 @@ struct Step3_DescriptionView: View {
                     .font(.poppinsSemiBold(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                 
-                TextEditor(text: $description)
-                    .font(.poppinsRegular(size: 18))
-                    .foregroundColor(.white)
-                    .background(Color.clear)
-                    .frame(height: 150)
-                
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(.white.opacity(0.5))
+                ZStack(alignment: .topLeading) {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.white.opacity(0.1))
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        .frame(height: 150)
+                    
+                    if description.isEmpty {
+                        Text("Describe detalladamente el problema que encontraste...")
+                            .font(.poppinsRegular(size: 16))
+                            .foregroundColor(.white.opacity(0.4))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                    }
+                    
+                    TextEditor(text: $description)
+                        .font(.poppinsRegular(size: 16))
+                        .foregroundColor(.white)
+                        .scrollContentBackground(.hidden) // ✅ Esto es crucial - oculta el fondo blanco
+                        .background(Color.clear)
+                        .frame(height: 150)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                }
             }
             .padding(.horizontal, 30)
 
@@ -475,3 +499,4 @@ struct StyledTextField: View {
 #Preview {
     ScreenCreateReport(reportedURL: "https://ejemplo.com")
 }
+

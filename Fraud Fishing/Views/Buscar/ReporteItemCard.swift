@@ -160,6 +160,7 @@ struct ReporteItemCard: View {
                     }
                 }
             }
+            .cornerRadius(12)
             .buttonStyle(PlainButtonStyle())
             .frame(height: 180)
             .padding(.horizontal, 20)

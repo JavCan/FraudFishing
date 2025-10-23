@@ -11,6 +11,7 @@ struct ScreenBuscar: View {
     let searchedURL: String
     @State private var selectedTab: Tab = .dashboard
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var authController: AuthenticationController
 
     // Estado de carga y datos
     @State private var isLoading = false
@@ -50,7 +51,7 @@ struct ScreenBuscar: View {
                             Spacer()
                             
                             // Botón de notificaciones
-                            NavigationLink(destination: ScreenNotifications()) {
+                            NavigationLink(destination: ScreenNotifications().environmentObject(authController)) {
                                 Image(systemName: "bell.fill")
                                     .font(.title)
                                     .foregroundColor(Color(red: 0.0, green: 0.71, blue: 0.737))

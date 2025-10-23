@@ -10,6 +10,7 @@ import SwiftUI
 struct ScreenHome: View {
     @State private var urlInput: String = ""
     @State private var selectedTab: Tab = .home
+    @EnvironmentObject var authController: AuthenticationController
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -66,7 +67,7 @@ struct ScreenHome: View {
                                 .cornerRadius(10)
                         }
 
-                        NavigationLink(destination: ScreenBuscar(searchedURL: urlInput)) {
+                        NavigationLink(destination: ScreenBuscar(searchedURL: urlInput).environmentObject(authController)) {
                             Text("Buscar")
                                 .font(.title2)
                                 .fontWeight(.bold)
@@ -85,7 +86,7 @@ struct ScreenHome: View {
                 .padding(.bottom, 88) // Espacio para la tab bar
 
                 // Botón de notificaciones
-                NavigationLink(destination: ScreenNotifications()) {
+                NavigationLink(destination: ScreenNotifications().environmentObject(authController)) {
                     Image(systemName: "bell.fill")
                         .font(.title)
                         .foregroundColor(Color(red: 0.0, green: 0.71, blue: 0.737))
@@ -103,7 +104,7 @@ struct ScreenHome: View {
                 .padding(.top, 20)
             }
             // Capa 2: CustomTabBar superpuesta
-            CustomTabBar(selectedTab: $selectedTab)
+            CustomTabBar(selectedTab: $selectedTab).environmentObject(authController)
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -112,11 +113,12 @@ struct ScreenHome: View {
 }
 
 enum Tab {
-    case home, dashboard, profile
+    case home, dashboard, profile, settings
 }
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
+    @EnvironmentObject var authController: AuthenticationController
 
     var body: some View {
         let turquoise = Color(red: 0.0, green: 0.71, blue: 0.737)
@@ -126,12 +128,13 @@ struct CustomTabBar: View {
             // Fondo blanco con curva hacia abajo al centro
             Path { path in
                 let width = UIScreen.main.bounds.width
-                path.move(to: CGPoint(x: 0, y: 0))
-                path.addQuadCurve(to: CGPoint(x: width, y: 0),
+                path.move(to: CGPoint(x: -20, y: 0)) // <- sobresale un poco a la izquierda
+                path.addQuadCurve(to: CGPoint(x: width + 20, y: 0), // <- sobresale a la derecha
                                   control: CGPoint(x: width / 2, y: 40))
-                path.addLine(to: CGPoint(x: width, y: barHeight))
-                path.addLine(to: CGPoint(x: 0, y: barHeight))
+                path.addLine(to: CGPoint(x: width + 20, y: barHeight))
+                path.addLine(to: CGPoint(x: -20, y: barHeight))
                 path.closeSubpath()
+
             }
             .fill(Color(red: 0.537, green: 0.616, blue: 0.733, opacity: 0.6))
             .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: -6)
@@ -144,7 +147,7 @@ struct CustomTabBar: View {
                         .font(.system(size: 24))
                         .foregroundColor(.white)
                 } else {
-                    NavigationLink(destination: ScreenDashboard()) {
+                    NavigationLink(destination: ScreenDashboard().environmentObject(authController)) {
                         Image(systemName: "chart.bar.fill")
                             .font(.system(size: 24))
                             .foregroundColor(Color(red: 0.537, green: 0.616, blue: 0.733))
@@ -183,7 +186,7 @@ struct CustomTabBar: View {
                 }
                 .offset(y: -25)
             } else {
-                NavigationLink(destination: ScreenHome()) {
+                NavigationLink(destination: ScreenHome().environmentObject(authController)) {
                     ZStack {
                         Circle()
                             .fill(turquoise)

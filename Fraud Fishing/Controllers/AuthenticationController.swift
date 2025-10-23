@@ -5,11 +5,14 @@ class AuthenticationController: ObservableObject {
     
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var currentUser: User?
     
     private let httpClient: HTTPClient
     
     init(httpClient: HTTPClient) {
         self.httpClient = httpClient
+        // Cargar usuario guardado al inicializar
+        loadSavedUser()
     }
     
     // MARK: - Registro de Usuario (Corregido)
@@ -51,12 +54,41 @@ class AuthenticationController: ObservableObject {
             let accessTokenSaved = TokenStorage.set(.access, value: loginResponse.accessToken)
             let refreshTokenSaved = TokenStorage.set(.refresh, value: loginResponse.refreshToken)
             
+            // Guardamos la información del usuario
+            if accessTokenSaved && refreshTokenSaved {
+                saveUser(loginResponse.user)
+                self.currentUser = loginResponse.user
+            }
+            
             return accessTokenSaved && refreshTokenSaved
             
         } catch {
             self.errorMessage = error.localizedDescription
             throw error // Re-lanzamos el error para que la vista lo capture
         }
+    }
+    
+    // MARK: - Gestión de Usuario
+    private func saveUser(_ user: User) {
+        if let userData = try? JSONEncoder().encode(user) {
+            UserDefaults.standard.set(userData, forKey: "currentUser")
+        }
+    }
+    
+    private func loadSavedUser() {
+        if let userData = UserDefaults.standard.data(forKey: "currentUser"),
+           let user = try? JSONDecoder().decode(User.self, from: userData) {
+            self.currentUser = user
+        }
+    }
+    
+    func clearUserData() {
+        UserDefaults.standard.removeObject(forKey: "currentUser")
+        self.currentUser = nil
+    }
+    
+    func getCurrentUserId() -> Int? {
+        return currentUser?.id
     }
     
     func getAccessToken() -> String? {
