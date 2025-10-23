@@ -394,7 +394,6 @@ struct NotificationRow: View {
             Spacer()
             
             VStack {
-                chevronIcon
                 Spacer()
                 if !notification.isRead {
                     unreadIndicator
@@ -434,12 +433,6 @@ struct NotificationRow: View {
                 .font(.poppinsRegular(size: 12))
                 .foregroundColor(.gray.opacity(0.7))
         }
-    }
-    
-    private var chevronIcon: some View {
-        Image(systemName: "chevron.right")
-            .font(.system(size: 14))
-            .foregroundColor(.gray.opacity(0.5))
     }
     
     private var unreadIndicator: some View {

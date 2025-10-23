@@ -11,6 +11,7 @@ struct ScreenHome: View {
     @State private var urlInput: String = ""
     @State private var selectedTab: Tab = .home
     @EnvironmentObject var authController: AuthenticationController
+    @StateObject private var notificacionesController = NotificacionesController()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -87,17 +88,18 @@ struct ScreenHome: View {
 
                 // Botón de notificaciones
                 NavigationLink(destination: ScreenNotifications().environmentObject(authController)) {
-                    Image(systemName: "bell.fill")
-                        .font(.title)
-                        .foregroundColor(Color(red: 0.0, green: 0.71, blue: 0.737))
+                    Image("icono-noti 1")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
+                        .padding(10)
                         .overlay(
-                            Text("1")
-                                .font(.caption2)
-                                .foregroundColor(.white)
-                                .padding(5)
-                                .background(Color.red)
-                                .clipShape(Circle())
-                                .offset(x: 10, y: -10)
+                            // Solo mostrar el círculo rojo si hay notificaciones sin leer
+                            notificacionesController.unreadCount > 0 ? 
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 16, height: 16)
+                                .offset(x: 10, y: -10) : nil
                         )
                 }
                 .padding(.trailing, 30)
@@ -109,6 +111,20 @@ struct ScreenHome: View {
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .edgesIgnoringSafeArea(.bottom)
+        .task {
+            // Cargar el conteo de notificaciones no leídas al aparecer la vista
+            if let userId = authController.getCurrentUserId() {
+                await notificacionesController.obtenerConteoNoLeidas(userId: userId)
+            }
+        }
+        .onAppear {
+            // Actualizar el conteo cada vez que aparece la vista
+            Task {
+                if let userId = authController.getCurrentUserId() {
+                    await notificacionesController.obtenerConteoNoLeidas(userId: userId)
+                }
+            }
+        }
     }
 }
 
