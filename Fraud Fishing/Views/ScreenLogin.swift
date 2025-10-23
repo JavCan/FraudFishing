@@ -61,17 +61,7 @@ struct ScreenLogin: View {
                         isPasswordToggle: true,
                         isPasswordVisible: $isPasswordVisible
                     )
-
-                    // MARK: - Olvidé mi Contraseña (sin cambios)
-                    Button(action: {}) {
-                        Text("Olvidé mi contraseña")
-                            .font(.poppinsRegular(size: 15))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.trailing, 30)
-                    .padding(.top, 10)
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 20)
 
                     // MARK: - Botón Iniciar Sesión
                     Button(action: {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BuscarTabBar: View {
     @Binding var selectedTab: Tab
+    @EnvironmentObject var authController: AuthenticationController
 
     var body: some View {
         let turquoise = Color(red: 0.0, green: 0.71, blue: 0.737)
@@ -26,7 +27,7 @@ struct BuscarTabBar: View {
                         .font(.system(size: 24))
                         .foregroundColor(.white)
                 } else {
-                    NavigationLink(destination: ScreenDashboard()) {
+                    NavigationLink(destination: ScreenDashboard().environmentObject(authController)) {
                         Image(systemName: "chart.bar.fill")
                             .font(.system(size: 24))
                             .foregroundColor(Color(red: 0.537, green: 0.616, blue: 0.733))

@@ -52,6 +52,11 @@ struct CompactReportCard: View {
                     Task { await toggleVote() }
                 } label: {
                     HStack(spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(report.voteCount)")
+                                .font(.poppinsBold(size: 16))
+                                .foregroundColor(.white)
+                        }
                         ZStack {
                             Circle()
                                 .fill(hasVoted ? Color(red: 0.0, green: 0.8, blue: 0.7) : Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15))
@@ -60,16 +65,21 @@ struct CompactReportCard: View {
                                 .foregroundColor(hasVoted ? .white : Color(red: 0.0, green: 0.8, blue: 0.7))
                                 .font(.system(size: 14, weight: .semibold))
                         }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(report.voteCount)")
-                                .font(.poppinsBold(size: 16))
-                                .foregroundColor(.white)
-                        }
                     }
+                    .frame(maxWidth: 60)
+                    .padding(.vertical, 14)
                     .opacity(isVoting ? 0.5 : 1.0)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(isVoting)
+                
+                // Mostrar error de voto si existe
+                if let voteError = voteError {
+                    Text(voteError)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding(.top, 4)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 16)
@@ -155,6 +165,7 @@ struct CompactReportCard: View {
                     }
                 }
             }
+            .cornerRadius(12)
             .buttonStyle(PlainButtonStyle())
             .frame(height: 120)
             .padding(.horizontal, 16)
@@ -223,11 +234,14 @@ struct CompactReportCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
         .shadow(color: Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.06), radius: 16, x: 0, y: 8)
-        .fullScreenCover(isPresented: $showImageOverlay) {
-            if let imageURL = report.imageUrl {
-                ImageOverlayView(imageURL: imageURL, isPresented: $showImageOverlay)
+        .overlay(
+            // Overlay de imagen semitransparente
+            Group {
+                if showImageOverlay, let imageURL = report.imageUrl {
+                    ImageOverlayView(imageURL: imageURL, isPresented: $showImageOverlay)
+                }
             }
-        }
+        )
     }
     
     // MARK: - Helper Methods

@@ -1,5 +1,5 @@
 //
-//  ScreenHome.swift
+//  SrceenDashboard.swift
 //  Fraud Fishing
 //
 //  Created by Victor Bosquez on 02/10/25.
@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 // MARK: - URLItem para navegación
 struct URLItem: Identifiable {
@@ -74,147 +75,150 @@ struct URLReportsView: View {
                     Color(red: 0.043, green: 0.067, blue: 0.173)]),
                                startPoint: UnitPoint(x:0.5, y:0.1),
                                endPoint: .bottom)
-                    .edgesIgnoringSafeArea(.all)
+                .edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 0) {
-                    // Header
-                    HStack {
-                        Button("Cerrar") {
-                            isPresented = nil
-                        }
-                        .foregroundColor(.white)
-                        .font(.system(size: 16, weight: .medium))
-                        
-                        Spacer()
-                        
-                        VStack(spacing: 4) {
-                            Text("Reportes para")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.white.opacity(0.8))
-                            Text(displayURL)
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                                .lineLimit(1)
-                        }
-                        
-                        Spacer()
-                        
-                        // Placeholder para balance visual
-                        Color.clear.frame(width: 50)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    
-                    // Contenido
-                    if controller.isLoading {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            ProgressView()
-                                .tint(Color(red: 0.0, green: 0.8, blue: 0.7))
-                                .scaleEffect(1.2)
-                            Text("Cargando reportes...")
-                                .font(.system(size: 16))
-                                .foregroundColor(.white.opacity(0.7))
-                        }
-                        Spacer()
-                    } else if let errorMessage = controller.errorMessage {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.system(size: 50))
-                                .foregroundColor(.red.opacity(0.7))
-                            Text("Error al cargar reportes")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                            Text(errorMessage)
-                                .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.7))
-                                .multilineTextAlignment(.center)
-                        }
-                        Spacer()
-                    } else if controller.reports.isEmpty {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 50))
-                                .foregroundColor(.white.opacity(0.3))
-                            Text("No hay reportes")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                            Text("No se encontraron reportes para esta URL")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.7))
-                                .multilineTextAlignment(.center)
-                        }
-                        Spacer()
-                    } else {
-                        // Lista de reportes
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                // Estadísticas resumidas
-                                VStack(spacing: 12) {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Total de reportes")
-                                                .font(.system(size: 12, weight: .medium))
-                                                .foregroundColor(.white.opacity(0.7))
-                                            Text("\(controller.reports.count)")
-                                                .font(.system(size: 24, weight: .bold))
-                                                .foregroundColor(.white)
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        VStack(alignment: .trailing, spacing: 4) {
-                                            Text("Total de votos")
-                                                .font(.system(size: 12, weight: .medium))
-                                                .foregroundColor(.white.opacity(0.7))
-                                            Text("\(controller.totalVotes)")
-                                                .font(.system(size: 24, weight: .bold))
-                                                .foregroundColor(Color(red: 0.8, green: 0.2, blue: 0.2))
-                                        }
-                                    }
-                                    
-                                    if let mainCategory = controller.mainCategory {
-                                        HStack {
-                                            Text("Categoría principal:")
-                                                .font(.system(size: 12, weight: .medium))
-                                                .foregroundColor(.white.opacity(0.7))
-                                            Text(mainCategory)
-                                                .font(.system(size: 12, weight: .semibold))
-                                                .foregroundColor(.white)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 3)
-                                                .background(Color(red: 0.0, green: 0.8, blue: 0.7))
-                                                .cornerRadius(6)
-                                            Spacer()
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 16)
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(12)
-                                .padding(.horizontal, 20)
-                                
-                                // Lista de reportes
-                                ForEach(controller.reports.indices, id: \.self) { index in
-                                    NavigationLink(destination: ReportDetailView(report: $controller.reports[index])) {
-                                        CompactReportCard(report: $controller.reports[index])
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    .padding(.horizontal, 20)
-                                }
+                    VStack(spacing: 0) {
+                        // Header
+                        HStack {
+                            Button("Cerrar") {
+                                isPresented = nil
                             }
-                            .padding(.bottom, 20)
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                            
+                            Spacer()
+                            
+                            VStack(spacing: 4) {
+                                Text("Reportes para")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.8))
+                                Text(displayURL)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                            }
+                            
+                            Spacer()
+                            
+                            // Placeholder para balance visual
+                            Color.clear.frame(width: 50)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        
+                        // Contenido
+                        if controller.isLoading {
+                            Spacer()
+                            VStack(spacing: 16) {
+                                ProgressView()
+                                    .tint(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                    .scaleEffect(1.2)
+                                Text("Cargando reportes...")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            Spacer()
+                        } else if let errorMessage = controller.errorMessage {
+                            Spacer()
+                            VStack(spacing: 16) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.red.opacity(0.7))
+                                Text("Error al cargar reportes")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.white)
+                                Text(errorMessage)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                            }
+                            Spacer()
+                        } else if controller.reports.isEmpty {
+                            Spacer()
+                            VStack(spacing: 16) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.white.opacity(0.3))
+                                Text("No hay reportes")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.white)
+                                Text("No se encontraron reportes para esta URL")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                            }
+                            Spacer()
+                        } else {
+                            // Lista de reportes
+                            ScrollView {
+                                LazyVStack(spacing: 16) {
+                                    // Estadísticas resumidas
+                                    VStack(spacing: 12) {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text("Total de reportes")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.white.opacity(0.7))
+                                                Text("\(controller.reports.count)")
+                                                    .font(.system(size: 24, weight: .bold))
+                                                    .foregroundColor(.white)
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            VStack(alignment: .trailing, spacing: 4) {
+                                                Text("Total de votos")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.white.opacity(0.7))
+                                                Text("\(controller.totalVotes)")
+                                                    .font(.system(size: 24, weight: .bold))
+                                                    .foregroundColor(Color(red: 0.8, green: 0.2, blue: 0.2))
+                                            }
+                                        }
+                                        
+                                        if let mainCategory = controller.mainCategory {
+                                            HStack {
+                                                Text("Categoría principal:")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.white.opacity(0.7))
+                                                Text(mainCategory)
+                                                    .font(.system(size: 12, weight: .semibold))
+                                                    .foregroundColor(.white)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 3)
+                                                    .background(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                                    .cornerRadius(6)
+                                                Spacer()
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 16)
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(12)
+                                    .padding(.horizontal, 20)
+                                    
+                                    // Lista de reportes
+                                    ForEach(controller.reports.indices, id: \.self) { index in
+                                        NavigationLink(destination: ReportDetailView(report: $controller.reports[index])) {
+                                            CompactReportCard(report: $controller.reports[index])
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                        .padding(.horizontal, 20)
+                                    }
+                                }
+                                .padding(.bottom, 20)
+                            }
                         }
                     }
+                    
                 }
             }
-        }
-        .onAppear {
-            Task {
-                await controller.loadReports(for: url)
+            .onAppear {
+                Task {
+                    await controller.loadReports(for: url)
+                }
             }
         }
     }
@@ -226,6 +230,7 @@ struct ScreenDashboard: View {
     @State private var selectedTab: Tab = .dashboard
     @State private var showReportsForURL: URLItem? = nil
     @State private var hasAnimatedScroll = false
+    @EnvironmentObject var authController: AuthenticationController
     
     // Computed property for all categories
     private var allCategories: [String] {
@@ -246,6 +251,27 @@ struct ScreenDashboard: View {
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 0) {
+                    // Botón para limpiar filtros si hay una URL seleccionada
+                    if dashboardController.selectedURL != nil {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                dashboardController.clearFilters()
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "xmark.circle.fill")
+                                Text("Limpiar filtros")
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.red.opacity(0.8))
+                            .cornerRadius(20)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 10)
+                    }
+                    
                     // Header con título y notificaciones
                     HStack {
                         Text("Reportes Destacados")
@@ -333,7 +359,7 @@ struct ScreenDashboard: View {
                                     .cornerRadius(8)
                                 }
                                 .padding(.top, 60)
-                            } else if dashboardController.reports.filter({ dashboardController.selectedCategory == "Todas" || $0.categoryName == dashboardController.selectedCategory }).isEmpty {
+                            } else if dashboardController.filteredReports.isEmpty {
                                 // Estado vacío
                                 DashboardEmptyStateView(
                                     icon: "magnifyingglass",
@@ -368,15 +394,30 @@ struct ScreenDashboard: View {
                                 
                                 // Cards compactos de reportes con scroll vertical
                                 LazyVStack(spacing: 16) {
-                                    ForEach(dashboardController.reports.indices, id: \.self) { index in
-                                        let report = dashboardController.reports[index]
-                                        if dashboardController.selectedCategory == "Todas" || report.categoryName == dashboardController.selectedCategory {
-                                            NavigationLink(destination: ReportDetailView(report: $dashboardController.reports[index])) {
-                                                CompactReportCard(report: $dashboardController.reports[index])
+                                    let filteredReports = dashboardController.reports
+                                        .filter { report in
+                                            // Filtrar por URL si está seleccionada
+                                            if let selectedURL = dashboardController.selectedURL {
+                                                return report.url == selectedURL
                                             }
-                                            .buttonStyle(PlainButtonStyle())
-                                            .padding(.horizontal, 20)
+                                            return true
                                         }
+                                        .filter { report in
+                                            // Filtrar por categoría
+                                            if dashboardController.selectedCategory != "Todas" {
+                                                return report.categoryName == dashboardController.selectedCategory
+                                            }
+                                            return true
+                                        }
+                                        .sorted { $0.voteCount > $1.voteCount }
+                                    
+                                    ForEach(Array(filteredReports.enumerated()), id: \.element.id) { index, report in
+                                        let reportIndex = dashboardController.reports.firstIndex { $0.id == report.id } ?? 0
+                                        NavigationLink(destination: ReportDetailView(report: $dashboardController.reports[reportIndex])) {
+                                            CompactReportCard(report: $dashboardController.reports[reportIndex])
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                        .padding(.horizontal, 20)
                                     }
                                 }
                             }
@@ -397,7 +438,7 @@ struct ScreenDashboard: View {
         .toolbar(.hidden, for: .navigationBar)
         .edgesIgnoringSafeArea(.bottom)
         .sheet(isPresented: $showNotificaciones) {
-            ScreenNotifications()
+            ScreenNotifications().environmentObject(authController)
         }
         .sheet(item: $showReportsForURL) { urlItem in
             URLReportsView(url: urlItem.url, isPresented: $showReportsForURL)
@@ -414,34 +455,143 @@ struct ScreenDashboard: View {
 struct ImageOverlayView: View {
     let imageURL: String
     @Binding var isPresented: Bool
+    @State private var scale: CGFloat = 0.5
+    @State private var opacity: Double = 0.0
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            // Fondo semitransparente que permite ver el contenido de atrás
+            Color.black.opacity(0.9)
+                .edgesIgnoringSafeArea(.all)
+                .onTapGesture {
+                    dismissOverlay()
+                }
             
-            VStack {
+            VStack(spacing: 20) {
+                // Botón de cierre
                 HStack {
                     Spacer()
-                    Button("Cerrar") {
-                        isPresented = false
+                    Button(action: {
+                        dismissOverlay()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.white)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
                     }
-                    .foregroundColor(.white)
-                    .padding()
+                    .padding(.trailing, 20)
+                    .padding(.top, 20)
                 }
                 
                 Spacer()
                 
-                AsyncImage(url: URL(string: imageURL)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    ProgressView()
-                        .tint(.white)
+                // Imagen principal con fondo semitransparente
+                if let url = URL(string: imageURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            VStack(spacing: 16) {
+                                ProgressView()
+                                    .tint(Color(red: 0.0, green: 0.8, blue: 0.7))
+                                    .scaleEffect(1.5)
+                                Text("Cargando imagen...")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: 300)
+                            .background(Color.black.opacity(0.9))
+                            .cornerRadius(16)
+                            
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: UIScreen.main.bounds.width - 40)
+                                .frame(maxHeight: UIScreen.main.bounds.height * 0.7)
+                                .background(Color.black.opacity(0.2))
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                                
+                        case .failure(let error):
+                            VStack(spacing: 16) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.red.opacity(0.8))
+                                Text("Error al cargar la imagen")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.white)
+                                Text("No se pudo cargar la imagen desde el servidor")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                                
+                                Button("Cerrar") {
+                                    dismissOverlay()
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.red.opacity(0.8))
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: 300)
+                            .background(Color.black.opacity(0.9))
+                            .cornerRadius(16)
+                            
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                } else {
+                    VStack(spacing: 16) {
+                        Image(systemName: "photo.badge.exclamationmark")
+                            .font(.system(size: 50))
+                            .foregroundColor(.orange.opacity(0.8))
+                        Text("URL de imagen inválida")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("La URL proporcionada no es válida")
+                            .font(.system(size: 14))
+                            .foregroundColor(.white.opacity(0.9))
+                            .multilineTextAlignment(.center)
+                        
+                        Button("Cerrar") {
+                            dismissOverlay()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.orange.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+                    .background(Color.black.opacity(0.9))
+                    .cornerRadius(16)
                 }
                 
                 Spacer()
             }
+            Spacer()
+        }
+        .scaleEffect(scale)
+        .opacity(opacity)
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                scale = 1.0
+                opacity = 1.0
+            }
+        }
+    }
+    
+    private func dismissOverlay() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            scale = 0.8
+            opacity = 0.0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isPresented = false
         }
     }
 }

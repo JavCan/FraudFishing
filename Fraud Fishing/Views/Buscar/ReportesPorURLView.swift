@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ReportesPorURLView: View {
+    @Environment(\.dismiss) private var dismiss
     @Binding var reports: [ReportResponse]
     let searchedURL: String
 
@@ -61,6 +62,17 @@ struct ReportesPorURLView: View {
         }
         .onAppear {
             displayedCount = min(pageSize, reports.count)
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { dismiss() }) {
+                    ZStack {
+                        Circle().fill(Color.white.opacity(0.1)).frame(width: 36, height: 36)
+                        Image(systemName: "chevron.left").foregroundColor(.white).font(.system(size: 16, weight: .semibold))
+                    }
+                }
+            }
         }
     }
 
