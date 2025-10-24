@@ -15,7 +15,7 @@ final class HTTPFile {
     /// - Parameter imageData: Los datos de la imagen a subir
     /// - Returns: La respuesta con la información del archivo subido
     func uploadImage(imageData: Data) async throws -> FileUploadResponse {
-        guard let url = URL(string: "http://localhost:3000/files/upload") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/files/upload") else {
             throw URLError(.badURL)
         }
         

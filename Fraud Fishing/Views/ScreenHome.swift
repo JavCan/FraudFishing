@@ -8,10 +8,53 @@
 import SwiftUI
 
 struct ScreenHome: View {
-    @State private var urlInput: String = ""
+    @State private var urlInput: String = "https://"
     @State private var selectedTab: Tab = .home
+    @State private var isValidURL: Bool = false
+    @State private var urlErrorMessage: String = ""
     @EnvironmentObject var authController: AuthenticationController
     @StateObject private var notificacionesController = NotificacionesController()
+    
+    // Validación de URL en tiempo real
+    private func validateURL(_ url: String) {
+        let trimmedURL = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Verificar que comience con https://
+        guard trimmedURL.hasPrefix("https://") else {
+            isValidURL = false
+            urlErrorMessage = "La URL debe comenzar con https://"
+            return
+        }
+        
+        // Verificar longitud mínima (https:// + dominio mínimo)
+        guard trimmedURL.count >= 12 else { // https://a.co = 12 caracteres mínimo
+            isValidURL = false
+            urlErrorMessage = "URL demasiado corta"
+            return
+        }
+        
+        // Extraer la parte después de https://
+        let urlWithoutProtocol = String(trimmedURL.dropFirst(8))
+        
+        // Verificar que no esté vacía después del protocolo
+        guard !urlWithoutProtocol.isEmpty else {
+            isValidURL = false
+            urlErrorMessage = "Ingresa un dominio válido"
+            return
+        }
+        
+        // Verificar formato básico de dominio
+        let domainRegex = "^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.[a-zA-Z]{2,}(\\.[a-zA-Z]{2,})*(/.*)?$"
+        let domainPredicate = NSPredicate(format: "SELF MATCHES %@", domainRegex)
+        
+        if domainPredicate.evaluate(with: urlWithoutProtocol) {
+            isValidURL = true
+            urlErrorMessage = ""
+        } else {
+            isValidURL = false
+            urlErrorMessage = "Formato de dominio inválido"
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -39,23 +82,50 @@ struct ScreenHome: View {
                         Spacer()
                     }
 
-                    // Barra de entrada de URL
-                    HStack {
-                        TextField("URL", text: $urlInput)
-                            .padding()
-                            .background(Color(red: 0.0, green: 0.71, blue: 0.737, opacity: 0.2))
-                            .foregroundColor(.white)
-                            .cornerRadius(25)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(Color(red: 0.0, green: 0.71, blue: 0.737))
-                            )
-                            .padding(.leading, 20)
-                            .padding(.trailing, 20)
+                    // Barra de entrada de URL con validación
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            TextField("Escribe tu URL", text: $urlInput)
+                                .padding()
+                                .background(Color(red: 0.0, green: 0.71, blue: 0.737, opacity: 0.2))
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(
+                                            urlInput.count > 8 ? (isValidURL ? Color.green : Color.red) : Color(red: 0.0, green: 0.71, blue: 0.737),
+                                            lineWidth: urlInput.count > 8 ? 2 : 1
+                                        )
+                                )
+                                .padding(.leading, 20)
+                                .padding(.trailing, 20)
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.URL)
+                                .autocorrectionDisabled()
+                                .onChange(of: urlInput) { newValue in
+                                    validateURL(newValue)
+                                }
+                        }
+                        
+                        // Mensaje de error
+                        if !urlErrorMessage.isEmpty && urlInput.count > 8 {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 12))
+                                Text(urlErrorMessage)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 25)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                            .animation(.easeInOut(duration: 0.2), value: urlErrorMessage)
+                        }
                     }
                     .padding(.bottom, 30)
 
-                    // Botones de Reportar y Buscar
+                    // Botones de Reportar y Buscar con validación
                     HStack(spacing: 20) {
                         NavigationLink(destination: ScreenCreateReport(reportedURL: urlInput)) {
                             Text("Reportar")
@@ -64,9 +134,11 @@ struct ScreenHome: View {
                                 .foregroundColor(.white)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color.red)
+                                .background(isValidURL ? Color.red : Color.gray)
                                 .cornerRadius(10)
+                                .opacity(isValidURL ? 1.0 : 0.6)
                         }
+                        .disabled(!isValidURL)
 
                         NavigationLink(destination: ScreenBuscar(searchedURL: urlInput).environmentObject(authController)) {
                             Text("Buscar")
@@ -75,9 +147,11 @@ struct ScreenHome: View {
                                 .foregroundColor(.white)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color(red: 0.0, green: 0.71, blue: 0.737))
+                                .background(isValidURL ? Color(red: 0.0, green: 0.71, blue: 0.737) : Color.gray)
                                 .cornerRadius(10)
+                                .opacity(isValidURL ? 1.0 : 0.6)
                         }
+                        .disabled(!isValidURL)
                     }
                     .padding(.horizontal, 30)
                     .padding(.bottom, 50)
@@ -124,6 +198,8 @@ struct ScreenHome: View {
                     await notificacionesController.obtenerConteoNoLeidas(userId: userId)
                 }
             }
+            // Validar URL inicial
+            validateURL(urlInput)
         }
     }
 }

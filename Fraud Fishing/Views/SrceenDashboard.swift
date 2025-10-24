@@ -251,74 +251,69 @@ struct ScreenDashboard: View {
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 0) {
-                    // Botón para limpiar filtros si hay una URL seleccionada
-                    if dashboardController.selectedURL != nil {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                dashboardController.clearFilters()
-                            }
-                        }) {
-                            HStack {
-                                Image(systemName: "xmark.circle.fill")
-                                Text("Limpiar filtros")
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.red.opacity(0.8))
-                            .cornerRadius(20)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 10)
-                    }
-                    
-                    // Header con título y notificaciones
                     HStack {
                         Text("Reportes Destacados")
-                            .font(.system(size: 24, weight: .bold))
+                            .font(.poppinsBold(size: 24))
                             .foregroundColor(.white)
                         Spacer()
                     }
                     .padding(.horizontal, 20)
+                    .padding(.top, 15)
+                    .padding(.bottom, 10)
+                    
+                    // Controles de filtros alineados en una barra horizontal
+                    HStack {
+                        // Dropdown de categorías al lado derecho
+                        Menu {
+                            ForEach(allCategories, id: \.self) { categoria in
+                                Button(categoria) {
+                                    withAnimation(.spring(response: 0.3)) {
+                                        dashboardController.selectCategory(categoria)
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Text(dashboardController.selectedCategory)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white)
+                                Image(systemName: "chevron.down")
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(Color.white.opacity(0.12))
+                            .cornerRadius(10)
+                        }
+                        
+                        Spacer()
+                        
+                        // Botón Limpiar filtros al lado izquierdo
+                        if dashboardController.selectedURL != nil || (dashboardController.selectedCategory != "Todas") {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    dashboardController.clearFilters()
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "xmark.circle.fill")
+                                    Text("Limpiar filtros")
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.red.opacity(0.8))
+                                .cornerRadius(20)
+                            }
+                        } else {
+                            // Mantener altura y ergonomía
+                            Spacer().frame(height: 0)
+                        }
+                        
+                    }
+                    .padding(.horizontal, 20)
                     .padding(.top, 10)
                     .padding(.bottom, 15)
-
-                    // Filtros de categorías con scroll horizontal
-                    ScrollViewReader { proxy in
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(allCategories, id: \.self) { categoria in
-                                    CategoryChip(
-                                        title: categoria,
-                                        isSelected: dashboardController.selectedCategory == categoria,
-                                        action: {
-                                            withAnimation(.spring(response: 0.3)) {
-                                                dashboardController.selectCategory(categoria)
-                                            }
-                                        }
-                                    )
-                                    .id(categoria)
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                        .onAppear {
-                            if !hasAnimatedScroll && allCategories.count > 3 {
-                                hasAnimatedScroll = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    withAnimation(.easeInOut(duration: 2.0)) {
-                                        proxy.scrollTo(allCategories.last, anchor: .trailing)
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                        withAnimation(.easeInOut(duration: 2.0)) {
-                                            proxy.scrollTo(allCategories.first, anchor: .leading)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.bottom, 20)
 
                     // Contenido principal con scroll vertical
                     ScrollView {
@@ -382,11 +377,10 @@ struct ScreenDashboard: View {
                                             report: reporte,
                                             position: index + 1,
                                             onTap: {
-                                                // Filtrar reportes por esta URL en la vista principal
-                                                withAnimation(.spring(response: 0.3)) {
-                                                    dashboardController.selectURL(reporte.url)
-                                                }
-                                            }
+                                                // Quitar animación; selección directa
+                                                dashboardController.selectURL(reporte.url)
+                                            },
+                                            isSelected: dashboardController.selectedURL == reporte.url
                                         )
                                     }
                                 }
@@ -649,6 +643,7 @@ struct TopSiteCard: View {
     let report: ReportResponse
     let position: Int
     let onTap: () -> Void
+    let isSelected: Bool
     
     var medalColor: Color {
         switch position {
@@ -722,6 +717,13 @@ struct TopSiteCard: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(medalColor.opacity(0.3), lineWidth: 2)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        isSelected ? Color(red: 0.0, green: 0.71, blue: 0.737) : Color.clear,
+                        lineWidth: isSelected ? 3 : 0
+                    )
             )
         }
         .buttonStyle(PlainButtonStyle())

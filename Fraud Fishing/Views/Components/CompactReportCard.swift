@@ -85,88 +85,91 @@ struct CompactReportCard: View {
             .padding(.top, 16)
             .padding(.bottom, 12)
             
-            // Imagen compacta
-            Button(action: {
-                if report.imageUrl != nil {
-                    showImageOverlay = true
-                }
-            }) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15),
-                                    Color(red: 0.0, green: 0.6, blue: 0.7).opacity(0.08)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+            // Imagen compacta (sin acción de clic)
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.15),
+                                Color(red: 0.0, green: 0.6, blue: 0.7).opacity(0.08)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        )
-                    
-                    if let imageUrl = report.imageUrl, let url = URL(string: imageUrl) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                                    .tint(Color(red: 0.0, green: 0.71, blue: 0.737))
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(height: 120)
-                                    .clipped()
-                                    .overlay(
-                                        VStack {
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+                
+                if let imageUrl = report.imageUrl, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .tint(Color(red: 0.0, green: 0.71, blue: 0.737))
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 120)
+                                .clipped()
+                                .overlay(
+                                    VStack {
+                                        Spacer()
+                                        HStack {
                                             Spacer()
-                                            HStack {
-                                                Spacer()
+                                            // Botón específico para el overlay con transición suave
+                                            Button(action: {
+                                                withAnimation(.easeInOut(duration: 0.3)) {
+                                                    showImageOverlay = true
+                                                }
+                                            }) {
                                                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                                                     .font(.system(size: 12))
                                                     .foregroundColor(.white)
                                                     .padding(6)
                                                     .background(Color.black.opacity(0.5))
                                                     .clipShape(Circle())
-                                                    .padding(8)
                                             }
+                                            .buttonStyle(PlainButtonStyle())
+                                            .accessibilityLabel("Ver imagen en pantalla completa")
+                                            .accessibilityHint("Toca para abrir la imagen en una vista ampliada")
+                                            .padding(8)
                                         }
-                                    )
-                            case .failure:
-                                VStack(spacing: 6) {
-                                    Image(systemName: "exclamationmark.triangle")
-                                        .foregroundColor(.red.opacity(0.6))
-                                        .font(.system(size: 24))
-                                    Text("Error al cargar")
-                                        .font(.system(size: 10))
-                                        .foregroundColor(.white.opacity(0.5))
-                                }
-                            @unknown default:
-                                EmptyView()
+                                    }
+                                )
+                        case .failure:
+                            VStack(spacing: 6) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundColor(.red.opacity(0.6))
+                                    .font(.system(size: 24))
+                                Text("Error al cargar")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.5))
                             }
+                        @unknown default:
+                            EmptyView()
                         }
-                    } else {
-                        VStack(spacing: 8) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white.opacity(0.08))
-                                    .frame(width: 50, height: 50)
-                                Image(systemName: "photo")
-                                    .foregroundColor(.white.opacity(0.4))
-                                    .font(.system(size: 20))
-                            }
-                            Text("Sin imagen")
-                                .font(.system(size: 10))
-                                .foregroundColor(.white.opacity(0.3))
+                    }
+                } else {
+                    VStack(spacing: 8) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.08))
+                                .frame(width: 50, height: 50)
+                            Image(systemName: "photo")
+                                .foregroundColor(.white.opacity(0.4))
+                                .font(.system(size: 20))
                         }
+                        Text("Sin imagen")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.3))
                     }
                 }
             }
             .cornerRadius(12)
-            .buttonStyle(PlainButtonStyle())
             .frame(height: 120)
             .padding(.horizontal, 16)
             .padding(.bottom, 12)
@@ -235,10 +238,15 @@ struct CompactReportCard: View {
         .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
         .shadow(color: Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.06), radius: 16, x: 0, y: 8)
         .overlay(
-            // Overlay de imagen semitransparente
+            // Overlay de imagen con transición suave
             Group {
                 if showImageOverlay, let imageURL = report.imageUrl {
                     ImageOverlayView(imageURL: imageURL, isPresented: $showImageOverlay)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.8).combined(with: .opacity),
+                            removal: .scale(scale: 0.9).combined(with: .opacity)
+                        ))
+                        .animation(.easeInOut(duration: 0.3), value: showImageOverlay)
                 }
             }
         )

@@ -4,7 +4,7 @@ final class HTTPReport {
     private let executor = RequestExecutor()
 
     func searchReports(byURL urlString: String) async throws -> [ReportResponse] {
-        var components = URLComponents(string: "http://localhost:3000/reports")
+        var components = URLComponents(string: "https://89dbbd662624.ngrok-free.app/reports")
         components?.queryItems = [
             URLQueryItem(name: "url", value: urlString),
             URLQueryItem(name: "include", value: "tags"),
@@ -45,7 +45,7 @@ final class HTTPReport {
         limit: Int? = nil
     ) async throws -> [ReportResponse] {
         
-        var components = URLComponents(string: "http://localhost:3000/reports")
+        var components = URLComponents(string: "https://89dbbd662624.ngrok-free.app/reports")
         var queryItems: [URLQueryItem] = []
         
         if let status = status { queryItems.append(URLQueryItem(name: "status", value: status)) }
@@ -98,7 +98,7 @@ final class HTTPReport {
     }
 
     func createReport(reportData: CreateReportRequest) async throws -> ReportResponse {
-        guard let url = URL(string: "http://localhost:3000/reports") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/reports") else {
             throw URLError(.badURL)
         }
 
@@ -150,7 +150,7 @@ final class HTTPReport {
         }
         
         // Construir URL con query parameters
-        var components = URLComponents(string: "http://localhost:3000/reports")
+        var components = URLComponents(string: "https://89dbbd662624.ngrok-free.app/reports")
         components?.queryItems = [
             URLQueryItem(name: "status", value: "\(status)"),
             URLQueryItem(name: "userId", value: "\(userId)")
@@ -230,7 +230,7 @@ final class HTTPReport {
     
     // MARK: - Obtener todas las categorías disponibles
     func getCategories() async throws -> [CategoryDTO] {
-        guard let url = URL(string: "http://localhost:3000/categories") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/categories") else {
             throw URLError(.badURL)
         }
         
@@ -265,7 +265,7 @@ final class HTTPReport {
 
     // MARK: - Obtener categoría de un reporte específico
     func getReportCategory(reportId: Int) async throws -> ReportCategoryResponse {
-        let url = URL(string: "http://localhost:3000/reports/\(reportId)/category")!
+        let url = URL(string: "https://89dbbd662624.ngrok-free.app/reports/\(reportId)/category")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -299,7 +299,7 @@ final class HTTPReport {
     /// - Parameter reportId: ID del reporte
     /// - Returns: Array de tags
     func getReportTags(reportId: Int) async throws -> [TagResponse] {
-        guard let url = URL(string: "http://localhost:3000/reports/\(reportId)/tags") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/reports/\(reportId)/tags") else {
             throw URLError(.badURL)
         }
 
@@ -338,7 +338,7 @@ final class HTTPReport {
     /// - Parameter reportId: ID del reporte a votar
     /// - Returns: VoteResponse con el nuevo estado de votación
     func voteReport(reportId: Int) async throws -> VoteResponse {
-        guard let url = URL(string: "http://localhost:3000/reports/\(reportId)/vote") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/reports/\(reportId)/vote") else {
             throw URLError(.badURL)
         }
         

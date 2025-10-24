@@ -4,7 +4,7 @@ final class HTTPComment {
     private let executor = RequestExecutor()
 
     func fetchComments(reportId: Int) async throws -> [CommentResponse] {
-        guard let url = URL(string: "http://localhost:3000/comments/report/\(reportId)") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/comments/report/\(reportId)") else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)
@@ -14,7 +14,7 @@ final class HTTPComment {
     }
 
     func createComment(reportId: Int, text: String) async throws -> CommentResponse {
-        guard let url = URL(string: "http://localhost:3000/comments") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/comments") else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)
@@ -26,7 +26,7 @@ final class HTTPComment {
     }
     
     func createCommentWithTitle(reportId: Int, title: String, content: String) async throws -> CommentResponse {
-        guard let url = URL(string: "http://localhost:3000/comments") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/comments") else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)

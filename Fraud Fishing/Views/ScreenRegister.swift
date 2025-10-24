@@ -199,8 +199,7 @@ struct ScreenRegister: View {
     private func formularioValido() -> Bool {
         return !nombre.trimmingCharacters(in: .whitespaces).isEmpty &&
                validarCorreo() &&
-               contrasena.count >= 6 &&
-               contrasena.rangeOfCharacter(from: .decimalDigits) != nil &&
+               passwordCumpleRequisitos(contrasena) &&
                contrasena == confirmarContrasena
     }
 
@@ -209,9 +208,25 @@ struct ScreenRegister: View {
         return NSPredicate(format:"SELF MATCHES %@", regex)
             .evaluate(with: correo.trimmingCharacters(in: .whitespacesAndNewlines))
     }
+    
+    private func passwordCumpleRequisitos(_ password: String) -> Bool {
+        let hasMinLength = password.count >= 6
+        let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
+        let hasLowercase = password.range(of: "[a-z]", options: .regularExpression) != nil
+        let hasNumber = password.range(of: "[0-9]", options: .regularExpression) != nil
+        let hasSpecialChar = password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil
+        
+        return hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecialChar
+    }
 
     @MainActor
     private func registrarUsuario() async {
+        guard passwordCumpleRequisitos(contrasena) else {
+            registroExitoso = false
+            alertMessage = "La contraseña no cumple los requisitos:\n- Mínimo 6 caracteres\n- Mayúscula, minúscula, número y símbolo especial"
+            showAlert = true
+            return
+        }
         do {
             try await authController.registerUser(
                 name: nombre.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -235,9 +250,13 @@ struct PasswordStrengthView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             RequirementView(isMet: password.count >= 6, text: "Al menos 6 caracteres")
-            RequirementView(isMet: password.rangeOfCharacter(from: .decimalDigits) != nil, text: "Al menos un número")
+            RequirementView(isMet: password.range(of: "[A-Z]", options: .regularExpression) != nil, text: "Al menos una letra mayúscula")
+            RequirementView(isMet: password.range(of: "[a-z]", options: .regularExpression) != nil, text: "Al menos una letra minúscula")
+            RequirementView(isMet: password.range(of: "[0-9]", options: .regularExpression) != nil, text: "Al menos un número")
+            RequirementView(isMet: password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil, text: "Al menos un símbolo especial")
         }
-        .font(.caption).foregroundColor(.white.opacity(0.7))
+        .font(.caption)
+        .foregroundColor(.white.opacity(0.7))
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 38)
     }

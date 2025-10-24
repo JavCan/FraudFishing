@@ -10,7 +10,7 @@ import Foundation
 struct HTTPClient {
     
     // MARK: - Base URL
-    let baseURL = "http://localhost:3000"
+    let baseURL = "https://89dbbd662624.ngrok-free.app"
     
     func UserRegistration(_ request: UserRegisterRequest) async throws {
         guard let url = URL(string: "\(baseURL)/users") else {
@@ -52,7 +52,7 @@ struct HTTPClient {
             
         let loginRequest = UserLoginRequest(email: email, password: password)
         
-        guard let url = URL(string: "http://localhost:3000/auth/login") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/auth/login") else {
             throw URLError(.badURL)
         }
         
@@ -91,7 +91,7 @@ struct HTTPClient {
     
     func refreshAccessToken(refreshToken: String) async throws -> String{
         let refreshRequest = RefreshRequest(refreshToken: refreshToken)
-        guard let url = URL(string: "http://localhost:3000/auth/refresh") else {
+        guard let url = URL(string: "https://89dbbd662624.ngrok-free.app/auth/refresh") else {
             throw URLError(.badURL)
         }
         var urlRequest = URLRequest(url: url)
