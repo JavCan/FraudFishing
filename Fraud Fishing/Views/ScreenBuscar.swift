@@ -90,21 +90,32 @@ struct ScreenBuscar: View {
                             ErrorView(message: errorMessage)
                                 .padding(.top, 60)
                         } else if let summary {
-                            NavigationLink(
-                                destination: ReportesPorURLView(
-                                    reports: $reports,
-                                    searchedURL: summary.url
-                                )
-                            ) {
+                            if summary.totalReports > 0 {
+                                NavigationLink(
+                                    destination: ReportesPorURLView(
+                                        reports: $reports,
+                                        searchedURL: summary.url
+                                    )
+                                ) {
+                                    ResumenBusquedaCard(
+                                        total: summary.totalReports,
+                                        url: summary.url,
+                                        tags: Array(tags.prefix(5)),
+                                        categories: Array(categories.prefix(5))
+                                    )
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.top, 20)
+                            } else {
                                 ResumenBusquedaCard(
                                     total: summary.totalReports,
                                     url: summary.url,
                                     tags: Array(tags.prefix(5)),
                                     categories: Array(categories.prefix(5))
                                 )
+                                .padding(.horizontal, 20)
+                                .padding(.top, 20)
                             }
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
                         } else {
                             EmptyResultsView(url: searchedURL)
                                 .padding(.top, 60)

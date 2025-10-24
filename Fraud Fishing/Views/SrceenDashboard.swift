@@ -201,11 +201,8 @@ struct URLReportsView: View {
                                     
                                     // Lista de reportes
                                     ForEach(controller.reports.indices, id: \.self) { index in
-                                        NavigationLink(destination: ReportDetailView(report: $controller.reports[index])) {
-                                            CompactReportCard(report: $controller.reports[index])
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
-                                        .padding(.horizontal, 20)
+                                        CompactReportCard(report: $controller.reports[index])
+                                            .padding(.horizontal, 20)
                                     }
                                 }
                                 .padding(.bottom, 20)
@@ -407,11 +404,8 @@ struct ScreenDashboard: View {
                                     
                                     ForEach(Array(filteredReports.enumerated()), id: \.element.id) { index, report in
                                         let reportIndex = dashboardController.reports.firstIndex { $0.id == report.id } ?? 0
-                                        NavigationLink(destination: ReportDetailView(report: $dashboardController.reports[reportIndex])) {
-                                            CompactReportCard(report: $dashboardController.reports[reportIndex])
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
-                                        .padding(.horizontal, 20)
+                                        CompactReportCard(report: $dashboardController.reports[reportIndex])
+                                            .padding(.horizontal, 20)
                                     }
                                 }
                             }

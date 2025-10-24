@@ -217,7 +217,35 @@ struct CompactReportCard: View {
                 }
             }
             .padding(.horizontal, 16)
+            .padding(.bottom, 12)
+            
+            // Botón "Ver detalles" con NavigationLink
+            NavigationLink(destination: ReportDetailView(report: $report)) {
+                HStack(spacing: 8) {
+                    Text("Ver detalles")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                    
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color(red: 0.0, green: 0.8, blue: 0.7))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color(red: 0.0, green: 0.8, blue: 0.7).opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.horizontal, 16)
             .padding(.bottom, 16)
+            .accessibilityLabel("Ver detalles del reporte")
+            .accessibilityHint("Navegar a la vista detallada del reporte con comentarios")
         }
         .background(
             ZStack {
