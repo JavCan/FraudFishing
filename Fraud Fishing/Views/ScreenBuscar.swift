@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ScreenBuscar: View {
     let searchedURL: String
-    @State private var selectedTab: Tab = .dashboard
+    @State private var selectedTab: Tab = .home
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var authController: AuthenticationController
 
