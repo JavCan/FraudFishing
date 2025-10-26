@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		91A4A4BD2EAD7445000512E0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9133B4932E73AFF200E24775 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9133B49A2E73AFF200E24775;
+			remoteInfo = "Fraud Fishing";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		9133B49B2E73AFF200E24775 /* Fraud Fishing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fraud Fishing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		91A4A4B92EAD7445000512E0 /* Fraud FishingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Fraud FishingTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = "Fraud Fishing";
 			sourceTree = "<group>";
 		};
+		91A4A4BA2EAD7445000512E0 /* Fraud FishingTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Fraud FishingTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		9133B4982E73AFF200E24775 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		91A4A4B62EAD7445000512E0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				9133B49D2E73AFF200E24775 /* Fraud Fishing */,
+				91A4A4BA2EAD7445000512E0 /* Fraud FishingTests */,
 				9133B49C2E73AFF200E24775 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				9133B49B2E73AFF200E24775 /* Fraud Fishing.app */,
+				91A4A4B92EAD7445000512E0 /* Fraud FishingTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 9133B49B2E73AFF200E24775 /* Fraud Fishing.app */;
 			productType = "com.apple.product-type.application";
 		};
+		91A4A4B82EAD7445000512E0 /* Fraud FishingTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 91A4A4BF2EAD7445000512E0 /* Build configuration list for PBXNativeTarget "Fraud FishingTests" */;
+			buildPhases = (
+				91A4A4B52EAD7445000512E0 /* Sources */,
+				91A4A4B62EAD7445000512E0 /* Frameworks */,
+				91A4A4B72EAD7445000512E0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				91A4A4BE2EAD7445000512E0 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				91A4A4BA2EAD7445000512E0 /* Fraud FishingTests */,
+			);
+			name = "Fraud FishingTests";
+			packageProductDependencies = (
+			);
+			productName = "Fraud FishingTests";
+			productReference = 91A4A4B92EAD7445000512E0 /* Fraud FishingTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,10 @@
 				TargetAttributes = {
 					9133B49A2E73AFF200E24775 = {
 						CreatedOnToolsVersion = 16.4;
+					};
+					91A4A4B82EAD7445000512E0 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 9133B49A2E73AFF200E24775;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				9133B49A2E73AFF200E24775 /* Fraud Fishing */,
+				91A4A4B82EAD7445000512E0 /* Fraud FishingTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9133B4992E73AFF200E24775 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		91A4A4B72EAD7445000512E0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		91A4A4B52EAD7445000512E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		91A4A4BE2EAD7445000512E0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9133B49A2E73AFF200E24775 /* Fraud Fishing */;
+			targetProxy = 91A4A4BD2EAD7445000512E0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9133B4A42E73AFF500E24775 /* Debug */ = {
@@ -302,6 +377,40 @@
 			};
 			name = Release;
 		};
+		91A4A4C02EAD7445000512E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mx.A01424391.Fraud-FishingTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fraud Fishing.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fraud Fishing";
+			};
+			name = Debug;
+		};
+		91A4A4C12EAD7445000512E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mx.A01424391.Fraud-FishingTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fraud Fishing.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fraud Fishing";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -319,6 +428,15 @@
 			buildConfigurations = (
 				9133B4A72E73AFF500E24775 /* Debug */,
 				9133B4A82E73AFF500E24775 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		91A4A4BF2EAD7445000512E0 /* Build configuration list for PBXNativeTarget "Fraud FishingTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				91A4A4C02EAD7445000512E0 /* Debug */,
+				91A4A4C12EAD7445000512E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
