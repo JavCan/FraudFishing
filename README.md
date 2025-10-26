@@ -93,6 +93,8 @@
 
 ## 🧩 Estructura del Proyecto
 
+
+```bash
 Fraud Fishing/
 ├── 📱 Views/                    # Interfaces de usuario
 │   ├── Components/              # Componentes reutilizables
@@ -121,7 +123,7 @@ Fraud Fishing/
 │   └── StorageTokens.swift      # Gestión de tokens
 ├── 🎨 Assets.xcassets/          # Recursos visuales
 └── 🔧 Extensions/               # Extensiones de Swift
-
+```
 
 ### 📡 Flujo de Comunicación
 
